@@ -93,7 +93,7 @@ def main():
         dag_config = EasyDict(dag_config)
 
         # Create output paths
-        out_dir = os.path.join(depth_gen_ds_paths, '_'.join(args.func_vocab))
+        out_dir = os.path.join(depth_gen_ds_paths, '_'.join(func_vocab))
         out_path = os.path.join(out_dir, f'testdata_N{n_nodes}.pt')
         os.makedirs(out_dir, exist_ok=True)
 
