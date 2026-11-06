@@ -1,0 +1,37 @@
+# ============================================================================
+# 依赖表：根据 repro 分支对全部 23 个 .py 文件的 import 扫描人工维护（2026-11-06）
+# 上游仓库未提供依赖清单，本文件由代码实际 import 推断，安装后用 pip freeze
+# 生成 requirements-lock.txt 固定精确版本。
+#
+# 版本敏感点：
+#   - torch: 训练脚本开启 torch.compile => 需要 >= 2.0；Python 3.12 => 建议 >= 2.3
+#            服务器驱动 CUDA 12.4 => 选 cu121/cu124 轮子
+#   - lightning: 代码使用 lightning.pytorch 命名空间 => 需要 >= 2.0
+#            module_base.py 使用 lightning.pytorch.utilities.grad_norm，
+#            新版本可能移位，安装后需验证
+#   - sklearn/matplotlib/seaborn/pandas/scipy 在 Simtransformer/simtransformer/
+#     utils.py 顶层导入，而 EasyDict 来自该文件 => 对训练也是硬依赖，不是可选项
+# ============================================================================
+
+# --- 核心训练/评估 ---
+torch>=2.3
+lightning>=2.0
+numpy
+pyyaml
+tqdm
+pandas
+networkx            # dag_generator.py 图生成
+
+# --- 可视化/分析（Simtransformer/utils.py 顶层导入，硬依赖）---
+matplotlib
+seaborn
+scikit-learn        # cosine_similarity
+scipy               # logm
+plotly              # evaluation/*.py 顶层导入
+ansi2html           # evaluation/*.py 顶层导入
+
+# --- 实验跟踪（配置 use_wandb=false 可关闭，但 import 仍在顶层）---
+wandb
+
+# --- 机制分析阶段（model_interp notebook，暂不必须）---
+# jupyter
