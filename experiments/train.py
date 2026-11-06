@@ -319,6 +319,11 @@ if __name__ == '__main__':
         callbacks = []
         logger = None
 
+    # [fix-env] torch>=2.6 的 compiled backward 默认启用 donated buffers，与本模型
+    # 逐因子 manual_backward(retain_graph=True) 不兼容（A线seed42首训39s崩溃于此）。
+    # 禁用 donated_buffer：仅放弃显存复用优化，不改变训练语义。
+    torch._functorch.config.donated_buffer = False
+
     # compile the model
     if getattr(train_config, 'compile', False):
         # litmodel = torch.compile(litmodel)
