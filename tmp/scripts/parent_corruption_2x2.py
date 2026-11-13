@@ -268,7 +268,10 @@ with torch.no_grad():
                         st[u['pos'], V] = tok.value_tok2idx[str(u['a_inj'])]
                     if cond in ('r', 'ur'):
                         st[u['r_pos'], V] = tok.value_tok2idx[str(u['r_wrong'])]
-                    st[Rg] = r_false; st[Md] = m_false
+                    # st is [seq_len, 6]; Rg/Md are factor columns. Use the
+                    # column slice. st[Rg]/st[Md] would overwrite the whole
+                    # token rows at sequence positions Rg/Md (all 6 factors).
+                    st[:, Rg] = r_false; st[:, Md] = m_false
                     states.append(st)
                     meta.append((c, u, cond))
             cur = torch.stack(states).to('cuda')

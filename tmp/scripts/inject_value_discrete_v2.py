@@ -190,19 +190,22 @@ def run_teacher(batch_cands, data, label, info, depths):
                 continue
             u = c['us'][k]; bi = c['b']
             u0, a_val, a_inj = vals[bi]
-            # 参考轮：注入发生在 loop d 之后；post round r -> loop d+r
+            # 参考轮：注入发生在 loop d 之后；post round r -> loop d+r。
+            # rollout 从 S[d+1] 开始，列表下标 0 就对应 loop d+1，因此下标是
+            # r-1；绝对 loop（d+r）只用于记录/可算性判断，不能当下标。
             for r in [1, 2, 4]:
+                idx = r - 1
                 loop = u['d'] + r
-                if loop >= n_loops:
+                if idx >= n_loops:
                     continue
                 rec = dict(graph_id=None, b=bi, pos=u['pos'], d=u['d'],
                            a=a_val, a_inj=a_inj, post_round=r, loop=loop)
-                rec['u_status'] = ('recovered' if us_inj[bi][loop] == a_val else
-                                   'injected' if us_inj[bi][loop] == a_inj else 'other')
+                rec['u_status'] = ('recovered' if us_inj[bi][idx] == a_val else
+                                   'injected' if us_inj[bi][idx] == a_inj else 'other')
                 qrows = []
                 for j, q in enumerate(u['qs']):
                     dq = int(depths[bi, q].cpu())
-                    qval = qs_inj[bi][loop][j]
+                    qval = qs_inj[bi][idx][j]
                     if loop < dq:
                         status = 'not_yet'
                     else:
