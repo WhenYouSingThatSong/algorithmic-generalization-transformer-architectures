@@ -89,7 +89,8 @@
 | `migration-loss-drop-check.md` | 核查迁移后 loss 快速下降：数据/验证集未变（hash、mtime、checkpoint hparams）；resume 重置 shuffle；seed2025 误用 last=e53 而 e55 top-k 存在 | 结论 + 流程错误记录 |
 | `b-checkpoint-fingerprints.md` | P0：所有 B 权重（B-M6 + cyh 三 seed）的 `last` mask、vocab、params、路径盘点 | 已完成 |
 | `p1-pilot-20261113.md` | P1 pilot：B 128 图 R-only/EMPTY5 轨迹 + C0 中期 eval smoke；4→4 待做 | **旧数作废**：parent 脚本行/列索引 bug，见下条 |
-| `code-review-fixes-20261113.md` | **代码修复记录**：parent 2×2 `st[Rg]`→`st[:,Rg]`；v2 teacher-state 轮次下标 `loop`→`r-1`；受影响结果清单 + smoke + 重跑计划 | **修复完成，重跑中** |
+| `code-review-fixes-20261113.md` | **代码修复记录**：parent 2×2 `st[Rg]`→`st[:,Rg]`；v2 teacher-state 轮次下标 `loop`→`r-1`；受影响结果清单 + smoke + 全量重跑结果 | **修复完成，重跑完成** |
+| `metric-and-tokenizer-fixes-20261113.md` | 指标/tokenizer 修复：统一 `build_factored_tokenizer`；分因子/位置/`last_var` 排除 PAD；新增数值节点、整图数值全对、strict 前三指标；batch=8/1 一致性 smoke | **代码修复完成，smoke 通过** |
 | `../runs/C0-M4-MixedN8-32-D12-Vocab128-2Val-100ep/migration/MIGRATION_PLAN.md` | 三 seed 迁移记录：old/new GPU/PID、resume ckpt、丢失 epoch、速度 | 进行中 |
 
 ## 当前核心结论（截至 2026-11-09 晚）
