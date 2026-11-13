@@ -270,6 +270,8 @@ class LitRecurrentTransformerModel(pl.LightningModule):
         # If None, train all depths in batch.
         self.max_train_loop = getattr(train_config, 'max_train_loop', None)
         self.max_val_loop = getattr(train_config, 'max_val_loop', None)
+        # second validation stream (e.g. N128) can need a larger loop cap
+        self.max_val_loop_n128 = getattr(train_config, 'max_val_loop_n128', self.max_val_loop)
         # NOTE / FIXME: we would like to change how this is done, making it more similar to the initial training runs
 
         self.teacher_model = teacher_model
@@ -347,9 +349,14 @@ class LitRecurrentTransformerModel(pl.LightningModule):
 
         # return total_train_loss
 
-    def validation_step(self, batch, batch_idx):
+    def validation_step(self, batch, batch_idx, dataloader_idx=0):
+        # dataloader_idx 0 = in-range val, 1 = optional second stream (N128).
+        log_prefix = 'val_n128' if dataloader_idx > 0 else 'val'
         if self.nointerm:
-            total_val_loss = self.compute_batch_loss_nointerm(batch, log_prefix='val', log=True, on_step=False, on_epoch=True)
+            max_loop = self.max_val_loop_n128 if dataloader_idx > 0 else self.max_val_loop
+            total_val_loss = self.compute_batch_loss_nointerm(
+                batch, log_prefix=log_prefix, log=True, on_step=False, on_epoch=True,
+                max_loop=max_loop, add_dataloader_idx=False)
         else:
             t = torch.rand(1).item() < 0.5
             if t:
@@ -367,7 +374,7 @@ class LitRecurrentTransformerModel(pl.LightningModule):
                 verbose = False
 
 
-            total_val_loss = self.compute_batch_loss(batch, train=False, log_prefix='val', log=True, on_step=False, on_epoch=True, use_teacher_pred_for_next_loop=use_teacher_pred_for_next_loop, use_regret_for_correction=False, verbose=False)
+            total_val_loss = self.compute_batch_loss(batch, train=False, log_prefix=log_prefix, log=True, on_step=False, on_epoch=True, use_teacher_pred_for_next_loop=use_teacher_pred_for_next_loop, use_regret_for_correction=False, verbose=False, add_dataloader_idx=False)
 
 
 
@@ -376,7 +383,12 @@ class LitRecurrentTransformerModel(pl.LightningModule):
 
     def test_step(self, batch, batch_idx):
         if self.nointerm:
-            total_test_loss = self.compute_batch_loss_nointerm(batch, log_prefix='test', log=True, on_step=False, on_epoch=True)
+            # max_loop=-1 = no cap: run until the batch's actual max depth.
+            # This avoids truncating deep_v2 (>36) test graphs; in-range/N128
+            # still only run their own actual depth.
+            total_test_loss = self.compute_batch_loss_nointerm(
+                batch, log_prefix='test', log=True, on_step=False, on_epoch=True,
+                max_loop=-1)
         else:
             total_test_loss = self.compute_batch_loss(batch, train=False, log_prefix='test', log=True, on_step=False, on_epoch=True)
 
@@ -852,6 +864,7 @@ class LitRecurrentTransformerModel(pl.LightningModule):
                                    batch,
                                    log_prefix=None,
                                    log=True,
+                                   max_loop=None,
                                    **log_kwargs):
         batch = self.reduce_batch(copy.deepcopy(batch))
 
@@ -864,6 +877,13 @@ class LitRecurrentTransformerModel(pl.LightningModule):
             opt.zero_grad()
         total_loss = 0
         max_depth_data = depths.max() + 1
+        # max_loop=-1 means "no cap": run until the batch's actual max depth.
+        # Used by test_step so deep (>36) test graphs are not truncated.
+        if max_loop == -1:
+            cap = None
+        else:
+            cap = self.max_train_loop if train else (self.max_val_loop if max_loop is None else max_loop)
+        last_loop = max_depth_data - 1 if cap is None else min(max_depth_data, cap) - 1
         batch_ext, value_avail_pos, value_to_compute_pos = self.get_teacher_batch_with_depth(batch, batch_label, depths)
 
         depth_batch = self.model.token_embedder(batch)
@@ -872,7 +892,7 @@ class LitRecurrentTransformerModel(pl.LightningModule):
 
             label = batch_ext[loop + 1, ...]
 
-            depth_batch, factor_preds = self.model.TF_forward(depth_batch)
+            depth_batch, factor_preds = self.model(depth_batch, True)  # [switch] 走已编译 forward(nointerm=True)，与 TF_forward 逐行同义
 
             factor_decodes = self.generate_factor_decodes(factor_preds, temperature=self.train_temperature if log_prefix == 'train' else self.val_temperature)
 
@@ -917,7 +937,7 @@ class LitRecurrentTransformerModel(pl.LightningModule):
                     else:
                         full_factor_correct = torch.logical_and(full_factor_correct, correct)
 
-                if log:
+                if log and loop == last_loop:  # [switch] 详细指标只在最后一轮记录
                     self.log(f'{log_prefix}_{factor_name}_per_token_acc_nointerm/loop_{loop}', per_token_acc, **log_kwargs)
                     self.log(f'{log_prefix}_{factor_name}_full_seq_acc_nointerm/loop_{loop}', full_seq_acc, **log_kwargs)
 
@@ -928,6 +948,7 @@ class LitRecurrentTransformerModel(pl.LightningModule):
             if log:
                 self.log(f'{log_prefix}_loss_nointerm/loop_{loop}', depth_loss, **log_kwargs)
 
+            if log and loop == last_loop:  # [switch] ratio 指标只在最后一轮记录
                 # log the ratio of solved variables compared to the teacher predictions
 
                 # find the positions where the depth is less than or equal to the loop and is the rhs of an equation
@@ -955,16 +976,10 @@ class LitRecurrentTransformerModel(pl.LightningModule):
 
                 self.log(f'{log_prefix}_ratio_solved_dep_eq_loop_nointerm/loop_{loop}', correct_values_ratio, **log_kwargs)
 
-                # log the full_factor_correct accuracy
-                full_factor_correct_ratio = full_factor_correct.all(dim=-1).float().mean()
-                print(f"loop_{loop}, full_factor_correct_ratio: {full_factor_correct_ratio}")
-
             total_loss += depth_loss
 
-            # Break if we have reached the maximum depth to train
-            if train and self.max_train_loop is not None and loop == self.max_train_loop - 1:
-                break
-            if log_prefix == 'val' and self.max_val_loop is not None and loop == self.max_val_loop - 1:
+            # Stop at the effective loop cap (train cap or per-val-stream cap).
+            if loop == last_loop:
                 break
 
         # check one more thing: proportion of correct values in each depth at the output

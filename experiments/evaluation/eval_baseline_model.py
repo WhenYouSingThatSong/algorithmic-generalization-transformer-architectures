@@ -1,5 +1,9 @@
 import argparse
-import os, sys; sys.path.append(os.path.abspath('../'))
+import os, sys
+_current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.abspath(os.path.join(_current_dir, '..', '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(_current_dir, '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(_current_dir, '..', 'baselines')))
 
 import torch
 import numpy as np
@@ -19,7 +23,7 @@ from tokenizers import FactoredVocabTokenizer
 
 from metric_utils import calc_metrics_across_batches, print_model_steps
 
-from DAG_train import DAGDataModule
+from train import DAGDataModule
 from datetime import datetime
 
 parser = argparse.ArgumentParser(description="Training parameters")
@@ -33,6 +37,12 @@ parser.add_argument('--out_path', type=str, default='results/baselines')
 parser.add_argument('--log_wandb', action='store_true')
 parser.add_argument('--overwrite_ok', action='store_true')
 parser.add_argument('--debug', action='store_true', help="Debug mode (no wandb logging and no saving of results)")
+parser.add_argument('--config_dir_name', type=str, default=None,
+                    help='Explicit config dir under experiments/configs; default: derive from group_name')
+parser.add_argument('--ckpt_base_dir', type=str, default=None,
+                    help='Checkpoint base dir; default: experiments/checkpoints/baselines')
+parser.add_argument('--ckpt_name', type=str, default='last.ckpt',
+                    help='Checkpoint filename inside <base>/<group>-<run>/')
 
 args = parser.parse_args()
 
@@ -50,7 +60,7 @@ group_name = args.group_name
 run_name = args.run_name
 
 # load model, train, and data config
-config_dir = group_name.replace(' ', '') # calc config dir from wandb group name
+config_dir = args.config_dir_name or group_name.replace(' ', '') # calc config dir from wandb group name
 # if config_dir has '_nointerm', remove it
 config_dir = config_dir.replace('_nointerm', '')
 # if config_dir has '_interm', remove it
@@ -67,16 +77,19 @@ with open(os.path.join(configs_dir, config_dir, 'data_config.yaml')) as f:
 # load factored_tokenizer
 # with open(os.path.join(base_dir, data_config.data_dir, data_config.tokenizer_file_name), 'rb') as f:
 #     factored_tokenizer = pickle.load(f)
-factored_tokenizer = FactoredVocabTokenizer(n_vars=max(data_config.dag_config.num_nodes, data_config.val_dag_config.num_nodes), ops=data_config.dag_config.func_vocab, mod_val=data_config.dag_config.mod_val, max_fan_in=data_config.dag_config.max_fan_in_deg)
+tokenizer_n_vars = getattr(data_config, 'tokenizer_n_vars', None)
+if tokenizer_n_vars is None:
+    tokenizer_n_vars = max(data_config.dag_config.num_nodes, data_config.val_dag_config.num_nodes)
+factored_tokenizer = FactoredVocabTokenizer(n_vars=tokenizer_n_vars, ops=data_config.dag_config.func_vocab, mod_val=data_config.dag_config.mod_val, max_fan_in=data_config.dag_config.max_fan_in_deg)
 
 # set vocab_size and factors in model_config
 model_config.vocab_sizes = factored_tokenizer.vocab_sizes
 model_config.factors = factored_tokenizer.factors
 
 # load model
-ckpt_path = 'checkpoints/baselines'
-ckpt_fname = 'last.ckpt'
-model_ckpt_path = os.path.join(base_dir, ckpt_path, f"{group_name}-{run_name}", ckpt_fname) # model checkpoint path from group name
+ckpt_base_dir = args.ckpt_base_dir or os.path.join(base_dir, 'checkpoints', 'baselines')
+ckpt_fname = args.ckpt_name
+model_ckpt_path = os.path.join(ckpt_base_dir, f"{group_name}-{run_name}", ckpt_fname) # model checkpoint path from group name
 # model_ckpt = torch.load(model_ckpt_path, weights_only=False)
 
 litmodel = LitRecurrentTransformerModel(model_config, train_config, data_config)

@@ -4,6 +4,10 @@ from tqdm import tqdm
 import numpy as np
 from Simtransformer.simtransformer.utils import attach_hooks, EasyDict
 
+# [eval-speed] 注意力熵/最大注意力指标在每个 batch 的每个 step 都要对 [B,H,T,T]
+# 重算一遍，是 C0 伴随矩阵评测的主要开销（且与主指标无关）。评测脚本可置 True 跳过。
+SKIP_ATTN = False
+
 
 def attach_hooks_to_model(litmodel):
     HookDict = EasyDict()
@@ -72,7 +76,10 @@ def one_step_prediction(litmodel, batch, step, outputs=None, step_stack=None):
 def calc_batch_metrics(litmodel, batch, factored_tokenizer, n_steps=None, factors_slice=None, verbose=False):
 
     litmodel.eval()
-    buffer, hook_handles = attach_hooks_to_model(litmodel)
+    if SKIP_ATTN:
+        buffer, hook_handles = {}, []
+    else:
+        buffer, hook_handles = attach_hooks_to_model(litmodel)
 
     device = litmodel.device
 
@@ -191,11 +198,12 @@ def calc_batch_metrics(litmodel, batch, factored_tokenizer, n_steps=None, factor
             metrics['step_last_var_fully_correct'].append(last_var_fully_correct)
 
             # calculate attention metrics
-            attn_metrics = compute_attention_metrics(buffer)
-            for k, v in attn_metrics.items():
-                if k not in metrics:
-                    metrics[k] = []
-                metrics[k].append(v)
+            if not SKIP_ATTN:
+                attn_metrics = compute_attention_metrics(buffer)
+                for k, v in attn_metrics.items():
+                    if k not in metrics:
+                        metrics[k] = []
+                    metrics[k].append(v)
 
             # set boolean mask of mistakes to check re-correction at next iteration
             last_mistakes = torch.logical_not(is_correct)
@@ -490,7 +498,10 @@ def orange(text):
 def calc_batch_metrics_fast(litmodel, batch, factored_tokenizer, n_steps=None, factors_slice=None, verbose=False):
 
     litmodel.eval()
-    buffer, hook_handles = attach_hooks_to_model(litmodel)
+    if SKIP_ATTN:
+        buffer, hook_handles = {}, []
+    else:
+        buffer, hook_handles = attach_hooks_to_model(litmodel)
 
     model_config = litmodel.model_config
 
@@ -612,11 +623,12 @@ def calc_batch_metrics_fast(litmodel, batch, factored_tokenizer, n_steps=None, f
             metrics['step_last_var_fully_correct'].append(last_var_fully_correct)
 
             # calculate attention metrics
-            attn_metrics = compute_attention_metrics(buffer)
-            for k, v in attn_metrics.items():
-                if k not in metrics:
-                    metrics[k] = []
-                metrics[k].append(v)
+            if not SKIP_ATTN:
+                attn_metrics = compute_attention_metrics(buffer)
+                for k, v in attn_metrics.items():
+                    if k not in metrics:
+                        metrics[k] = []
+                    metrics[k].append(v)
 
             # set boolean mask of mistakes to check re-correction at next iteration
             last_mistakes = torch.logical_not(is_correct)

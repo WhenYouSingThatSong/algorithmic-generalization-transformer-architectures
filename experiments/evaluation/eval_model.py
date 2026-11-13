@@ -46,6 +46,8 @@ parser.add_argument('--nointerm', action='store_true')
 parser.add_argument('--start_graph_size', type=int, default=1, help='Start graph size for evaluation (enables incremental evaluation)')
 parser.add_argument('--num_workers', type=int, default=4)
 parser.add_argument('--ckpt_base_dir', type=str_or_none, default=os.path.abspath('../checkpoints'), help='Base directory for checkpoints. If None, use parent directory/checkpoints')
+parser.add_argument('--config_dir_name', type=str, default=None,
+                    help='Explicit config dir under experiments/configs; default: derive from group_name')
 
 args = parser.parse_args()
 
@@ -57,7 +59,7 @@ group_name = args.group_name
 run_name = args.run_name
 
 # load model, train, and data config
-config_dir = group_name.replace(' ', '') # calc config dir from wandb group name
+config_dir = args.config_dir_name or group_name.replace(' ', '') # calc config dir from wandb group name
 # if config_dir has '_nointerm', remove it
 config_dir = config_dir.replace('_nointerm', '')
 # if config_dir has '_interm', remove it
@@ -76,7 +78,10 @@ if hasattr(args, 'nointerm') and args.nointerm:
 # load factored_tokenizer
 # with open(os.path.join(base_dir, data_config.data_dir, data_config.tokenizer_file_name), 'rb') as f:
 #     factored_tokenizer = pickle.load(f)
-factored_tokenizer = FactoredVocabTokenizer(n_vars=max(data_config.dag_config.num_nodes, data_config.val_dag_config.num_nodes), ops=data_config.dag_config.func_vocab, mod_val=data_config.dag_config.mod_val, max_fan_in=data_config.dag_config.max_fan_in_deg)
+tokenizer_n_vars = getattr(data_config, 'tokenizer_n_vars', None)
+if tokenizer_n_vars is None:
+    tokenizer_n_vars = max(data_config.dag_config.num_nodes, data_config.val_dag_config.num_nodes)
+factored_tokenizer = FactoredVocabTokenizer(n_vars=tokenizer_n_vars, ops=data_config.dag_config.func_vocab, mod_val=data_config.dag_config.mod_val, max_fan_in=data_config.dag_config.max_fan_in_deg)
 
 # set vocab_size and factors in model_config
 model_config.vocab_sizes = factored_tokenizer.vocab_sizes
@@ -151,11 +156,13 @@ def to_numpy(d):
 
 def save_results(val_metrics_by_size, val_metrics_by_size_agg, sample_preds, specs):
     if not args.debug:
+        # [fix-metric] 原实现下一行把 val_metrics_by_size_np 覆盖为聚合对象，
+        # 导致两个 .npy 都存聚合结果、逐batch原始结果丢失。分开保存。
         val_metrics_by_size_np = to_numpy(val_metrics_by_size)
-        val_metrics_by_size_np = to_numpy(val_metrics_by_size_agg)
+        val_metrics_by_size_agg_np = to_numpy(val_metrics_by_size_agg)
 
         np.save(os.path.join(out_path, 'val_metrics_by_size.npy'), val_metrics_by_size_np)
-        np.save(os.path.join(out_path, 'val_metrics_by_size_agg.npy'), val_metrics_by_size_np)
+        np.save(os.path.join(out_path, 'val_metrics_by_size_agg.npy'), val_metrics_by_size_agg_np)
         np.save(os.path.join(out_path, 'sample_preds.npy'), sample_preds)
         np.save(os.path.join(out_path, 'specs.npy'), specs)
         print(f'Saved to {out_path}')
@@ -244,11 +251,12 @@ def calc_size(d):
     else:
         return 0
 
+# [fix-metric] 同 save_results 的覆盖问题：此处仅影响打印的内存占用估计，一并修正
 val_metrics_by_size_np = to_numpy(val_metrics_by_size)
-val_metrics_by_size_np = to_numpy(val_metrics_by_size_agg)
+val_metrics_by_size_agg_np = to_numpy(val_metrics_by_size_agg)
 
 val_metrics_by_size_mem = calc_size(val_metrics_by_size_np) / 1e6
-val_metrics_by_size_agg_mem = calc_size(val_metrics_by_size_np) / 1e6
+val_metrics_by_size_agg_mem = calc_size(val_metrics_by_size_agg_np) / 1e6
 sample_preds_mem = sum([sys.getsizeof(s) for s in sample_preds.values()]) / 1e6
 specs_mem = sys.getsizeof(specs) / 1e6
 

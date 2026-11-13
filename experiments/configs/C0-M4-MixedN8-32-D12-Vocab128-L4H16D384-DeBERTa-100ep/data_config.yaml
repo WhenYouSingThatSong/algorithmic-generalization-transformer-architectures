@@ -1,0 +1,40 @@
+# VOCAB CONTROL (2026-11-12):
+# val_dag_config.num_nodes is 128 ONLY to make train.py derive
+# n_vars = max(train.num_nodes=32, val.num_nodes=128) = 128,
+# hence VARIABLE vocab 129 and params 8,033,447, matching old C0.
+# The actual val_data.pt is the MixedN8-32 dataset (N<=32); this is NOT an N128
+# validation set. Do not edit num_nodes here thinking it changes val data.
+dag_config:
+  data_file_name: train_data.pt
+  fix_graph: false
+  func_vocab:
+  - ADD
+  max_comp_depth: 12
+  max_depth: 12
+  max_fan_in_deg: 3
+  max_length: 256
+  min_fan_in_deg: 1
+  mod_val: 23
+  num_leaf_nodes: 6
+  num_nodes: 32
+  num_samples: 100000
+  shuffle_node_name: true
+  verbose: false
+data_dir: data/C0-MixedN8-32-D12-ADD
+tokenizer_file_name: tokenizer.pickle
+val_dag_config:
+  data_file_name: val_data.pt
+  fix_graph: false
+  func_vocab:
+  - ADD
+  max_comp_depth: 12
+  max_depth: 12
+  max_fan_in_deg: 3
+  max_length: 256
+  min_fan_in_deg: 1
+  mod_val: 23
+  num_leaf_nodes: 6
+  num_nodes: 128
+  num_samples: 2000
+  shuffle_node_name: true
+  verbose: false

@@ -1,5 +1,7 @@
 import argparse
-import os, sys; sys.path.append(os.path.abspath('../'))
+import os, sys
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.abspath(os.path.join(current_dir, '..')))
 
 import torch
 import numpy as np
@@ -17,8 +19,9 @@ from model import LitRecurrentTransformerModel, DAGTeacherModel
 from Simtransformer.simtransformer.utils import EasyDict
 
 from metric_utils import calc_metrics_across_batches, print_model_steps, calc_batch_metrics_fast
+import metric_utils
 
-from DAG_train import DAGDataModule
+from train import DAGDataModule
 from tokenizers import FactoredVocabTokenizer
 from datetime import datetime
 
@@ -38,21 +41,35 @@ parser.add_argument('--debug', action='store_true')
 parser.add_argument('--log_wandb', action='store_true')
 parser.add_argument('--nointerm', action='store_true')
 parser.add_argument('--num_workers', type=int, default=4)
+parser.add_argument('--ckpt_base_dir', type=str, default=None,
+                    help='Base dir of checkpoints; default: experiments/checkpoints')
+parser.add_argument('--ckpt_name', type=str, default='last.ckpt',
+                    help='Checkpoint filename inside <base>/<group>-<run>/')
+parser.add_argument('--config_dir_name', type=str, default=None,
+                    help='Explicit config dir under experiments/configs; default: derive from group_name')
+parser.add_argument('--val_ds_path', type=str, default=None,
+                    help='Val datasets dir; default: <this script dir>/val_datasets')
+parser.add_argument('--compile', action='store_true',
+                    help='torch.compile the recurrent model (eval speed only; semantics-neutral)')
+parser.add_argument('--no_attn_metrics', action='store_true',
+                    help='skip attention entropy/max-score metrics (main accuracy metrics unchanged)')
 
 args = parser.parse_args()
+if args.no_attn_metrics:
+    metric_utils.SKIP_ATTN = True
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-base_dir = os.path.abspath('../')
+base_dir = os.path.dirname(current_dir)
 configs_dir = os.path.join(base_dir, 'configs')
 
-val_ds_path = 'val_datasets'
+val_ds_path = args.val_ds_path or os.path.join(current_dir, 'val_datasets')
 
 group_name = args.group_name
 run_name = args.run_name
 
 # load model, train, and data config
-config_dir = group_name.replace(' ', '') # calc config dir from wandb group name
+config_dir = args.config_dir_name or group_name.replace(' ', '') # calc config dir from wandb group name
 # if config_dir has '_nointerm', remove it
 config_dir = config_dir.replace('_nointerm', '')
 # if config_dir has '_interm', remove it
@@ -71,16 +88,19 @@ if hasattr(args, 'nointerm') and args.nointerm:
 # load factored_tokenizer
 # with open(os.path.join(base_dir, data_config.data_dir, data_config.tokenizer_file_name), 'rb') as f:
 #     factored_tokenizer = pickle.load(f)
-factored_tokenizer = FactoredVocabTokenizer(n_vars=max(data_config.dag_config.num_nodes, data_config.val_dag_config.num_nodes), ops=data_config.dag_config.func_vocab, mod_val=data_config.dag_config.mod_val, max_fan_in=data_config.dag_config.max_fan_in_deg)
+tokenizer_n_vars = getattr(data_config, 'tokenizer_n_vars', None)
+if tokenizer_n_vars is None:
+    tokenizer_n_vars = max(data_config.dag_config.num_nodes, data_config.val_dag_config.num_nodes)
+factored_tokenizer = FactoredVocabTokenizer(n_vars=tokenizer_n_vars, ops=data_config.dag_config.func_vocab, mod_val=data_config.dag_config.mod_val, max_fan_in=data_config.dag_config.max_fan_in_deg)
 
 # set vocab_size and factors in model_config
 model_config.vocab_sizes = factored_tokenizer.vocab_sizes
 model_config.factors = factored_tokenizer.factors
 
 # load model
-ckpt_path = 'checkpoints'
-ckpt_fname = 'last.ckpt'
-model_ckpt_path = os.path.join(base_dir, ckpt_path, f"{group_name}-{run_name}", ckpt_fname) # model checkpoint path from group name
+ckpt_base_dir = args.ckpt_base_dir or os.path.join(base_dir, 'checkpoints')
+ckpt_fname = args.ckpt_name
+model_ckpt_path = os.path.join(ckpt_base_dir, f"{group_name}-{run_name}", ckpt_fname) # model checkpoint path from group name
 # model_ckpt = torch.load(model_ckpt_path, weights_only=False)
 
 teacher_model = DAGTeacherModel(model_config, factored_tokenizer)
@@ -90,6 +110,9 @@ litmodel.load_ckpt(model_ckpt_path)
 
 # move model to device
 litmodel.to(device)
+if args.compile:
+    print('compiling recurrent model for eval ...')
+    litmodel.model = torch.compile(litmodel.model)
 
 # create the data module
 func_vocab_val_dir = '_'.join(data_config.dag_config.func_vocab)
@@ -195,7 +218,7 @@ def to_numpy(d):
         return d
 
 val_metrics_by_size_np = to_numpy(val_metrics_by_size)
-val_metrics_by_size_np = to_numpy(val_metrics_by_size_agg)
+val_metrics_by_size_agg_np = to_numpy(val_metrics_by_size_agg)
 
 # save parsed results
 
@@ -210,7 +233,7 @@ out_path = os.path.join(args.out_path, group_name, run_name_)
 os.makedirs(out_path, exist_ok=True)
 
 np.save(os.path.join(out_path, 'val_metrics_by_size.npy'), val_metrics_by_size_np)
-np.save(os.path.join(out_path, 'val_metrics_by_size_agg.npy'), val_metrics_by_size_np)
+np.save(os.path.join(out_path, 'val_metrics_by_size_agg.npy'), val_metrics_by_size_agg_np)
 np.save(os.path.join(out_path, 'sample_preds.npy'), sample_preds)
 np.save(os.path.join(out_path, 'specs.npy'), specs)
 print(f'Saved to {out_path}')
@@ -226,7 +249,18 @@ def calc_size(d):
         return 0
 
 val_metrics_by_size_mem = calc_size(val_metrics_by_size_np) / 1e6
-val_metrics_by_size_agg_mem = calc_size(val_metrics_by_size_np) / 1e6
+val_metrics_by_size_agg_mem = calc_size(val_metrics_by_size_agg_np) / 1e6
+
+# [fix-plot] 多 batch 时 raw 指标是 3D（n_batches, n_steps, ...），曲线统一用 batch 均值；
+# raw 已单独保存到 val_metrics_by_size.npy，不受影响。
+val_metrics_by_size_np = val_metrics_by_size_agg_np
+
+# [no-attn] 跳过注意力指标时，给画图用的副本补零占位（已保存的 .npy 不受影响）
+if args.no_attn_metrics:
+    for _n in val_sizes:
+        _ref = val_metrics_by_size_np[_n]['fully_correct_acc']
+        for _k in ['max_attn_score', 'attn_score_entropy', 'attn_score_normalized_entropy']:
+            val_metrics_by_size_np[_n][_k] = np.zeros_like(_ref)
 sample_preds_mem = sum([sys.getsizeof(s) for s in sample_preds.values()]) / 1e6
 specs_mem = sys.getsizeof(specs) / 1e6
 
@@ -271,21 +305,23 @@ for n_nodes in val_sizes:
         wandb.log({f'N = {n_nodes}/Recorrection %': fig})
     # fig.show()
 
-    # max_attn_score
-    df = pd.DataFrame({'Iteration': range(1, len(val_metrics_by_size_np[n_nodes]['max_attn_score']) + 1), 'Max Attention Score': val_metrics_by_size_np[n_nodes]['max_attn_score']})
-    fig = px.line(df, x='Iteration', y='Max Attention Score', title=f'Max Attention Score (# Nodes {n_nodes})')
-    fig.update_layout(yaxis_tickformat = '.1%')
-    if args.log_wandb:
-        wandb.log({f'N = {n_nodes}/Max Attention Score Table': wandb.Table(dataframe=df)})
-        wandb.log({f'N = {n_nodes}/Max Attention Score': fig})
+    # max_attn_score（--no_attn_metrics 时跳过）
+    if 'max_attn_score' in val_metrics_by_size_np[n_nodes]:
+        df = pd.DataFrame({'Iteration': range(1, len(val_metrics_by_size_np[n_nodes]['max_attn_score']) + 1), 'Max Attention Score': val_metrics_by_size_np[n_nodes]['max_attn_score']})
+        fig = px.line(df, x='Iteration', y='Max Attention Score', title=f'Max Attention Score (# Nodes {n_nodes})')
+        fig.update_layout(yaxis_tickformat = '.1%')
+        if args.log_wandb:
+            wandb.log({f'N = {n_nodes}/Max Attention Score Table': wandb.Table(dataframe=df)})
+            wandb.log({f'N = {n_nodes}/Max Attention Score': fig})
 
-    # attn_score_entropy
-    df = pd.DataFrame({'Iteration': range(1, len(val_metrics_by_size_np[n_nodes]['attn_score_entropy']) + 1), 'Attention Score Entropy': val_metrics_by_size_np[n_nodes]['attn_score_entropy']})
-    fig = px.line(df, x='Iteration', y='Attention Score Entropy', title=f'Attention Score Entropy (# Nodes {n_nodes})')
-    fig.update_layout(yaxis_tickformat = '.1%')
-    if args.log_wandb:
-        wandb.log({f'N = {n_nodes}/Attention Score Entropy Table': wandb.Table(dataframe=df)})
-        wandb.log({f'N = {n_nodes}/Attention Score Entropy': fig})
+    # attn_score_entropy（--no_attn_metrics 时跳过）
+    if 'attn_score_entropy' in val_metrics_by_size_np[n_nodes]:
+        df = pd.DataFrame({'Iteration': range(1, len(val_metrics_by_size_np[n_nodes]['attn_score_entropy']) + 1), 'Attention Score Entropy': val_metrics_by_size_np[n_nodes]['attn_score_entropy']})
+        fig = px.line(df, x='Iteration', y='Attention Score Entropy', title=f'Attention Score Entropy (# Nodes {n_nodes})')
+        fig.update_layout(yaxis_tickformat = '.1%')
+        if args.log_wandb:
+            wandb.log({f'N = {n_nodes}/Attention Score Entropy Table': wandb.Table(dataframe=df)})
+            wandb.log({f'N = {n_nodes}/Attention Score Entropy': fig})
 
     # position accuracy
     df = pd.DataFrame({'Position': range(1, val_metrics_by_size_np[n_nodes]['position_acc'].shape[1] + 1), 'Position-wise Accuracy': val_metrics_by_size_np[n_nodes]['position_acc'].mean(axis=0)})
