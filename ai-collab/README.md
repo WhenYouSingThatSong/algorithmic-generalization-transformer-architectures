@@ -34,6 +34,6 @@ ai-collab/
 ## 快速开始
 
 - 当前状态：`board.md`
-- 已确认事实：`consensus.md`
+- 已确认事实：`consensus.md`（当前暂空，待用户确认后再填；具体口径见 `board.md`）
 - 最近发生了什么：`log.md` 末尾
 - 长报告：`handoff/`

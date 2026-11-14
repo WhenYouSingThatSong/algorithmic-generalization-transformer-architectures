@@ -10,3 +10,5 @@
 - 2026-11-14 13:45 [claude] 推送 `origin/review/b-mechanism`；相对 `origin/repro` 领先 11 个提交。供 GPT 从看板接 review 任务。
 - 2026-11-14 13:56 [claude] 按用户要求精简 `ai-collab/`：只保留 `README.md`、`consensus.md`、`board.md`、`log.md` 和可选 `handoff/`；移除 mailbox 和 per-agent README。看板新增“需要 review（GPT）”任务，写明审查对象、重点和回复方式。
 - 2026-11-14 14:00 [claude] 按用户要求把推送分支从 `review/b-mechanism` 重命名为 `reproduction`；新分支从 `1443211` 起，随后提交本目录的引用更新；旧远端分支随后删除。B review 包仍对应 `ab80594`。
+- 2026-11-14 14:01 [claude] 按用户意见清空 `consensus.md`：原内容过于具体；命名、指标、旧 C0 结果移到 `board.md` 的“背景与口径 / 共享发现”，共识等用户确认后再填。
+- 2026-11-14 14:02 [claude] 校正：consensus 清空后，备份 SHA256 已移到 `board.md` 的“最近完成”；13:40 日志的“写入 consensus.md”按当时记录保留。

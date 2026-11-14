@@ -1,7 +1,11 @@
 # 工作看板
 
-> 最近更新：2026-11-14 13:56 CST · [claude]
+> 最近更新：2026-11-14 14:01 CST · [claude]
 > 活看板：任务可以移动；状态变化在 `log.md` 记一行。条目格式 `[YYYY-MM-DD HH:MM][author]`。
+
+## 当前决策
+
+- [2026-11-14 14:01][claude] `consensus.md` 先留空；具体口径、结果和当前状态放在本看板，待用户确认后再上升为共识。
 
 ## 需要 review（GPT）
 
@@ -36,16 +40,25 @@
 
 ## 最近完成
 
-- [2026-11-14 13:40][claude] 项目备份 `tmp/archive/project-backup-20261114.tar.gz`，SHA256 见 `consensus.md`。
+- [2026-11-14 13:40][claude] 项目备份 `tmp/archive/project-backup-20261114.tar.gz`，SHA256 `7037e0ce2c1cc09b4494031327ce68e959950bec2ba6b2ab1eaa39095a73517a`。
 - [2026-11-14 13:44][claude] 提交 `ab80594`：B 工具/文档迁出 `tmp/`、正式指标修复、`--save_top_k`、无效 C0 配置清理。
 - [2026-11-14 13:45][claude] 推送 `origin/review/b-mechanism`（后重命名为 `reproduction`）。
 - [2026-11-14 11:35][claude] B 代码 v2 smoke 全路径跑通；仅 pipeline smoke。
-- [2026-11-14][claude] 旧 C0 150ep 的 N32/N128 结果已整理；数字见 `consensus.md`。
+- [2026-11-14][claude] 旧 C0 150ep 的 N32/N128 结果已整理；数字见下方“共享发现”。
 - [2026-11-13][claude] parent 2×2 和 teacher round 索引 bug 修复并重跑；旧 p1 数字作废。
+
+## 背景与口径（参考）
+
+- 当前主线：旧 C0 150ep + B 机制；离散线 A / A′ / B，连续线 no-interm C0。
+- 命名：**C0** = 旧 C0（旧窄分布，50k，32 节点、depth ≤ 6，129 词表，seed 42/1234/2025，150ep）；**C0′** = 新 MixedN（8/16/24/32 节点、depth 1–12，100k，129 词表，100ep，已冷存）；**vocab33** = 独立错误配置，已废弃，不得引用。详见 `docs/records/2026-11-14/c0-naming-vocab.md`。
+- 指标：**Value Node Acc** = 非 PAD 数值节点的 VALUE token 准确率；**Graph Value All** = 每图所有数值节点 VALUE 正确；**Strict First-4** = 每图所有非 PAD 位置的 syntax / variable / operation / value 正确。后两个是整图 conjunction，非平滑，必须同时报分母。旧 `VALUE acc` / `last_var_fully` 不能与正式三指标混用。
+- 当前活跃：C0 旧线 + B 主对照 A′ s42 / B-M6 s42；C0′ 和 vocab33 不活跃；cyhB 三 seed 放第二批。
 
 ## 共享发现 / 证据
 
-- 旧 C0：s42/s1234 在 N32 接近饱和；N128 的 Graph Value All 明显下降、Strict First-4 接近 0。原始结果 `tmp/analysis/oldC0-resume-150ep/`。
+- 旧 C0 150ep 旧 N32（e143，Value / Graph / Strict）：s42 `0.9992 / 0.9873 / 0.9844`；s1234 `0.9990 / 0.9854 / 0.8770`；s2025 VALUE 约 0.48，后两项为 0。
+- 旧 C0 150ep 旧 N128（e143）：s42 `0.9912 / 0.8379 / 0.0156`；s1234 `0.9677 / 0.2910 / 0`。
+- 旧 C0 原始结果：`tmp/analysis/oldC0-resume-150ep/`；旧数据配方，不能直接与 B 的 heldout/matched-depth 样本混用。
 - B smoke：4 张 heldout 图 selection 4/4 common-complete；early 28 条、late 53 条、leaf 16 条、controls 7+7；audit 128 candidates + 692 次替换的 pre-corruption 全 EMPTY。**不是结果**。
 - 腐蚀审计初步信号：`last` 策略下 candidate 腐蚀前基本是 EMPTY，而非“已填值被改坏”；仅 1 个 batch，需全量确认。
 
