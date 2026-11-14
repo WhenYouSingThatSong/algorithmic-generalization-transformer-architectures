@@ -9,11 +9,14 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import os
+import sys
 from pathlib import Path
 from collections import defaultdict
 
-import b_mechanism_summary as S
-import b_mechanism_horizon_summary as H
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import b_mechanism_summary as S  # noqa: E402
+import b_mechanism_horizon_summary as H  # noqa: E402
 
 CONDITIONS = {'leaf_constant', 'leaf_constant_scratch', 'leaf_constant_pinned'}
 
