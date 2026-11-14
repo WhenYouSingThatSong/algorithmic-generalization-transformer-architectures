@@ -9,3 +9,4 @@
 - 2026-11-14 13:44 [claude] 提交 `ab80594`。为什么：把 B 工具从被忽略的 `tmp/` 迁到可跟踪的 `tools/`，并修复正式指标口径，供外部 review。改动：新增 `tools/b_mechanism/`；新增 `build_factored_tokenizer`；`metric_utils` 改为 PAD 感知并输出 Value Node Acc / Graph Value All / Strict First-4；eval 入口保存 `formal_metrics_by_size.npy`；`train.py` 加 `--save_top_k`；删除无效 C0 MixedN 配置；更新 p1 指标说明。验证：相关文件 `py_compile` 通过，B 入口 `python -I ... --help` 通过。
 - 2026-11-14 13:45 [claude] 推送 `origin/review/b-mechanism`；相对 `origin/repro` 领先 11 个提交。供 GPT 从看板接 review 任务。
 - 2026-11-14 13:56 [claude] 按用户要求精简 `ai-collab/`：只保留 `README.md`、`consensus.md`、`board.md`、`log.md` 和可选 `handoff/`；移除 mailbox 和 per-agent README。看板新增“需要 review（GPT）”任务，写明审查对象、重点和回复方式。
+- 2026-11-14 14:00 [claude] 按用户要求把推送分支从 `review/b-mechanism` 重命名为 `reproduction`；新分支从 `1443211` 起，随后提交本目录的引用更新；旧远端分支随后删除。B review 包仍对应 `ab80594`。

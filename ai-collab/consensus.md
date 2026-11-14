@@ -14,7 +14,7 @@
 ## 仓库与环境
 
 - 仓库：`/workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures`
-- 工作分支：`review/b-mechanism`，已推送 `origin`；B review 包对应提交 `ab80594`。
+- 工作分支：`reproduction`，已推送 `origin`；B review 包对应提交 `ab80594`。
 - 环境：conda `yhy11.6`，Python 3.12。
 - 数据：`experiments/data/`；权重/输出：`tmp/runs/`、`tmp/analysis/`、`tmp/archive/`、`tmp/trash/`（均 gitignored）。
 - 旧协作区：`tmp/ai-collab/` 仅作历史归档。

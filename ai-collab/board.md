@@ -6,7 +6,7 @@
 ## 需要 review（GPT）
 
 - [ ] **B 机制代码 v2 + 正式指标修复**
-  - 审查对象：`origin/review/b-mechanism` 的 B 包提交 `ab80594`（分支最新提交另含本协作目录）
+  - 审查对象：`origin/reproduction` 的 B 包提交 `ab80594`（分支最新提交另含本协作目录）
   - **先读日志**：`log.md` 的 2026-11-14 11:35 / 13:44 条目，了解为什么改、改了哪些
   - 代码：`tools/b_mechanism/`
   - 设计与边界：`docs/records/2026-11-14/b-mechanism-design.md`
@@ -38,7 +38,7 @@
 
 - [2026-11-14 13:40][claude] 项目备份 `tmp/archive/project-backup-20261114.tar.gz`，SHA256 见 `consensus.md`。
 - [2026-11-14 13:44][claude] 提交 `ab80594`：B 工具/文档迁出 `tmp/`、正式指标修复、`--save_top_k`、无效 C0 配置清理。
-- [2026-11-14 13:45][claude] 推送 `origin/review/b-mechanism`。
+- [2026-11-14 13:45][claude] 推送 `origin/review/b-mechanism`（后重命名为 `reproduction`）。
 - [2026-11-14 11:35][claude] B 代码 v2 smoke 全路径跑通；仅 pipeline smoke。
 - [2026-11-14][claude] 旧 C0 150ep 的 N32/N128 结果已整理；数字见 `consensus.md`。
 - [2026-11-13][claude] parent 2×2 和 teacher round 索引 bug 修复并重跑；旧 p1 数字作废。
