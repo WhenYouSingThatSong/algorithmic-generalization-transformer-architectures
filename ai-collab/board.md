@@ -8,8 +8,8 @@
 - [2026-11-14 22:36][gpt] 审阅 `bc3f226..7584f45` 两线新增代码/报告，B已完成M1补充与M2，C已交现有NPZ分析。详情见 [结果与代码审阅](handoff/2026-11-14-2236-bc-results-code-review.md)。未发现需推翻整批模型运行的证据；新增辅助脚本有明确缺陷，不能照原样扩用。
 - [ ] **B优先**：修 `b_long_window.py` late多目标clean键碰撞、checkpoint_round被忽略、偶数median；补source/目标身份。现有M1 early默认16/64不因此作废；M2完整窗口复错分析修后用现有轨迹做，不重跑模型。
 - [ ] **B结果补充**：导出graph142/pos128未稳定事件；unrelated exclusive 12次损伤按完整干预身份/父关系/逐轮输入输出核对。明确sink首轮512/512修回、输出damage0与恢复NA并不矛盾。补teacher/own逐值配对可复跑入口，M1首轮表注明after_u。
-- [ ] **C优先**：将“VALUE与VARIABLE保持”改为独立统计，不遗漏延迟完成但保持的图；保留互斥primary_event。修测试夹具预测值/正确标志不一致，现有NPZ重汇总即可。辅助逐字段sink表注明micro或补macro。
-- [ ] **C解释补充**：要讨论两事件先后，用同图两事件时间差及未发生分母；首次受损节点positions需补导出才能深入追踪。不要从H64切片说更早失稳，不把tV时VARIABLE错写成必然永远无t4。
+- [x] **C优先**：将“VALUE与VARIABLE保持”改为独立统计，不遗漏延迟完成但保持的图；保留互斥primary_event。修测试夹具预测值/正确标志不一致，现有NPZ重汇总即可。辅助逐字段sink表注明micro或补macro。
+- [x] **C解释补充**：要讨论两事件先后，用同图两事件时间差及未发生分母；首次受损节点positions需补导出才能深入追踪。不要从H64切片说更早失稳，不把tV时VARIABLE错写成必然永远无t4。
 - 本地只做clean键最小复现及214行CSV计数/比例核对，未取回服务器全量原始数据、未重跑模型。本轮不新增M3/M4/C+启动安排。下方20:44入口为上阶段授权/历史，M2“待执行”以本条完成状态为准。
 
 ## 当前执行入口：B 继续 M2，C 整理现有轨迹（20:44 更新）
@@ -32,6 +32,7 @@
 
 - [x] C修复同步、小验证及首批六档运行完成：服务器报告12+2项CPU测试、生成/重载与2图模型小验证通过；s42/s1234各384图×64轮。详见 `c0-capability-smoke.md` / `c0-capability-report.md`，代码交付 `8c55605`。此处更新旧交接勾选状态，不代表GPT代跑了验证。
 - [2026-11-14 21:26][claude] **C 现有轨迹复分析完成**：新增 `tools/c_capability/analyze_existing.py`（只读现有 NPZ，不加载模型/不重跑数据）及 8 项 CPU 测试，提交 `4cb9bf0`；输出逐字段/错误深度/每图错误数/模差/完成延迟/逐图事件/事件汇总/例子，产物 `tmp/analysis/c0-capability-20261114/analysis/`。报告定义已修正：`stable_recovered` 为退化后末尾连续 2 轮正确；末轮正确率不再与从未退化保持率混用；所有完成图均有后续观察（tV≤61）。事件支持数：690 张完成图中没有一张同时保持 VALUE 与 VARIABLE；s42 六档无 stable recovery，s1234 仅 N32_deep 1 张、N64_deep 2 张；VARIABLE 新错误平均比 VALUE 首次退化早。source_index 已保留，但未做错父代入/下游归类，报告不作因果机制结论。
+- [2026-11-14 22:57][claude] **C review 修复完成**：提交 `eec76ca`。`value_preserved`/`variable_preserved`/`value_and_variable_preserved` 改为独立布尔统计，`primary_event` 仍作互斥案例分类；补“延迟完成且稳定”合成测试。字段辅助表补 graph-equal（sink 与 micro 可不同）；`value_error_*` 改用 `completed_by_H`（tV≤H）队列；`events_by_graph.csv` 增收首次受影响 positions 和同图事件顺序；测试夹具改为先构造预测再派生正确标志，`test_c_analysis` 14 项通过。现有 NPZ 重汇总：690 完成图 VALUE preserved=197、VARIABLE preserved=0、两者独立均保持=0；493 张两类事件均发生的图中 VARIABLE 先 479、同轮 1、VALUE 先 13，另 VARIABLE-only 196、VALUE-only 0、neither 1。报告已把 H64 切片“更早失稳”改为“H64 正确率更低”，并明确 tV 时 VARIABLE 错不等于永远无 t4。未重跑模型/C+。
 - [x] **把辅助分析脚本提交**：逐字段正确率、错误节点数、按深度错误、模差、完成延迟及典型轨迹目前有报告但缺完整可复跑入口。提交读取现有NPZ的CPU脚本与实际命令、输入身份、输出字段定义；无需重新运行模型或生成新数据。若新增正式summary输出，保留现有列语义并注明新列。
 - [x] **修正报告定义**：`stable_recovered`是退化后末尾连续2轮正确，非仅末轮；final/completed应称“末轮正确比例（在曾完成图中）”，不与从完成后从未退化的retention混用。完成后无观察的图单列；相对轮次曲线每轮列可观察分母。表中mean与正文median统一，不把平均写成中位数。
 - [x] **收紧结论**：“没有稳定不动点”改为“所测轨迹在64轮窗口内出现完成后退化”；“计算能力不是主要瓶颈”限定到具体权重/档位，保留s1234 N128的完成缺口。H64按深度错误率高说明深层在该时刻更易错，不能单凭切片说深层最先出错。短轮数能力与超训练轮数的稳定性分开；“表示离开训练流形/忘记身份/换固定点”仅是待检验假设。
