@@ -95,3 +95,23 @@
 - late/sustained 四项无输出，重跑即可；
 - 性能修改完成、通过上述验收后，执行 agent 再按 board 的 B 长轮数任务重跑六项，
   然后做 H 表/曲线/报告；C 能力探索仍排在 B 之后，不提前启动。
+
+## 对 C 能力探索的性能含义（请一并考虑）
+
+C 的首批设计单是 `docs/records/2026-11-14/c0-capability-exploration-plan.md`，
+排在 B 长轮数之后。它和 B 不是同一个 runner：
+
+- C 走 C0 **nointerm 连续 hidden 回灌**：从原始输入 `token_embedder(batch)` 开始，
+  每轮 `depth_batch, factor_preds = model(depth_batch, True)`，hidden 回灌，
+  离散解码只用于观察、不写回；不能复用 B 的 `C.rollout`（离散 argmax 回灌）。
+  现有 `compute_batch_loss_nointerm` 的主体循环可作为语义参考。
+- 规模更大：6 档（N32/64/128 × 浅层≤6 / 较深 7–12）× 约 64 图/档 × 2 个 seed
+  × 64 轮，且 N128 的节点数更多。如果仍按每个 position、每个 factor 逐标量
+  `int()` 读 GPU，同步次数会比 B 再高一个量级。
+- C 的读出不只要损伤率：每轮全节点前四字段、`tV`/`t4` 首次全对时刻、完成后
+  漂移（首次数值退化/仅其他字段退化、错误节点数、回正/反复），都需要逐轮
+  聚合。建议把 CPU 侧/批量读出与聚合做成 `b_mechanism_common`/新 common 的
+  可复用 helper，而不是只给 B 的三个 runner 打补丁；C 实现时直接复用。
+- 如果实现成本可控，B 的性能修复可先按“每图/每轮一次 `.cpu()` + CPU 记录”
+  做；C runner 再考虑把同一档的多图合成 batch 前向和 GPU 侧 reduction。两者
+  不要混在一个提交里，避免影响 B 的等价验证。

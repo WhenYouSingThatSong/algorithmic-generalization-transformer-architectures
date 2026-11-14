@@ -22,6 +22,7 @@
   - **要求**：每轮/每图只做一次 `.cpu()`，CPU 侧构造记录并缓存 label 真值；加 `--num_threads`（默认 4–8）；进度日志 + JSONL 增量落盘；启动端最多 2 项并行。保持 manifest/资格/条件/轮数/JSON schema 不变。
   - **代码位置**：`tools/b_mechanism/b_mechanism_common.py:354,366`；`b_mechanism_early.py:26,145`；`b_mechanism_late.py:39,140,154`；`b_mechanism_controls.py:31,35`。
   - **验收**：CPU 等价测试、4 图 horizon 2/8 GPU 等价、现有 15 项 CPU 检查通过、4 图 horizon 64 至少 5× 加速且不拖慢训练。完成后在 board/log 记提交；**不要直接启动六项重跑**，由执行 agent 做。
+  - **兼顾 C**：C 能力探索排在 B 之后，走 nointerm hidden 回灌，6 档 × 64 图 × 2 seed × 64 轮，逐轮全节点读出；请把 CPU 侧/批量读出做成可复用 helper，不要只为 B 三个 runner 打补丁。详见交接单末节。
 
 - [x] **B 机制代码 v2 + 指标实现**（GPT 已完成；发现 P1 缺陷，见“Review 结论”）
   - 审查对象：`origin/reproduction` 的 B 包提交 `ab80594`；review 修复提交 `66440b8` + `c91b6fe`（分支最新提交另含本协作目录）
