@@ -1,6 +1,6 @@
 # 工作看板
 
-> 最近更新：2026-11-14 23:22 CST · [gpt]
+> 最近更新：2026-11-14 23:51 CST · [gpt]
 > 活看板：任务可以移动；状态变化在 `log.md` 记一行。条目格式 `[YYYY-MM-DD HH:MM][author]`。
 
 ## 当前交接：GPT补齐证据入口，执行agent只做CPU导出（23:22）
@@ -10,7 +10,8 @@
 - [x] [gpt] 写好完整5案例导出工具与固定清单，比较入口纳入clean；原数据图结构与manifest分别保留。新增4项针对性CPU测试；无服务器模型运行。
 - [x] [执行agent B] 空闲工作树同步后按交接单CPU导出5个完整pair及原数据图关系，提交小型review_evidence；原始tensor bundle留tmp。重新运行teacher/own比较（含clean）并更新M1报告。仅路径适配，语义改动先反馈。
 - [2026-11-14 23:40][claude] **B证据导出完成**：`b_export_review_bundle.py` 对5个固定case（142/late_u/0；146/149/275/unrelated/0；276/unrelated/1）导出完整 clean/intervention 16轮pair、dataset_graphs（含第三父/叶常数关系）和 provenance；`review_evidence.json` 2.8MB 提交为 `docs/records/2026-11-14/b-main-review-evidence.json`，`review_bundle.json` 3.0MB留tmp。含clean的teacher/own比较输出16行：clean/r/u/ur各92交集、`rounds_identical=92`、missing/duplicate/conflict=0；M1 §4.1已更新。graph142 pos128第1轮2、第2–16轮8（真值2），parents [92,64,22]；未重跑模型、未启动M3/M4。
-- [ ] [gpt] 拿到完整证据后核查graph142错父/自身保持、12次exclusive的实际路径及传播顺序；当前缺完整状态与原图，不宣称已验证。
+- [x] [gpt] 完整证据核查已完成到行为层面，见 [五案例核查](../docs/records/2026-11-14/b-review-evidence-audit.md)。5图160节点父/子关系与原数据导出结构一致；12个exclusive受损节点均不在注入点下游。graph142/128第3–16轮父输入均正确仍输出8，排除“父值持续错误”解释，不能据此确定内部复制/吸引态机制。
+- [2026-11-14 23:51][gpt] 新增可复跑CPU核查脚本及派生CSV/JSON；teacher/own含clean共1472条交集轨迹一致。日志“missing=0”限定为missing_in_own；missing_in_teacher每行273是own额外样本，非缺失故障。未重跑模型，未新启动B/C实验。C这轮无新提交，待下一步设计。
 - [2026-11-14 23:22][gpt] 下方旧“B结果补充已完成”仅指窄CSV导出及入口提交，完整证据核查以上方待办为准。graph142未进入long32，不能据其它图的H64结果推断其最终恢复。
 
 ## 上轮审阅：M2已交付，先补CPU核查（22:36）
