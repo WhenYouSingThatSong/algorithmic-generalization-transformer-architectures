@@ -17,6 +17,12 @@ import json
 import os
 import sys
 
+# Set library thread limits before torch/model imports.
+import sys as _runtime_sys
+_runtime_sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from trajectory_io import configure_runtime, add_runtime_arguments
+if __name__ == '__main__':
+    configure_runtime()
 import torch
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -33,17 +39,8 @@ def values_at(state, tok, positions):
 
 
 def round_records(inputs, outputs, tok, positions, label_b, pre_forward_round):
-    rows = []
-    for t in range(len(inputs)):
-        rows.append(dict(
-            post_round=t + 1,
-            pre_forward_round=pre_forward_round,
-            input=values_at(inputs[t], tok, positions),
-            output=values_at(outputs[t], tok, positions),
-            input_nodes=C.node_state(inputs[t], label_b, tok, positions),
-            output_nodes=C.node_state(outputs[t], label_b, tok, positions),
-        ))
-    return rows
+    return C.StateRecorder(tok, label_b).rounds(
+        inputs, outputs, positions, pre_forward_round)
 
 
 def validate_control_schedule(mode, hold_rounds, switch_at, horizon):
@@ -81,6 +78,7 @@ def main():
     p.add_argument('--delta', type=int, default=3)
     p.add_argument('--horizon', type=int, default=10)
     p.add_argument('--out', required=True)
+    add_runtime_arguments(p)
     a = p.parse_args()
     try:
         validate_control_schedule(a.mode, a.hold_rounds, a.switch_at, a.horizon)
@@ -95,9 +93,9 @@ def main():
     ctx = C.load_eval_context(a.config, a.group, a.run, a.base, a.ckpt,
                               a.ds_file, batch_size=a.batch_size, num_workers=0)
     lit, tok, teacher, mc = ctx['lit'], ctx['tok'], ctx['teacher'], ctx['mc']
-    records = []
     clean_done = set()
     counts = dict(processed=0, emitted=0, clean_emitted=0, skipped=0)
+    records = C.RecordWriter(a, counts, len(graphs))
 
     with torch.no_grad():
         for batch_idx, raw in enumerate(ctx['dm'].val_dataloader()):
@@ -109,12 +107,15 @@ def main():
                 if gid not in graphs:
                     continue
                 mg = graphs[gid]
+                label_cpu = label[bi].detach().cpu()
+                recorder = C.StateRecorder(tok, label_cpu)
                 meta = C.build_meta(data[bi], label[bi], info[bi], tok, teacher)
                 meta['info_b'] = info[bi].cpu()
                 _, outs = C.rollout(lit, teacher, data[bi:bi + 1], mg['n_loops'])
                 T = mg['T']
                 if T >= len(outs) or not C.all_numeric_correct(outs[T][0], label[bi], meta['numeric']):
                     counts['skipped'] += 1
+                    records.graph_done()
                     continue
                 base = outs[T].clone()
                 counts['processed'] += 1
@@ -142,8 +143,7 @@ def main():
                             r_true=r_true, r_wrong=r_wrong, r_other=r_other,
                             hold_rounds=a.hold_rounds, switch_at=a.switch_at,
                             pre_forward_round=T + 1,
-                            rounds=round_records(clean_inputs, clean_outputs, tok,
-                                                 positions, label[bi], T + 1),
+                            rounds=recorder.rounds(clean_inputs, clean_outputs, positions, T + 1),
                             node_truth=mg['nodes']))
                         counts['clean_emitted'] += 1
 
@@ -165,14 +165,13 @@ def main():
                         r_true=r_true, r_wrong=r_wrong, r_other=r_other,
                         hold_rounds=a.hold_rounds, switch_at=a.switch_at,
                         pre_forward_round=T + 1,
-                        rounds=round_records(inputs, outputs, tok, positions,
-                                             label[bi], T + 1),
+                        rounds=recorder.rounds(inputs, outputs, positions, T + 1),
                         node_truth=mg['nodes']))
                     counts['emitted'] += 1
 
-    os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True)
-    with open(a.out, 'w') as f:
-        json.dump(dict(args=vars(a), counts=counts, records=records), f, indent=2)
+                records.graph_done()
+
+    records.finish()
     print(json.dumps(counts, indent=2))
     print('WROTE', a.out)
 

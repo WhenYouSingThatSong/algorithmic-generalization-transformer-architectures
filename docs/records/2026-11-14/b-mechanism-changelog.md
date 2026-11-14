@@ -97,3 +97,7 @@ must not be cited.
 ## Smoke
 
 See `b-mechanism-smoke.md`.  Smoke is pipeline-only; no scientific claim.
+
+## 2026-11-14 17:03：runner记录与资源优化
+
+基于968129a，未改实验条件。early/late/controls共用CPU批量记录与真值缓存；默认4线程、逐条JSONL、进度快照、最终JSON流式写出；增加串行启动器。19项CPU检查及语法检查通过；实际GPU等价/加速未验证，交执行agent。新增参数 --num_threads / --progress_every，输出必须使用新路径；JSON内容字段兼容、空白改为紧凑格式。详见 ai-collab/handoff/2026-11-14-1703-b-runner-performance-fix.md。

@@ -12,10 +12,14 @@ import copy
 import hashlib
 import os
 import sys
+import time
 from collections import defaultdict, deque
 
 import torch
 import yaml
+
+from trajectory_io import StateRecorder, RecordWriter, TIMINGS
+from trajectory_io import factor_strings as cpu_factor_strings
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 for _p in (ROOT, os.path.join(ROOT, 'experiments')):
@@ -150,6 +154,7 @@ def rollout(lit, teacher, start, n_rounds, input_hook=None):
       inputs[t]  = state fed to forward t
       outputs[t] = model argmax output after forward t
     """
+    started = time.perf_counter()
     cur = start.clone()
     inputs, outputs = [], []
     with torch.no_grad():
@@ -164,6 +169,7 @@ def rollout(lit, teacher, start, n_rounds, input_hook=None):
             force_aux_false(preds, teacher)
             outputs.append(preds.detach().clone())
             cur = preds
+    TIMINGS['rollout_s'] += time.perf_counter() - started
     return inputs, outputs
 
 
@@ -352,27 +358,14 @@ def pick_chain(meta, token_data, label_b, tok, k=4, require_q2=True, allow_multi
 
 
 def factor_strings(row, tok, factors=('SYNTAX', 'VARIABLE', 'OPERATION', 'VALUE')):
-    out = {}
-    for name in factors:
-        idx = tok.factors.index(name)
-        mapping = getattr(tok, name.lower() + '_idx2tok', None)
-        if mapping is None:
-            out[name] = str(int(row[idx]))
-        else:
-            out[name] = mapping.get(int(row[idx]), str(int(row[idx])))
-    return out
+    return cpu_factor_strings(row, tok, factors)
 
 
 def node_state(state, label_b, tok, positions):
-    """First-four prediction/truth for tracked nodes (batch 0)."""
-    out = {}
-    for p in positions:
-        pred4 = factor_strings(state[0, p], tok)
-        true4 = factor_strings(label_b[p], tok)
-        out[str(p)] = dict(pos=int(p), pred4=pred4, true4=true4,
-                           first4_correct=pred4 == true4,
-                           value_correct=pred4['VALUE'] == true4['VALUE'])
-    return out
+    """Compatibility wrapper; runners reuse a graph-level StateRecorder."""
+    from trajectory_io import cpu_rows
+    return StateRecorder(tok, label_b).nodes(cpu_rows(state[0]), positions)
+
 
 
 def graph_records(meta, label_b, tok):

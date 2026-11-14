@@ -20,6 +20,12 @@ import argparse
 import json
 import os
 
+# Set library thread limits before torch/model imports.
+import sys as _runtime_sys
+_runtime_sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from trajectory_io import configure_runtime, add_runtime_arguments
+if __name__ == '__main__':
+    configure_runtime()
 import torch
 
 import os as _os, sys as _sys
@@ -141,26 +147,16 @@ def rollout_records(lit, teacher, tok, start, meta, manifest_graph, target, kind
                     horizon, label_b, pre_forward_round, input_hook=None,
                     new_truth_values=None):
     positions = tracked_positions(meta, manifest_graph, target, kind)
+    label_b = meta.get('_label_cpu', label_b)
+    recorder = meta.get('_recorder')
+    if recorder is None:
+        recorder = C.StateRecorder(tok, label_b)
     label_new = (truth_label(label_b, new_truth_values, tok)
                  if new_truth_values is not None else None)
+    new_recorder = C.StateRecorder(tok, label_new) if label_new is not None else None
     inputs, outputs = C.rollout(lit, teacher, start, horizon, input_hook=input_hook)
-    rows = []
-    for t in range(horizon):
-        row = dict(
-            post_round=t + 1,
-            pre_forward_round=pre_forward_round,
-            input=token_values(inputs[t], tok, positions),
-            output=token_values(outputs[t], tok, positions),
-            input_nodes=C.node_state(inputs[t], label_b, tok, positions),
-            output_nodes=C.node_state(outputs[t], label_b, tok, positions),
-            truth_ref='old',
-        )
-        if label_new is not None:
-            row['input_nodes_new'] = C.node_state(inputs[t], label_new, tok, positions)
-            row['output_nodes_new'] = C.node_state(outputs[t], label_new, tok, positions)
-            row['truth_ref_new'] = 'new'
-        rows.append(row)
-    return rows
+    return recorder.rounds(inputs, outputs, positions, pre_forward_round,
+                           new_recorder=new_recorder, truth_ref=True)
 
 
 def main():
@@ -182,6 +178,7 @@ def main():
     p.add_argument('--n_graphs', type=int, default=0,
                     help='0 = all manifest graphs')
     p.add_argument('--out', required=True)
+    add_runtime_arguments(p)
     a = p.parse_args()
 
     with open(a.manifest) as f:
@@ -194,9 +191,9 @@ def main():
     lit, tok, teacher, mc = ctx['lit'], ctx['tok'], ctx['teacher'], ctx['mc']
     selected = set(graphs)
     done = 0
-    records = []
     clean_done = set()
     counts = dict(processed=0, emitted=0, skipped_not_complete=0)
+    records = C.RecordWriter(a, counts, min(len(graphs), a.n_graphs) if a.n_graphs else len(graphs))
 
     with torch.no_grad():
         for batch_idx, raw in enumerate(ctx['dm'].val_dataloader()):
@@ -208,14 +205,19 @@ def main():
                 if gid not in selected:
                     continue
                 mg = graphs[gid]
+                label_cpu = label[bi].detach().cpu()
+                recorder = C.StateRecorder(tok, label_cpu)
                 meta = C.build_meta(data[bi], label[bi], info[bi], tok, teacher)
                 meta['info_b'] = info[bi].cpu()
+                meta['_recorder'] = recorder
+                meta['_label_cpu'] = label_cpu
                 # Recompute clean rollout and require the preselected T to be complete.
                 n_loops = mg['n_loops']
                 _, outs = C.rollout(lit, teacher, data[bi:bi + 1], n_loops)
                 T = mg['T']
                 if T >= len(outs) or not C.all_numeric_correct(outs[T][0], label[bi], meta['numeric']):
                     counts['skipped_not_complete'] += 1
+                    records.graph_done()
                     continue
                 base = outs[T].clone()
                 counts['processed'] += 1
@@ -325,15 +327,14 @@ def main():
                                             T=T, pre_forward_round=T + 1, rounds=rows,
                                             node_truth=mg['nodes'], **extra))
                         counts['emitted'] += 1
+                records.graph_done()
                 done += 1
                 if a.n_graphs and done >= a.n_graphs:
                     break
             if a.n_graphs and done >= a.n_graphs:
                 break
 
-    os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True)
-    with open(a.out, 'w') as f:
-        json.dump(dict(args=vars(a), counts=counts, records=records), f, indent=2)
+    records.finish()
     print(json.dumps(counts, indent=2))
     print('WROTE', a.out)
 

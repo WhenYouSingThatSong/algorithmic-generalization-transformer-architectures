@@ -273,8 +273,8 @@ B/cyh 训练于 2026-11-07/08；比对当前 `randomly_corrupt_values` 与训练
 - `--ds_file`、`--n_graphs`、`--batch_size`、`--seed`；
 - 输出 JSONL/JSON + 汇总 CSV；
 - `OMP_NUM_THREADS=4–8`、`num_workers=0/1`；
-- 默认单卡串行；2026-11-14 长轮数小试跑在空闲 GPU 上按“单进程单模型”并行
-  运行 A′/B 的 early/late/sustained，未并发共用同一张卡。
+- 默认串行；15:39 长轮数试跑曾六项并行，因共享 CPU 争用已停止。17:03 优化版
+  early/late/controls 默认4线程，后续六项串行重跑；不能因不同 GPU 就忽略 CPU 争用。
 
 ## 9. 执行顺序与资源
 

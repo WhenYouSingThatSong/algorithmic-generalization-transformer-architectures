@@ -1,6 +1,6 @@
 # 工作看板
 
-> 最近更新：2026-11-14 16:45 CST · [claude]
+> 最近更新：2026-11-14 17:03 CST · [gpt]
 > 活看板：任务可以移动；状态变化在 `log.md` 记一行。条目格式 `[YYYY-MM-DD HH:MM][author]`。
 
 ## 当前决策
@@ -16,7 +16,9 @@
 
 ## 需要 review（GPT）
 
-- [ ] **B 长轮数 runner 性能修改（待 GPT 实现）**
+- [x] **B 长轮数 runner 性能修改（GPT 已实现；GPU 等价与测速待执行 agent）**
+  - [2026-11-14 17:03][gpt] 用户授权后基于最新 `968129a` 完成 CPU 批量记录/按图真值缓存、默认4线程、逐条 JSONL/进度、串行启动器；19项 CPU 检查和语法检查通过。服务器模型等价、加速倍数、训练资源影响未测；不启动任务。交接见 [性能优化交付](handoff/2026-11-14-1703-b-runner-performance-fix.md)。
+  - **执行交接**：执行 agent 按原交接做必要小验证，然后用同 manifest/参数串行重跑六项，输出新目录。训练所在工作树不 pull，可用 reproduction 此提交的独立目录快照。下方“最多2项”由本轮“串行一项”取代；5×仍是待实测目标。
   - **先读**：`handoff/2026-11-14-1645-b-horizon-performance.md` 和 `log.md` 的 16:30 条目
   - **问题**：`node_state`/`factor_strings` 对每个 position、每个 factor 从 GPU 逐标量 `int()`，每轮约 580 次同步；126 条 × 64 轮约 470 万次/任务。runner 未限制线程，六进程各约 224 线程，与 seed2026 共用 84 核 cgroup，训练 epoch 从 4:23 拖到 34:07；输出只在最后一次性写盘。
   - **要求**：每轮/每图只做一次 `.cpu()`，CPU 侧构造记录并缓存 label 真值；加 `--num_threads`（默认 4–8）；进度日志 + JSONL 增量落盘；启动端最多 2 项并行。保持 manifest/资格/条件/轮数/JSON schema 不变。
@@ -35,6 +37,8 @@
   - 回复：在下方“Review 结论”追加，并在 `log.md` 记一行；不要直接改 `consensus.md`
 
 ## 进行中
+
+- [2026-11-14 17:03][gpt] B 性能代码已交付，等待执行 agent 的 GPU 小验证与测速；旧“等待 GPT 性能修改”状态由此更新。B 重跑尚未由 GPT 启动，C 仍排在其后。
 
 - [2026-11-14 16:40][claude] B 长轮数试跑暂停，等待 GPT 性能修改后整体重跑。A′/B early after_u 已在 16:34 完成并各写盘 126 条/260 MB；late/sustained 四项已停止且无输出。用户要求六项都重跑，early 旧文件保留作对照，优化版输出另放 `_v2`/新目录。GPU0 训练未动。
 - [2026-11-14 10:12][claude] 旧 C0 seed2026 150 epoch，GPU0；输出 `tmp/runs/oldC0-newseed-150ep/`；14:42 检查 epoch 61/150，约 5.9 it/s，val 1.540。不要停止/重启。
