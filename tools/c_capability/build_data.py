@@ -21,6 +21,10 @@ import random
 import sys
 from pathlib import Path
 
+HERE = Path(__file__).resolve().parent
+if str(HERE) not in sys.path:
+    sys.path.insert(0, str(HERE))
+
 try:
     from . import c_common
 except ImportError:  # direct script execution

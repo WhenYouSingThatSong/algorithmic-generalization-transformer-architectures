@@ -70,6 +70,22 @@ class NodeMetadataTests(unittest.TestCase):
         self.assertEqual(nodes["is_sink"].tolist(), [False, False, False, True])
         self.assertEqual(nodes["parents"][4], [2, 3])
 
+    def test_three_parents_affect_sink(self):
+        info = np.full((8, 6), -1, dtype=np.int64)
+        # positions 0..2 are value-token parents; 3..7 are numeric nodes.
+        for pos, parent in ((3, 0), (4, 1), (5, 2)):
+            info[pos, 0] = 0
+            info[pos, 1] = parent
+            info[pos, 2] = 1
+        info[6] = [1, 3, 1, 4, 1, 5]   # three numeric parents
+        info[7] = [2, 6, 1, -1, -1, -1]
+        numeric = np.zeros((1, 8), dtype=bool)
+        numeric[0, 3:] = True
+        nodes = c_common.node_meta(info[None, ...], numeric)[0]
+        self.assertEqual(nodes["parents"][6], [3, 4, 5])
+        self.assertEqual(nodes["is_sink"].tolist(),
+                         [False, False, False, False, True])
+
 
 class CompletionTests(unittest.TestCase):
     def test_preexisting_field_error_is_not_drift(self):

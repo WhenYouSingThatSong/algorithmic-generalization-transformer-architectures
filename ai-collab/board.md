@@ -39,10 +39,13 @@ B 试跑作为预算/现象参考保留，不能并入独立主实验冒充新�
 
 ### Agent C：直接执行已批准的 C0 能力与漂移探索
 
-- [ ] 领取并核实可用的 s42/s1234 权重实际路径/哈希，沿用现有 e143；s2025不测，s2026完成后同协议补入，不等它才开工。
-- [ ] 按 [C首批设计单](../docs/records/2026-11-14/c0-capability-exploration-plan.md) 固定六档数据：N32/64/128 × 实际深度≤6 / 7–12，每档约64图；交实际深度/图数摘要，缺档用既有生成器补齐或说明，不按模型答对筛题。
-- [ ] 实现必要记录与汇总，做一次简短检查后运行。连续hidden自由反馈64轮；两项节点指标并列，按深度/内部/结果端分解；记录 tV/t4、完全算对后的保持/漂移/恢复。
-- [ ] 交付 `docs/records/2026-11-14/c0-capability-report.md`：能力表、过程曲线、典型错误、对C+的启示。产物 `tmp/analysis/c0-capability-20261114/`。本任务不训练C+，不扩展人工注错矩阵。
+- [2026-11-14 19:44][claude] **领取 C 线并启动正式小跑**：工作目录本仓库，代码基线 `9df92a8` + 本地未提交的 C 入口路径/测试修复；产物 `tmp/analysis/c0-capability-20261114/`；数据构建用 CPU，runner 用空闲 GPU6（seed2026 在 GPU0 不动）；负责 `tools/c_capability/` 与 C 报告。先构建六档数据，再按 s42→s1234 串行 64 图/档 × 64 轮，阶段结果写回 board/log。
+- [2026-11-14 19:58][claude] **C 首批六档完成**：s42_e143 95.4 s、s1234_e143 99.7 s，各 384 图 × 64 轮，无 Traceback/OOM；GPU6 已释放，seed2026 未受影响。主要现象：VALUE 完成率 s42 59–64/64、s1234 32–64/64（缺口在 N128）；H=64 整图 VALUE 全对率大幅下降（s42 N32_shallow 47/64 → N128_deep 1/64；s1234 N64/N128 只剩 0–7/64）。first-4 的下降几乎全来自 VARIABLE（SYNTAX/OPERATION 在 H=64 仍 1.000；VARIABLE 约 0.08–0.11），本任务的 first-4 实际是 `VALUE ∧ VARIABLE`；H=36 时已无图 VARIABLE 全对。VALUE 漂移深层优先，N32 多为 1–2 个错节点，N64/N128 多为 >5 个错；s42 完成时几乎严格按 depth+1，s1234 大图有明显长尾/未完成（N128_deep 32/64 完成）。报告：`docs/records/2026-11-14/c0-capability-report.md`；汇总：`tmp/analysis/c0-capability-20261114/runs/summary/`。
+
+- [x] 领取并核实可用的 s42/s1234 权重实际路径/哈希，沿用现有 e143；s2025不测，s2026完成后同协议补入，不等它才开工。
+- [x] 按 [C首批设计单](../docs/records/2026-11-14/c0-capability-exploration-plan.md) 固定六档数据：N32/64/128 × 实际深度≤6 / 7–12，每档约64图；交实际深度/图数摘要，缺档用既有生成器补齐或说明，不按模型答对筛题。
+- [x] 实现必要记录与汇总，做一次简短检查后运行。连续hidden自由反馈64轮；两项节点指标并列，按深度/内部/结果端分解；记录 tV/t4、完全算对后的保持/漂移/恢复。
+- [x] 交付 `docs/records/2026-11-14/c0-capability-report.md`：能力表、过程曲线、典型错误、对C+的启示。产物 `tmp/analysis/c0-capability-20261114/`。本任务不训练C+，不扩展人工注错矩阵。
 
 ### Agent B：先整理试跑，同时准备主实验；分两次交付
 
@@ -185,6 +188,7 @@ B 试跑作为预算/现象参考保留，不能并入独立主实验冒充新�
 - [2026-11-14 17:31][claude] **B 长轮数 v2（pilot，非最终）**：B-M6 在 after_u U/R、complete U/R、sustained_R 的 all_affected 稳定恢复 H=8 约 0.995–1.000、H=16 全部 1.000，受损节点 first recovery 均在 2–8 轮；A′ 全部 never（direct U 42/42、R 39/42 等持续错）。clean 分支 64 轮无漂移。建议主 H=16 + 64 轮长期稳定性检查；最终 H 待用户/GPT。
 - [2026-11-14 16:46][claude] **仅 early 的优化前预览，不是最终结果**：B-M6 after_u U/R 的受损节点在 H=8 时稳定恢复已约 100%；A′ 同期全部 never（direct U 42/42、R 39/42 持续错）。late/sustained 未跑，H 未定；性能修复后六项重跑再正式分析。
 - [2026-11-14 14:41][claude] Post-review fix smoke（4 图）：selection 9 chains / 16 sinks / 16 leaves；batch 4 与 8 的 `(T, n_loops)` 一致；early 36 条、late 66 条、controls 9+9 clean；summary 7 行，A′/B 来源分离、输入顺序不变、`duplicate_cleans=0`。**仅 pipeline smoke**。
+- [2026-11-14 19:58][claude] **C 首批六档（探索，非最终）**：s42 的 VALUE 完成率 59–64/64，s1234 32–64/64（N128 缺口）；H=64 整图 VALUE 全对率 s42 N32_shallow 47/64 → N128_deep 1/64，s1234 N64/N128 0–7/64。first-4 下降几乎全来自 VARIABLE（H=64 SYNTAX/OPERATION 1.000、VARIABLE 0.08–0.11），本任务 first-4 ≈ `VALUE ∧ VARIABLE`；H=36 已无图 VARIABLE 全对。VALUE 漂移深层优先；s42 完成几乎按 depth+1，s1234 大图长尾/未完成明显。报告 `docs/records/2026-11-14/c0-capability-report.md`。
 - 旧 C0 150ep 旧 N32（e143，Value / Graph / Strict，按当前 eval 实现口径，非最终验收）：s42 `0.9992 / 0.9873 / 0.9844`；s1234 `0.9990 / 0.9854 / 0.8770`；s2025 VALUE 约 0.48，后两项为 0。
 - 旧 C0 150ep 旧 N128（e143）：s42 `0.9912 / 0.8379 / 0.0156`；s1234 `0.9677 / 0.2910 / 0`。
 - 旧 C0 原始结果：`tmp/analysis/oldC0-resume-150ep/`；旧数据配方，不能直接与 B 的 heldout/matched-depth 样本混用。

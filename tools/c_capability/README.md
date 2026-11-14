@@ -2,7 +2,12 @@
 
 Design: `docs/records/2026-11-14/c0-capability-exploration-plan.md`
 
-Status: **code drafted for GPT review; no model/data run in this session.**
+Status: **GPT-reviewed; CPU tests and a 2-graph model smoke passed; the formal
+six-stratum run for s42_e143 and s1234_e143 is complete.**
+
+The smoke evidence is in `docs/records/2026-11-14/c0-capability-smoke.md`.
+The formal data and results are under `tmp/analysis/c0-capability-20261114/`;
+the report is `docs/records/2026-11-14/c0-capability-report.md`.
 
 This directory implements the approved first C0 capability exploration:
 
@@ -41,7 +46,7 @@ indices with a fixed seed and records `source_indices`, source SHA256, actual
 depth stats and the generator config.  Generated strata use the full 128-name
 variable pool (vocab129), matching C0.
 
-## Commands (not run yet)
+## Commands used for the formal run
 
 ```bash
 # 1) Build data.  --allow-generate is needed for N64_shallow and N128_shallow.
@@ -53,11 +58,11 @@ python tools/c_capability/build_data.py --dry-run
 # 2) Run one weight over all strata.  Use a free GPU; the runner is serial.
 python tools/c_capability/run_capability.py \
   --weight s42_e143 --strata all --device cuda:0 \
-  --rounds 64 --batch-size 4 --num-threads 4
+  --rounds 64 --batch-size 4 --num_threads 4
 
 python tools/c_capability/run_capability.py \
   --weight s1234_e143 --strata all --device cuda:0 \
-  --rounds 64 --batch-size 4 --num-threads 4
+  --rounds 64 --batch-size 4 --num_threads 4
 
 # Smoke only (writes at most 2 graphs per stratum, still 64 rounds):
 python tools/c_capability/run_capability.py \
@@ -120,4 +125,7 @@ append-only and flushed per graph, so a killed run leaves completed graphs.
 3. The runner sets 64 loops explicitly; it does not use the old config's
    `max_val_loop=36`.
 4. `tV` and `t4` drift are separate; summary consumers must not merge them.
-5. No model, data generation, GPU job or board/log update was performed here.
+5. The formal run used GPU6 only; seed2026 training on GPU0 was untouched.  The
+   first pass is an exploration budget, not a final evaluation protocol.  It
+   found that first-4 collapse in this ADD task is dominated by the VARIABLE
+   readout, while VALUE remains high much longer; see the report.

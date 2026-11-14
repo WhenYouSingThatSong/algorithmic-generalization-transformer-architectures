@@ -1,7 +1,7 @@
-# C0 能力探索：代码实现设计（待 GPT review）
+# C0 能力探索：代码实现设计（GPT 已审阅）
 
-日期：2026-11-14 18:00 CST。  
-状态：**代码已写，未运行**；未生成数据、未加载模型、未占用 GPU、未修改训练任务。  
+日期：2026-11-14 18:00 CST；19:36 更新 smoke 状态。  
+状态：**代码已写并经 GPT 审阅；CPU 测试、极小生成和 2 图 smoke 通过；正式六档已运行，报告见 `c0-capability-report.md`**。  
 上游设计：`docs/records/2026-11-14/c0-capability-exploration-plan.md`
 
 ## 1. 交付内容
@@ -58,26 +58,31 @@
 - 辅助：整图 VALUE 全对率、整图前四全对率；明确不等于节点指标。
 - 输出：`curves.csv`、`capability_by_H.csv`、`by_node_type.csv`、`by_depth.csv`、`completion.csv`、`drift.csv`、`drift_by_graph.csv`、`examples.json`、`report.md`。
 
-## 6. 需要 GPT review 的点
+## 6. GPT review 结果与剩余 open questions
 
-1. **生成档的来源**：N64_shallow/N128_shallow 用新生成池是否可接受；是否应改为“现有 54 + 生成 10”的混合，还是保持单一来源。
-2. **`tV`/`t4` 漂移锚点**：当前代码分别计算 `tV` 后和 `t4` 后的漂移；是否还需要“VALUE 完成后、四属性尚未完成”的单独阶段统计（代码已输出 `other_only`）。
-3. **样本量**：每档 64 图是探索预算；整图全对率会较粗，报告需保留覆盖 n，不建议扩成正式结论。
-4. **权重固定**：s1234 e143 在 C0′ MixedN test 上并非 strict 最优（e133 更高），但按设计固定 e143；报告需注明这是“可比性选择”，不是“最佳 checkpoint”。
-5. **存储格式**：逐图 npz + `index.jsonl`，而不是单个大 JSON；便于中断后保留已完成图。若 GPT 希望统一到 `trajectory_io` 的 JSONL schema，可在 runner 输出层再包一层。
-6. **不运行**：本轮未执行 `build_data.py`、未加载模型、未生成数据、未改 board/log。等 review 后再决定是否运行和如何领取 C 线。
+GPT 已在 `handoff/2026-11-14-1857-bc-execution-review.md` 审阅，并在
+`5669677` 修复第三父节点、生成 meta、逐图等权/漂移口径；本文件上方原有
+C1–C4 问题已不再作为未决项。仍建议后续报告时明确：
 
-## 7. 静态检查
+1. N64_shallow/N128_shallow 采用新生成池，不与现有 54 张 N64 浅图混合。
+2. `tV`/`t4` 漂移分开；`other_only_error`（错误存在）与
+   `other_only_ever`（已正确字段后变错）不可混称。
+3. 每档 64 图是探索预算；整图全对率会较粗，报告需保留覆盖 n。
+4. s1234 e143 是固定可比性选择，不是最佳 checkpoint。
+5. 逐图 npz + `index.jsonl` 保留；summary 已输出逐图等权与节点加权两套值。
 
-已执行：
+## 7. 检查状态
 
-```bash
-python -m py_compile tools/c_capability/c_common.py \
-  tools/c_capability/build_data.py \
-  tools/c_capability/run_capability.py \
-  tools/c_capability/summarize.py \
-  tools/c_capability/tests/test_c_common.py
-```
+- `py_compile` 通过。
+- `tests/test_c_common.py` 12 项、`tests/test_c_summary.py` 2 项 CPU-only
+  检查通过（含第三父节点、既有错误 vs 漂移、逐图等权、空桶支持数）。
+- 三个入口在 `python -I` 下的 `--help` 通过；期间修复了脚本目录未加入
+  `sys.path` 导致 `c_common` 找不到的问题。
+- `build_data.py --dry-run` 与极小 N128_shallow 生成/加载通过。
+- 真实 checkpoint runner→summary 小样本检查通过：s42/s1234 各 2 图 × 64 轮，
+  GPU4 约 3 秒；详见 `docs/records/2026-11-14/c0-capability-smoke.md`。
+- 正式六档数据已由 `build_data.py --allow-generate` 生成；s42_e143 与
+  s1234_e143 各完成 384 图 × 64 轮，无 Traceback/OOM；汇总已生成。
+  结果、边界与典型轨迹见 `docs/records/2026-11-14/c0-capability-report.md`。
+- **未训练 C+、未扩展人工注错矩阵；seed2026 训练未受影响。**
 
-结果：`py_compile` 通过；`tests/test_c_common.py` 的 8 项 CPU-only 检查通过。
-未加载模型、未生成数据、未运行 GPU、未占用训练资源。
