@@ -281,6 +281,8 @@ if __name__ == '__main__':
                         help='for smoke tests; passed to Trainer')
     parser.add_argument('--limit_val_batches', type=int, default=None,
                         help='for smoke tests; passed to Trainer')
+    parser.add_argument('--save_top_k', type=int, default=None,
+                        help='override ModelCheckpoint save_top_k (default 3)')
     parser.add_argument('--resume_from_checkpoint', type=str, default=None,
                         help='Path to a Lightning checkpoint to resume training from.')
 
@@ -392,12 +394,17 @@ if __name__ == '__main__':
     # callbacks: checkpoint and lr monitor
     checkpoint_dir = os.path.join(current_dir, f'checkpoints', f'{train_config.experiment_group}-{train_config.experiment_run_name}') if args.checkpoint_dir is None else os.path.join(args.checkpoint_dir, f'{train_config.experiment_group}-{train_config.experiment_run_name}')
 
+    # Keep more than the historical top-3 when explicitly requested, so a
+    # continuation run can preserve intermediate candidates for later formal
+    # metric-based checkpoint selection.
+    save_top_k = args.save_top_k if args.save_top_k is not None else 3
+
     checkpoint_callback = ModelCheckpoint(
         dirpath=checkpoint_dir,
         filename='{epoch}-{val_loss:.4f}',
         monitor='total_loss/val', # this depends on logging in the LightningModule
         mode='min',
-        save_top_k=3,
+        save_top_k=save_top_k,
         save_last=True
     )
 
@@ -414,7 +421,7 @@ if __name__ == '__main__':
             filename='{epoch}-{val_loss:.4f}',
             monitor='total_loss/val_n128',
             mode='min',
-            save_top_k=3,
+            save_top_k=save_top_k,
             save_last=True
         )
         callbacks.append(checkpoint_callback_n128)

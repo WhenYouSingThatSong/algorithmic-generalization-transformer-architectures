@@ -18,11 +18,11 @@ from ansi2html import Ansi2HTMLConverter
 from model import LitRecurrentTransformerModel, DAGTeacherModel
 from Simtransformer.simtransformer.utils import EasyDict
 
-from metric_utils import calc_metrics_across_batches, print_model_steps, calc_batch_metrics_fast
+from metric_utils import calc_metrics_across_batches, print_model_steps, calc_batch_metrics_fast, aggregate_formal_metrics, aggregate_batch_metrics
 import metric_utils
 
 from train import DAGDataModule
-from tokenizers import FactoredVocabTokenizer
+from tokenizers import build_factored_tokenizer
 from datetime import datetime
 
 
@@ -88,10 +88,7 @@ if hasattr(args, 'nointerm') and args.nointerm:
 # load factored_tokenizer
 # with open(os.path.join(base_dir, data_config.data_dir, data_config.tokenizer_file_name), 'rb') as f:
 #     factored_tokenizer = pickle.load(f)
-tokenizer_n_vars = getattr(data_config, 'tokenizer_n_vars', None)
-if tokenizer_n_vars is None:
-    tokenizer_n_vars = max(data_config.dag_config.num_nodes, data_config.val_dag_config.num_nodes)
-factored_tokenizer = FactoredVocabTokenizer(n_vars=tokenizer_n_vars, ops=data_config.dag_config.func_vocab, mod_val=data_config.dag_config.mod_val, max_fan_in=data_config.dag_config.max_fan_in_deg)
+factored_tokenizer = build_factored_tokenizer(data_config)
 
 # set vocab_size and factors in model_config
 model_config.vocab_sizes = factored_tokenizer.vocab_sizes
@@ -145,6 +142,7 @@ if args.log_wandb:
 
 val_metrics_by_size = dict()
 val_metrics_by_size_agg = dict()
+val_formal_by_size = dict()
 
 sample_preds = dict({n: [] for n in val_sizes})
 
@@ -191,11 +189,13 @@ for n_nodes in val_sizes:
         n_steps=n_steps, n_batches=args.n_batches, factors_slice=slice(0, 4), verbose=False, func_to_call=calc_batch_metrics_fast)
 
     val_metrics_by_size[n_nodes] = val_metrics
+    val_formal_by_size[n_nodes] = aggregate_formal_metrics(val_metrics)
 
-    val_metrics_by_size_agg[n_nodes] = {k: torch.nanmean(v, dim=0) for k, v in val_metrics.items()}
+    val_metrics_by_size_agg[n_nodes] = aggregate_batch_metrics(val_metrics)
 
     for k, v in val_metrics_by_size_agg[n_nodes].items():
         print(f"{k}: {v}")
+    print(f"formal_metrics N={n_nodes}: {val_formal_by_size[n_nodes]}")
 
     # get sample predictions
     with torch.no_grad():
@@ -219,6 +219,7 @@ def to_numpy(d):
 
 val_metrics_by_size_np = to_numpy(val_metrics_by_size)
 val_metrics_by_size_agg_np = to_numpy(val_metrics_by_size_agg)
+formal_metrics_by_size_np = to_numpy(val_formal_by_size)
 
 # save parsed results
 
@@ -234,6 +235,7 @@ os.makedirs(out_path, exist_ok=True)
 
 np.save(os.path.join(out_path, 'val_metrics_by_size.npy'), val_metrics_by_size_np)
 np.save(os.path.join(out_path, 'val_metrics_by_size_agg.npy'), val_metrics_by_size_agg_np)
+np.save(os.path.join(out_path, 'formal_metrics_by_size.npy'), formal_metrics_by_size_np)
 np.save(os.path.join(out_path, 'sample_preds.npy'), sample_preds)
 np.save(os.path.join(out_path, 'specs.npy'), specs)
 print(f'Saved to {out_path}')
@@ -334,9 +336,21 @@ for n_nodes in val_sizes:
 
 # Final Prediction
 print('Final Prediction Metrics')
-df = pd.DataFrame({'# Nodes': val_sizes, '% Completely Solved': [val_metrics_by_size_np[d]['final_label_full_acc'] for d in val_sizes]})
+df = pd.DataFrame({'# Nodes': val_sizes, '% Completely Solved': [formal_metrics_by_size_np[d]['final_strict_graph_acc'] for d in val_sizes]})
 for spec_key in ['min_depth', 'mean_depth', 'max_depth', 'min_non_pad_len', 'mean_non_pad_len', 'max_non_pad_len']:
     df.insert(1, spec_key, [specs[d][spec_key] for d in val_sizes])
+
+# Formal table: exactly the three acceptance numbers.
+formal_df = pd.DataFrame({
+    '# Nodes': val_sizes,
+    'Value Node Acc': [formal_metrics_by_size_np[d]['final_value_node_acc'] for d in val_sizes],
+    'Graph Value All': [formal_metrics_by_size_np[d]['final_value_graph_all_acc'] for d in val_sizes],
+    'Strict First-4': [formal_metrics_by_size_np[d]['final_strict_graph_acc'] for d in val_sizes],
+})
+print('Formal metrics:')
+print(formal_df.to_string(index=False))
+if args.log_wandb:
+    wandb.log({'Formal Metrics/Formal Table': wandb.Table(dataframe=formal_df)})
 
 fig = px.line(df, x='# Nodes', y='% Completely Solved', title='% Completely Solved by Graph Size')
 add_vline(fig, x=data_config.dag_config.num_nodes, annotation_text='Max Train # Nodes')
@@ -344,7 +358,7 @@ fig.update_layout(yaxis_tickformat = '.1%')
 # fig.show()
 if args.log_wandb:
     table = wandb.Table(dataframe=df)
-    wandb.log({'Summary Metrics/Final Prediction Average Accuracy': np.mean([val_metrics_by_size_np[d]['final_label_full_acc'] for d in val_sizes])})
+    wandb.log({'Summary Metrics/Final Prediction Average Accuracy': np.mean([formal_metrics_by_size_np[d]['final_strict_graph_acc'] for d in val_sizes])})
     wandb.log({'Final Prediction/Final Full Accuracy Table': table})
     wandb.log({'Final Prediction/Final Full Accuracy': fig})
     wandb.log({'Final Prediction/Final Full Accuracy (W&B)': wandb.plot.line(table, x='# Nodes', y='% Completely Solved', title='% Completely Solved by # Nodes')})

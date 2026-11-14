@@ -37,7 +37,7 @@ from collections import defaultdict, Counter
 from Simtransformer.simtransformer.utils import EasyDict
 from model import LitRecurrentTransformerModel, DAGTeacherModel, INVALID_NUM
 from train import DAGDataModule
-from tokenizers import FactoredVocabTokenizer
+from tokenizers import FactoredVocabTokenizer, build_factored_tokenizer
 import tokenizers as _tok
 sys.modules.setdefault('factored_tokenizers', _tok)
 
@@ -65,13 +65,7 @@ def load(name):
     with open(os.path.join(root, 'experiments/configs', a.config_dir_name, name)) as f:
         return EasyDict(yaml.load(f, Loader=yaml.FullLoader))
 mc, tc, dc = load('model_config.yaml'), load('train_config.yaml'), load('data_config.yaml')
-n_vars = getattr(dc, 'tokenizer_n_vars', None)
-if n_vars is None:
-    n_vars = max(dc.dag_config.num_nodes, dc.val_dag_config.num_nodes)
-tok = FactoredVocabTokenizer(
-    n_vars=n_vars,
-    ops=dc.dag_config.func_vocab, mod_val=dc.dag_config.mod_val,
-    max_fan_in=dc.dag_config.max_fan_in_deg)
+tok = build_factored_tokenizer(dc)
 mc.vocab_sizes = tok.vocab_sizes; mc.factors = tok.factors
 
 ckpt = os.path.join(a.ckpt_base_dir, f'{a.group_name}-{a.run_name}', a.ckpt_name)

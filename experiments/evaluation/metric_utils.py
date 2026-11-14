@@ -74,172 +74,15 @@ def one_step_prediction(litmodel, batch, step, outputs=None, step_stack=None):
 
 
 def calc_batch_metrics(litmodel, batch, factored_tokenizer, n_steps=None, factors_slice=None, verbose=False):
+    """Compatibility wrapper around the corrected fast implementation.
 
-    litmodel.eval()
-    if SKIP_ATTN:
-        buffer, hook_handles = {}, []
-    else:
-        buffer, hook_handles = attach_hooks_to_model(litmodel)
-
-    device = litmodel.device
-
-    batch = batch.to(device)
-
-    model_config = litmodel.model_config
-
-    if factors_slice is None:
-        factors_slice = slice(0, 6) # consider all factors
-
-    with torch.no_grad():
-        # process batch
-        # model_config, data_config = litmodel.model_config, litmodel.data_config
-        batch = litmodel.reduce_batch(copy.deepcopy(batch))
-        batch, batch_label, batch_info = batch[..., :model_config.data_dim], batch[..., model_config.data_dim:model_config.data_dim + model_config.label_dim], batch[..., model_config.data_dim + model_config.label_dim:]
-        # note: batch_label is final label
-
-        # get teacher batch
-        depths = batch_info[..., 0]
-        if n_steps is None:
-            n_steps = depths.max().item() + 1
-            print('inferred max steps:', n_steps)
-
-        batch_ext, value_avail_pos, value_to_compute_pos = litmodel.get_teacher_batch_with_depth(batch, batch_label, depths)
-        # batch_ext.shape: [n_steps, batch_size, seq_len, n_factors]
-
-        # infer which tokens are padding, and ignore them in computing accuracy
-        pad_encoding = torch.tensor(factored_tokenizer.encode_string(factored_tokenizer.PAD)[0]).to(device)
-        is_pad = torch.eq(batch, pad_encoding).all(dim=-1)
-
-        # get first pad for each sample
-        orig_seq_len = batch.size(1)
-        seq_lens = (~is_pad).sum(dim=1)
-        max_seq_len = seq_lens.max()
-        if verbose:
-            print('max non-pad length:', max_seq_len)
-            print('orig seq len:', orig_seq_len)
-
-        is_pad = is_pad.unsqueeze(-1).repeat(1, 1, 6)
-        is_pad = is_pad[..., factors_slice]
-
-        # calc metrics up to max_seq_len in batch
-        batch = batch[:, :max_seq_len]
-        batch_ext = batch_ext[:, :, :max_seq_len]
-        batch_label = batch_label[:, :max_seq_len]
-        is_pad = is_pad[:, :max_seq_len]
-
-        # inputs = batch[0]
-        step_stack = [batch]
-
-
-        metrics =  dict(factor_acc=[], position_acc=[], fully_correct_acc=[], recorrection=[], step_final_label_full_acc=[], step_final_label_factor_acc=[], step_final_label_persymbol_avg_acc=[], step_last_var_factor_acc=[], step_last_var_fully_correct=[])
-
-        last_mistakes = None
-        outputs = None
-        for step in range(0, n_steps):
-            if verbose:
-                print('step', step)
-
-            # one_step_prediction
-            outputs, logitss = one_step_prediction(litmodel, batch, step, outputs=outputs, step_stack=step_stack)
-
-            preds = torch.stack([logits.argmax(-1) for logits in logitss], dim=-1) # argmax prediction for each factoro
-            step_stack.append(preds)
-            # print('preds', preds.shape)
-
-            if step + 1 <= len(batch_ext) - 1:
-                step_label = batch_ext[step + 1]
-            else:
-                step_label = batch_ext[-1]
-
-            is_correct = (preds == step_label)[..., factors_slice]
-            is_correct = torch.logical_or(is_correct, is_pad)
-
-            # percent recorrection
-            if last_mistakes is None or last_mistakes.sum() == 0:
-                recorrection = torch.nan
-            else:
-                recorrection = torch.masked_select(is_correct, last_mistakes).float().mean().item()
-            metrics['recorrection'].append(recorrection)
-
-            factor_acc = is_correct.float().mean(axis=(0,1))
-            metrics['factor_acc'].append(factor_acc)
-
-            # accuracy by position (accounting for all factors)
-            position_acc = is_correct.all(axis=-1).float().mean(axis=(0))
-            # pad postion_acc with nan until orig_seq_len
-            position_acc = torch.cat([position_acc, torch.full((orig_seq_len - position_acc.size(0),), fill_value=torch.nan).to(device=batch.device)])
-            metrics['position_acc'].append(position_acc)
-
-            # check whether step label is correct
-            fully_correct = is_correct.all(axis=(1,2)) # sequence accuracy
-            fully_correct_acc = fully_correct.float().mean()
-            metrics['fully_correct_acc'].append(fully_correct_acc)
-
-            persymbol_avg_acc = is_correct.all(axis=2).float().mean(axis=(0,1)).mean() # average accuracy per symbol
-            metrics['persymbol_avg_acc'] = persymbol_avg_acc
-
-            # check whether final label is correct (i.e., full solved)
-            final_is_correct = (preds == batch_label)[..., factors_slice]
-            final_is_correct = torch.logical_or(final_is_correct, is_pad)
-            final_label_full_acc = final_is_correct.all(axis=(1,2)).float().mean() # sequence accuracy
-            final_label_factor_acc = final_is_correct.float().mean(axis=(0,1)) # accuracy by factor, averaged over batch
-            final_label_persymbol_avg_acc = final_is_correct.all(axis=2).float().mean(axis=(0,1)) # average accuracy per symbol
-            metrics['step_final_label_full_acc'].append(final_label_full_acc)
-            metrics['step_final_label_factor_acc'].append(final_label_factor_acc)
-            metrics['step_final_label_persymbol_avg_acc'].append(final_label_persymbol_avg_acc)
-
-            # check whether last variable is solved
-            # NOTE: this only works if no padding
-            assert batch.shape[0] == 1, 'batch size > 1 not supported right now'
-            last_var_is_correct = (preds[:, -1] == batch_label[:, -1])[..., factors_slice]
-            last_var_factor_acc = last_var_is_correct.float().mean(axis=(0))
-            metrics['step_last_var_factor_acc'].append(last_var_factor_acc)
-            last_var_fully_correct = last_var_is_correct.all(axis=-1).float().mean()
-            metrics['step_last_var_fully_correct'].append(last_var_fully_correct)
-
-            # calculate attention metrics
-            if not SKIP_ATTN:
-                attn_metrics = compute_attention_metrics(buffer)
-                for k, v in attn_metrics.items():
-                    if k not in metrics:
-                        metrics[k] = []
-                    metrics[k].append(v)
-
-            # set boolean mask of mistakes to check re-correction at next iteration
-            last_mistakes = torch.logical_not(is_correct)
-
-            if verbose:
-                print('factor_acc', factor_acc)
-                print('fully_correct_acc', fully_correct_acc)
-
-    metrics['recorrection'] = torch.tensor(metrics['recorrection'])
-
-    for k, v in metrics.items():
-        if isinstance(v, list):
-            metrics[k] = torch.stack(v)
-
-    # check whether final prediction is correct (i.e., full solved)
-    final_is_correct = (step_stack[-1] == batch_label)[..., factors_slice]
-
-    final_is_correct = torch.logical_or(final_is_correct, is_pad)
-
-    final_label_full_acc = final_is_correct.all(axis=(1,2)).float().mean().item()
-    final_label_factor_acc = final_is_correct.float().mean(axis=(0,1))
-    metrics['final_label_full_acc'] = final_label_full_acc
-    metrics['final_label_factor_acc'] = final_label_factor_acc
-
-    # check whether last variable in final prediction is solved
-    last_var_is_correct = (step_stack[-1][:, -1] == batch_label[:, -1])[..., factors_slice]
-    last_var_factor_acc = last_var_is_correct.float().mean(axis=(0,1))
-    metrics['last_var_factor_acc'] = last_var_factor_acc
-    last_var_fully_correct = last_var_is_correct.all(axis=-1).float().mean()
-    metrics['last_var_fully_correct'] = last_var_fully_correct
-
-    if verbose:
-        print('final_label_full_acc', final_label_full_acc)
-        print('final_label_factor_acc', final_label_factor_acc)
-
-    return metrics
+    The old implementation had a separate batch-size-1 branch and counted PAD
+    as correct in factor/position statistics.  Keep the public name, but use one
+    implementation so slow/fast eval cannot diverge.
+    """
+    return calc_batch_metrics_fast(
+        litmodel, batch, factored_tokenizer,
+        n_steps=n_steps, factors_slice=factors_slice, verbose=verbose)
 
 
 def calc_metrics_across_batches(litmodel, dataloader, factored_tokenizer, n_batches=None, n_steps=None, factors_slice=None, verbose=False, func_to_call=calc_batch_metrics):
@@ -272,6 +115,74 @@ def calc_metrics_across_batches(litmodel, dataloader, factored_tokenizer, n_batc
                 metrics[k] = torch.stack(v, dim=0)
 
     return metrics
+
+
+def aggregate_formal_metrics(metrics):
+    """Exact count-weighted formal metrics from per-batch metric tensors.
+
+    ``calc_batch_metrics_fast`` returns raw counts alongside rates.  Averaging
+    per-batch rates is not exact when the last batch is smaller, so the formal
+    table uses total_correct / total_count here.
+
+    Returns:
+      final_value_node_acc: numeric-node VALUE token accuracy (non-PAD only)
+      final_value_graph_all_acc: per-graph all numeric VALUEs correct
+      final_strict_graph_acc: per-graph all non-PAD first-four factors correct
+      final_label_full_acc: alias of final_strict_graph_acc for backwards compat
+      plus the raw counts used to compute them.
+    """
+    def total(key):
+        value = metrics.get(key)
+        if value is None:
+            return 0.0
+        return float(torch.as_tensor(value).sum().item())
+
+    value_node_num = total('final_value_node_num')
+    value_node_correct = total('final_value_node_correct')
+    value_graph_num = total('final_value_graph_num')
+    value_graph_correct = total('final_value_graph_correct')
+    strict_graph_num = total('final_strict_graph_num')
+    strict_graph_correct = total('final_strict_graph_correct')
+
+    def ratio(num, den):
+        return (num / den) if den > 0 else float('nan')
+
+    return {
+        'final_value_node_acc': ratio(value_node_correct, value_node_num),
+        'final_value_graph_all_acc': ratio(value_graph_correct, value_graph_num),
+        'final_strict_graph_acc': ratio(strict_graph_correct, strict_graph_num),
+        'final_label_full_acc': ratio(strict_graph_correct, strict_graph_num),
+        'final_value_node_correct': value_node_correct,
+        'final_value_node_num': value_node_num,
+        'final_value_graph_correct': value_graph_correct,
+        'final_value_graph_num': value_graph_num,
+        'final_strict_graph_correct': strict_graph_correct,
+        'final_strict_graph_num': strict_graph_num,
+    }
+
+
+FORMAL_COUNT_KEYS = frozenset({
+    'final_value_node_correct', 'final_value_node_num',
+    'final_value_graph_correct', 'final_value_graph_num',
+    'final_strict_graph_correct', 'final_strict_graph_num',
+})
+
+
+def aggregate_batch_metrics(metrics):
+    """Aggregate across batches for plotting/printing.
+
+    Count keys are summed (their per-batch values are integer counts); all
+    other keys are averaged with nanmean.  Formal rates should still be
+    computed by ``aggregate_formal_metrics`` (total_correct / total_count), not
+    from the sum of per-batch rates.
+    """
+    aggregated = {}
+    for key, value in metrics.items():
+        if key in FORMAL_COUNT_KEYS:
+            aggregated[key] = value.sum() if torch.is_tensor(value) else value
+        else:
+            aggregated[key] = torch.nanmean(value, dim=0)
+    return aggregated
 
 # region prediction on sample
 
@@ -510,7 +421,6 @@ def calc_batch_metrics_fast(litmodel, batch, factored_tokenizer, n_steps=None, f
 
     with torch.no_grad():
         # process batch
-        # model_config, data_config = litmodel.model_config, litmodel.data_config
         batch = litmodel.reduce_batch(copy.deepcopy(batch))
         batch, batch_label, batch_info = batch[..., :model_config.data_dim], batch[..., model_config.data_dim:model_config.data_dim + model_config.label_dim], batch[..., model_config.data_dim + model_config.label_dim:]
         # note: batch_label is final label
@@ -526,7 +436,7 @@ def calc_batch_metrics_fast(litmodel, batch, factored_tokenizer, n_steps=None, f
 
         # infer which tokens are padding, and ignore them in computing accuracy
         pad_encoding = torch.tensor(factored_tokenizer.encode_string(factored_tokenizer.PAD)[0], device=batch.device)
-        is_pad = torch.eq(batch, pad_encoding).all(dim=-1)
+        is_pad = torch.eq(batch, pad_encoding).all(dim=-1)  # [B, T]
 
         # get first pad for each sample
         orig_seq_len = batch.size(1)
@@ -536,23 +446,31 @@ def calc_batch_metrics_fast(litmodel, batch, factored_tokenizer, n_steps=None, f
             print('max non-pad length:', max_seq_len)
             print('orig seq len:', orig_seq_len)
 
-        is_pad = is_pad.unsqueeze(-1).repeat(1, 1, 6)
-        is_pad = is_pad[..., factors_slice]
-
-        # calc metrics up to max_seq_len in batch
+        # Truncate to the longest non-pad sequence in this batch.
         batch = batch[:, :max_seq_len]
         batch_ext = batch_ext[:, :, :max_seq_len]
         batch_label = batch_label[:, :max_seq_len]
         is_pad = is_pad[:, :max_seq_len]
 
-        # inputs = batch[0]
+        valid = ~is_pad                               # [B, T]
+        valid_f = valid.unsqueeze(-1)                 # [B, T, 1]
+        value_idx = factored_tokenizer.factors.index('VALUE')
+        # Numeric node: non-PAD position whose FINAL label is a value token
+        # (0..mod_val-1).  Excludes N/A, EMPTY, PAD and structural tokens.
+        numeric = valid & (batch_label[..., value_idx] < factored_tokenizer.mod_val)
+
         step_stack = [batch]
-
-
-        metrics =  dict(factor_acc=[], position_acc=[], fully_correct_acc=[], recorrection=[], step_final_label_full_acc=[], step_final_label_factor_acc=[], step_final_label_persymbol_avg_acc=[], step_last_var_factor_acc=[], step_last_var_fully_correct=[])
+        metrics = dict(
+            factor_acc=[], position_acc=[], fully_correct_acc=[], recorrection=[],
+            step_final_label_full_acc=[], step_final_label_factor_acc=[],
+            step_final_label_persymbol_avg_acc=[], step_last_var_factor_acc=[],
+            step_last_var_fully_correct=[])
 
         last_mistakes = None
         outputs = None
+        last_non_pad_by_sample = valid.sum(dim=1).clamp_min(1) - 1
+        batch_indices = torch.arange(batch.size(0), device=batch.device)
+
         for step in range(0, n_steps):
             if verbose:
                 print('step', step)
@@ -560,67 +478,74 @@ def calc_batch_metrics_fast(litmodel, batch, factored_tokenizer, n_steps=None, f
             # one_step_prediction
             outputs, logitss = one_step_prediction(litmodel, batch, step, outputs=outputs, step_stack=step_stack)
 
-            preds = torch.stack([logits.argmax(-1) for logits in logitss], dim=-1) # argmax prediction for each factoror. Shape: (batch_size, seq_len, n_factors)
+            preds = torch.stack([logits.argmax(-1) for logits in logitss], dim=-1)  # [B, T, F]
             step_stack.append(preds)
-            # print('preds', preds.shape)
 
             if step + 1 <= len(batch_ext) - 1:
                 step_label = batch_ext[step + 1]
             else:
                 step_label = batch_ext[-1]
 
-            is_correct = (preds == step_label)[..., factors_slice]
-            is_correct = torch.logical_or(is_correct, is_pad)
+            # Graph-level strict: PAD is ignored (OR pad).  Keep this for
+            # strict whole-graph metrics only; do NOT use it for factor stats.
+            raw_correct = (preds == step_label)[..., factors_slice]
+            strict_correct = torch.logical_or(raw_correct, is_pad.unsqueeze(-1))
 
             # percent recorrection
             if last_mistakes is None or last_mistakes.sum() == 0:
                 recorrection = torch.nan
             else:
-                recorrection = torch.masked_select(is_correct, last_mistakes).float().mean().item()
+                recorrection = torch.masked_select(strict_correct, last_mistakes).float().mean().item()
             metrics['recorrection'].append(recorrection)
 
-            factor_acc = is_correct.float().mean(axis=(0,1))
+            # Per-factor accuracy over non-PAD tokens only.
+            factor_acc = (raw_correct & valid_f).sum(dim=(0, 1)).float() / valid.sum().clamp_min(1)
             metrics['factor_acc'].append(factor_acc)
 
-            # accuracy by position (accounting for all factors)
-            position_acc = is_correct.all(axis=-1).float().mean(axis=(0))
-            # pad postion_acc with nan until orig_seq_len
-            position_acc = torch.cat([position_acc, torch.full((orig_seq_len - position_acc.size(0),), fill_value=torch.nan).to(device=batch.device)])
+            # Position-wise accuracy over non-PAD samples only.  Positions with
+            # no valid sample in the batch stay NaN and are ignored by nanmean.
+            pos_correct = (raw_correct.all(dim=-1) & valid).sum(dim=0).float()
+            pos_total = valid.sum(dim=0).float()
+            position_acc = torch.where(
+                pos_total > 0,
+                pos_correct / pos_total.clamp_min(1),
+                torch.full_like(pos_correct, float('nan')))
+            position_acc = torch.cat([
+                position_acc,
+                torch.full((orig_seq_len - position_acc.size(0),), fill_value=torch.nan,
+                           device=batch.device)])
             metrics['position_acc'].append(position_acc)
 
-            # check full correctness (accounting for all factors and positions)
-            fully_correct = is_correct.all(axis=(1,2)) # sequence accuracy
-            fully_correct_acc = fully_correct.float().mean()
-            metrics['fully_correct_acc'].append(fully_correct_acc)
+            # Full-sequence correctness (strict graph-level, PAD ignored).
+            fully_correct = strict_correct.all(axis=(1, 2))
+            metrics['fully_correct_acc'].append(fully_correct.float().mean())
 
-            # persymbol average accuracy (accounting for all factors, averaged over positions)
-            persymbol_avg_acc = is_correct.all(axis=2).float().mean(axis=(0,1)).mean() # average accuracy per symbol
-            metrics['persymbol_avg_acc'] = persymbol_avg_acc
+            # Per-symbol accuracy over non-PAD tokens.
+            metrics['persymbol_avg_acc'] = (
+                (raw_correct.all(dim=-1) & valid).sum().float()
+                / valid.sum().clamp_min(1))
 
-            # check whether final label is correct (i.e., full solved)
-            final_is_correct = (preds == batch_label)[..., factors_slice]
-            final_is_correct = torch.logical_or(final_is_correct, is_pad)
-            final_label_full_acc = final_is_correct.all(axis=(1,2)).float().mean() # sequence accuracy
-            final_label_factor_acc = final_is_correct.float().mean(axis=(0,1)) # accuracy by factor, averaged over batch
-            final_label_persymbol_avg_acc = final_is_correct.all(axis=2).float().mean(axis=(0,1)) # average accuracy per symbol
-            metrics['step_final_label_full_acc'].append(final_label_full_acc)
-            metrics['step_final_label_factor_acc'].append(final_label_factor_acc)
-            metrics['step_final_label_persymbol_avg_acc'].append(final_label_persymbol_avg_acc)
+            # Check whether final label is correct (strict graph-level).
+            final_raw = (preds == batch_label)[..., factors_slice]
+            final_strict = torch.logical_or(final_raw, is_pad.unsqueeze(-1))
+            metrics['step_final_label_full_acc'].append(
+                final_strict.all(axis=(1, 2)).float().mean())
+            metrics['step_final_label_factor_acc'].append(
+                (final_raw & valid_f).sum(dim=(0, 1)).float()
+                / valid.sum().clamp_min(1))
+            metrics['step_final_label_persymbol_avg_acc'].append(
+                (final_raw.all(dim=-1) & valid).sum().float()
+                / valid.sum().clamp_min(1))
 
-            # check whether last variable is solved (last non-padding token in each sample)
-            # NOTE: this only works if no padding
-            # assert batch.shape[0] == 1, 'batch size > 1 not supported right now'
-
-            # we support batch size > 1 here
-            last_non_pad_by_sample = (~is_pad[..., 0]).sum(dim=1) - 1
-            # use advanced indexing to get the last non-pad token for each sample
-            batch_indices = torch.arange(preds.shape[0])
-
-            last_var_is_correct = (preds[batch_indices, last_non_pad_by_sample, :] == batch_label[batch_indices, last_non_pad_by_sample, :])[..., factors_slice] # shape: (batch_size, n_factors)
-            last_var_factor_acc = last_var_is_correct.float().mean(axis=(0))
-            metrics['step_last_var_factor_acc'].append(last_var_factor_acc)
-            last_var_fully_correct = last_var_is_correct.all(axis=-1).float().mean()
-            metrics['step_last_var_fully_correct'].append(last_var_fully_correct)
+            # Last non-PAD token per sample (not the physical last column).
+            last_var_is_correct = (
+                preds[batch_indices, last_non_pad_by_sample, :]
+                == batch_label[batch_indices, last_non_pad_by_sample, :]
+            )[..., factors_slice]
+            metrics['step_last_var_factor_acc'].append(
+                last_var_is_correct.float().mean(dim=0))
+            metrics['step_last_var_fully_correct'].append(
+                last_var_is_correct.all(dim=-1).float().mean())
 
             # calculate attention metrics
             if not SKIP_ATTN:
@@ -631,11 +556,11 @@ def calc_batch_metrics_fast(litmodel, batch, factored_tokenizer, n_steps=None, f
                     metrics[k].append(v)
 
             # set boolean mask of mistakes to check re-correction at next iteration
-            last_mistakes = torch.logical_not(is_correct)
+            last_mistakes = torch.logical_not(strict_correct)
 
             if verbose:
                 print('factor_acc', factor_acc)
-                print('fully_correct_acc', fully_correct_acc)
+                print('fully_correct_acc', fully_correct.float().mean())
 
     metrics['recorrection'] = torch.tensor(metrics['recorrection'])
 
@@ -643,25 +568,46 @@ def calc_batch_metrics_fast(litmodel, batch, factored_tokenizer, n_steps=None, f
         if isinstance(v, list):
             metrics[k] = torch.stack(v)
 
-    # check whether final prediction is correct (i.e., full solved)
-    final_is_correct = (step_stack[-1] == batch_label)[..., factors_slice]
+    final_preds = step_stack[-1]
 
-    final_is_correct = torch.logical_or(final_is_correct, is_pad)
+    # Strict whole-graph metric: all non-PAD positions, first factors_slice.
+    final_raw = (final_preds == batch_label)[..., factors_slice]
+    final_strict = torch.logical_or(final_raw, is_pad.unsqueeze(-1))
+    final_strict_graph = final_strict.all(axis=(1, 2))
+    metrics['final_label_full_acc'] = final_strict_graph.float().mean().item()
+    metrics['final_label_factor_acc'] = (
+        (final_raw & valid_f).sum(dim=(0, 1)).float()
+        / valid.sum().clamp_min(1))
 
-    final_label_full_acc = final_is_correct.all(axis=(1,2)).float().mean().item()
-    final_label_factor_acc = final_is_correct.float().mean(axis=(0,1))
-    metrics['final_label_full_acc'] = final_label_full_acc
-    metrics['final_label_factor_acc'] = final_label_factor_acc
+    # Formal node VALUE accuracy: numeric nodes only, non-PAD only.
+    value_correct = (final_preds[..., value_idx] == batch_label[..., value_idx])
+    value_correct_numeric = value_correct & numeric
+    metrics['final_value_node_acc'] = (
+        value_correct_numeric.sum().float() / numeric.sum().clamp_min(1))
+    # Formal whole-graph VALUE all-correct: every numeric node correct;
+    # PAD/structural positions are ignored.
+    value_graph_ok = (value_correct | ~numeric).all(dim=1)
+    metrics['final_value_graph_all_acc'] = value_graph_ok.float().mean()
 
-    # check whether last variable in final prediction is solved
-    last_var_is_correct = (step_stack[-1][:, -1] == batch_label[:, -1])[..., factors_slice]
-    last_var_factor_acc = last_var_is_correct.float().mean(axis=(0,1))
-    metrics['last_var_factor_acc'] = last_var_factor_acc
-    last_var_fully_correct = last_var_is_correct.all(axis=-1).float().mean()
-    metrics['last_var_fully_correct'] = last_var_fully_correct
+    # Raw counts for exact aggregation across batches (not batch-mean of means).
+    metrics['final_value_node_correct'] = value_correct_numeric.sum().detach()
+    metrics['final_value_node_num'] = numeric.sum().detach()
+    metrics['final_value_graph_correct'] = value_graph_ok.sum().detach()
+    metrics['final_value_graph_num'] = torch.tensor(batch.size(0), device=batch.device)
+    metrics['final_strict_graph_correct'] = final_strict_graph.sum().detach()
+    metrics['final_strict_graph_num'] = torch.tensor(batch.size(0), device=batch.device)
+
+    # Last non-PAD token, not the physical last column (which can be PAD).
+    last_var_is_correct = (
+        final_preds[batch_indices, last_non_pad_by_sample, :]
+        == batch_label[batch_indices, last_non_pad_by_sample, :]
+    )[..., factors_slice]
+    metrics['last_var_factor_acc'] = last_var_is_correct.float().mean(dim=0)
+    metrics['last_var_fully_correct'] = last_var_is_correct.all(dim=-1).float().mean()
 
     if verbose:
-        print('final_label_full_acc', final_label_full_acc)
-        print('final_label_factor_acc', final_label_factor_acc)
+        print('final_label_full_acc', metrics['final_label_full_acc'])
+        print('final_label_factor_acc', metrics['final_label_factor_acc'])
+        print('final_value_node_acc', metrics['final_value_node_acc'])
 
     return metrics

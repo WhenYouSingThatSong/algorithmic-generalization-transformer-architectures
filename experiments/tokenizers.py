@@ -266,3 +266,42 @@ class CoTTokenizer():
     def decode_string(self, token_list, sep=' '):
         # given a list of integer tokens, decode it into a string
         return sep.join([self.idx2token[token] for token in token_list])
+
+
+def _cfg_get(obj, key, default=None):
+    """Read a field from either an EasyDict/object or a plain dict."""
+    if isinstance(obj, dict):
+        return obj.get(key, default)
+    return getattr(obj, key, default)
+
+
+def build_factored_tokenizer(data_config, n_vars=None):
+    """Build the factored tokenizer from a data config.
+
+    Priority:
+      1. explicit ``n_vars`` argument;
+      2. ``data_config.tokenizer_n_vars``;
+      3. legacy fallback: max(train.num_nodes, val.num_nodes).
+
+    The legacy fallback is only correct for datasets that use exactly
+    ``num_nodes`` variable names.  New MixedN data use the full 128-name pool,
+    so their config must set ``tokenizer_n_vars: 128``; otherwise this helper
+    will build a 33-entry VARIABLE vocab and the mismatch is reported here.
+    """
+    if n_vars is None:
+        n_vars = _cfg_get(data_config, 'tokenizer_n_vars')
+    if n_vars is None:
+        dag = _cfg_get(data_config, 'dag_config')
+        val_dag = _cfg_get(data_config, 'val_dag_config') or dag
+        n_vars = max(int(_cfg_get(dag, 'num_nodes')), int(_cfg_get(val_dag, 'num_nodes')))
+        print(f'[tokenizers] tokenizer_n_vars not set; legacy fallback n_vars={n_vars} '
+              f'(VARIABLE vocab={n_vars + 1}). Set tokenizer_n_vars explicitly for '
+              f'full-pool-renamed data.')
+
+    dag = _cfg_get(data_config, 'dag_config')
+    return FactoredVocabTokenizer(
+        n_vars=int(n_vars),
+        ops=_cfg_get(dag, 'func_vocab'),
+        mod_val=int(_cfg_get(dag, 'mod_val')),
+        max_fan_in=int(_cfg_get(dag, 'max_fan_in_deg')),
+    )

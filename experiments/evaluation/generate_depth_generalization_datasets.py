@@ -15,7 +15,7 @@ from tqdm import tqdm
 from generate_data import generate_dataset
 
 from Simtransformer.simtransformer.utils import EasyDict
-from tokenizers import FactoredVocabTokenizer
+from tokenizers import FactoredVocabTokenizer, build_factored_tokenizer
 
 
 def main():
@@ -38,12 +38,7 @@ def main():
     func_vocab = base_data_config.dag_config.func_vocab
 
     # Create factored tokenizer
-    factored_tokenizer = FactoredVocabTokenizer(
-        n_vars=max(base_data_config.dag_config.num_nodes, base_data_config.val_dag_config.num_nodes),
-        ops=func_vocab,
-        mod_val=base_data_config.dag_config.mod_val,
-        max_fan_in=base_data_config.dag_config.max_fan_in_deg
-    )
+    factored_tokenizer = build_factored_tokenizer(base_data_config)
 
     # Base DAG configuration template
     base_dag_config = dict(

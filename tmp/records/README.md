@@ -93,6 +93,16 @@
 | `metric-and-tokenizer-fixes-20261113.md` | 指标/tokenizer 修复：统一 `build_factored_tokenizer`；分因子/位置/`last_var` 排除 PAD；新增数值节点、整图数值全对、strict 前三指标；batch=8/1 一致性 smoke | **代码修复完成，smoke 通过** |
 | `../runs/C0-M4-MixedN8-32-D12-Vocab128-2Val-100ep/migration/MIGRATION_PLAN.md` | 三 seed 迁移记录：old/new GPU/PID、resume ckpt、丢失 epoch、速度 | 进行中 |
 
+### 2026-11-14/
+
+| 文件 | 内容 | 状态 |
+|---|---|---|
+| `c0-naming-vocab.md` | **命名/词表更正**：C0=旧 C0；欠拟合 C0′=新 MixedN 数据、129 词表、100ep；vocab33 是独立错误配置、已废弃，不得当作 C0′ 50ep | **必须遵守** |
+| `b-mechanism-design.md` | B 机制的完整设计：early/late 三时点、共同合格样本、late 四格、分母、控制、训练腐蚀审计、代码与执行顺序 | **设计稿，待审查；未执行** |
+| `b-local-self-consistent-deferred.md` | 局部自洽错误控制：**DEFERRED / NOT RUN**；当前构造可能不自洽，不进入结果 | **搁置** |
+| `b-mechanism-changelog.md` | B 代码 v2：审查修复清单、局部自洽搁置、smoke 状态 | **代码审查用** |
+| `b-mechanism-smoke.md` | 4 图/1 batch 的流水线 smoke：selection/early/late/controls/audit；非结果 | **smoke 完成** |
+
 ## 当前核心结论（截至 2026-11-09 晚）
 
 1. 离散潜空间 + 中间监督的规模/深度泛化成立：clean 口径下 A/B 系在 N=8…128、

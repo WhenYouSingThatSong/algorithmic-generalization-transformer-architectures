@@ -19,9 +19,9 @@ from ansi2html import Ansi2HTMLConverter
 
 from baseline_models import LitRecurrentTransformerModel
 from Simtransformer.simtransformer.utils import EasyDict
-from tokenizers import FactoredVocabTokenizer
+from tokenizers import build_factored_tokenizer
 
-from metric_utils import calc_metrics_across_batches, print_model_steps
+from metric_utils import calc_metrics_across_batches, print_model_steps, aggregate_formal_metrics, aggregate_batch_metrics
 
 from train import DAGDataModule
 from datetime import datetime
@@ -77,10 +77,7 @@ with open(os.path.join(configs_dir, config_dir, 'data_config.yaml')) as f:
 # load factored_tokenizer
 # with open(os.path.join(base_dir, data_config.data_dir, data_config.tokenizer_file_name), 'rb') as f:
 #     factored_tokenizer = pickle.load(f)
-tokenizer_n_vars = getattr(data_config, 'tokenizer_n_vars', None)
-if tokenizer_n_vars is None:
-    tokenizer_n_vars = max(data_config.dag_config.num_nodes, data_config.val_dag_config.num_nodes)
-factored_tokenizer = FactoredVocabTokenizer(n_vars=tokenizer_n_vars, ops=data_config.dag_config.func_vocab, mod_val=data_config.dag_config.mod_val, max_fan_in=data_config.dag_config.max_fan_in_deg)
+factored_tokenizer = build_factored_tokenizer(data_config)
 
 # set vocab_size and factors in model_config
 model_config.vocab_sizes = factored_tokenizer.vocab_sizes
@@ -139,55 +136,74 @@ def calc_batch_metrics(litmodel, batch, factored_tokenizer, factors_slice=None, 
     if factors_slice is None:
         factors_slice = slice(0, 6) # consider all factors
 
-    # process batch
-    # model_config, data_config = litmodel.model_config, litmodel.data_config
-    batch = litmodel.reduce_batch(copy.deepcopy(batch))
-    batch, batch_label, batch_info = batch[..., :model_config.data_dim], batch[..., model_config.data_dim:model_config.data_dim + model_config.label_dim], batch[..., model_config.data_dim + model_config.label_dim:]
-    # note: batch_label is final label
+    with torch.no_grad():
+        # process batch
+        batch = litmodel.reduce_batch(copy.deepcopy(batch))
+        batch, batch_label, batch_info = batch[..., :model_config.data_dim], batch[..., model_config.data_dim:model_config.data_dim + model_config.label_dim], batch[..., model_config.data_dim + model_config.label_dim:]
+        # note: batch_label is final label
 
-    # infer which tokens are padding, and ignore them in computing accuracy
-    pad_encoding = torch.tensor(factored_tokenizer.encode_string(factored_tokenizer.PAD)[0])
-    is_pad = torch.eq(batch, pad_encoding).all(dim=-1)
+        # infer which tokens are padding, and ignore them in computing accuracy
+        pad_encoding = torch.tensor(
+            factored_tokenizer.encode_string(factored_tokenizer.PAD)[0],
+            device=batch.device)
+        is_pad = torch.eq(batch, pad_encoding).all(dim=-1)  # [B, T]
 
-    # get first pad for each sample
-    orig_seq_len = batch.size(1)
-    seq_lens = (~is_pad).sum(dim=1)
-    max_seq_len = seq_lens.max()
-    if verbose:
-        print('max non-pad length:', max_seq_len)
+        # get first pad for each sample
+        orig_seq_len = batch.size(1)
+        seq_lens = (~is_pad).sum(dim=1)
+        max_seq_len = seq_lens.max()
+        if verbose:
+            print('max non-pad length:', max_seq_len)
 
-    is_pad = is_pad.unsqueeze(-1).repeat(1, 1, 6)
-    is_pad = is_pad[..., factors_slice]
+        # calc metrics up to max_seq_len in batch
+        batch = batch[:, :max_seq_len]
+        batch_label = batch_label[:, :max_seq_len]
+        is_pad = is_pad[:, :max_seq_len]
 
-    # calc metrics up to max_seq_len in batch
-    batch = batch[:, :max_seq_len]
-    batch_label = batch_label[:, :max_seq_len]
-    is_pad = is_pad[:, :max_seq_len]
+        valid = ~is_pad
+        valid_f = valid.unsqueeze(-1)
+        value_idx = factored_tokenizer.factors.index('VALUE')
+        numeric = valid & (batch_label[..., value_idx] < factored_tokenizer.mod_val)
 
-    # inputs = batch[0]
-    logitss = litmodel(batch)
-    preds = torch.stack([logits.argmax(-1) for logits in logitss], dim=-1) # argmax prediction for each factor
+        logitss = litmodel(batch)
+        preds = torch.stack([logits.argmax(-1) for logits in logitss], dim=-1) # argmax prediction for each factor
 
-    metrics =  dict()
+        metrics =  dict()
 
-    # compute attention metrics
-    attn_metrics = compute_attention_metrics(buffer)
-    metrics.update(attn_metrics)
+        # compute attention metrics
+        attn_metrics = compute_attention_metrics(buffer)
+        metrics.update(attn_metrics)
 
-    # compute accuracy
-    is_correct = (preds == batch_label)[..., factors_slice]
+        # Graph-level strict: PAD ignored.  Keep for strict whole-graph only.
+        raw_correct = (preds == batch_label)[..., factors_slice]
+        strict_correct = torch.logical_or(raw_correct, is_pad.unsqueeze(-1))
+        full_seq_acc = strict_correct.all(axis=(1, 2)).float().mean()
+        # Token-level factor accuracy: PAD excluded from numerator/denominator.
+        factor_acc = (
+            (raw_correct & valid_f).sum(dim=(0, 1)).float()
+            / valid.sum().clamp_min(1))
 
-    is_correct = torch.logical_or(is_correct, is_pad)
+        value_correct = (preds[..., value_idx] == batch_label[..., value_idx])
+        value_correct_numeric = value_correct & numeric
+        value_graph_ok = (value_correct | ~numeric).all(dim=1)
 
-    full_seq_acc = is_correct.all(axis=(1,2)).float().mean().item()
-    factor_acc = is_correct.float().mean(axis=(0,1))
-    metrics['final_label_full_acc'] = full_seq_acc
-    metrics['final_label_factor_acc'] = factor_acc
-    metrics['max_seq_len'] = max_seq_len.float()
+        metrics['final_label_full_acc'] = full_seq_acc.item()
+        metrics['final_label_factor_acc'] = factor_acc
+        metrics['final_value_node_acc'] = (
+            value_correct_numeric.sum().float() / numeric.sum().clamp_min(1))
+        metrics['final_value_graph_all_acc'] = value_graph_ok.float().mean()
+        metrics['final_value_node_correct'] = value_correct_numeric.sum().detach()
+        metrics['final_value_node_num'] = numeric.sum().detach()
+        metrics['final_value_graph_correct'] = value_graph_ok.sum().detach()
+        metrics['final_value_graph_num'] = torch.tensor(batch.size(0), device=batch.device)
+        metrics['final_strict_graph_correct'] = strict_correct.all(dim=(1, 2)).sum().detach()
+        metrics['final_strict_graph_num'] = torch.tensor(batch.size(0), device=batch.device)
+        metrics['max_seq_len'] = max_seq_len.float()
 
-    if verbose:
-        print('final_label_full_acc', full_seq_acc)
-        print('final_label_factor_acc', factor_acc)
+        if verbose:
+            print('final_label_full_acc', full_seq_acc)
+            print('final_label_factor_acc', factor_acc)
+            print('final_value_node_acc', metrics['final_value_node_acc'])
 
     return metrics
 
@@ -223,6 +239,7 @@ def calc_metrics_across_batches(
 
 val_metrics_by_size = dict()
 val_metrics_by_size_agg = dict()
+val_formal_by_size = dict()
 
 sample_preds = dict({n: [] for n in val_sizes})
 
@@ -261,11 +278,13 @@ for n_nodes in val_sizes:
         n_batches=args.n_batches, factors_slice=slice(0, 4), verbose=False)
 
     val_metrics_by_size[n_nodes] = val_metrics
+    val_formal_by_size[n_nodes] = aggregate_formal_metrics(val_metrics)
 
-    val_metrics_by_size_agg[n_nodes] = {k: torch.nanmean(v, dim=0) for k, v in val_metrics.items()}
+    val_metrics_by_size_agg[n_nodes] = aggregate_batch_metrics(val_metrics)
 
     for k, v in val_metrics_by_size_agg[n_nodes].items():
         print(f"{k}: {v}")
+    print(f"formal_metrics N={n_nodes}: {val_formal_by_size[n_nodes]}")
 
 
 # recursively cast Tensor to np.ndarray
@@ -278,7 +297,8 @@ def to_numpy(d):
         return d
 
 val_metrics_by_size_np = to_numpy(val_metrics_by_size)
-val_metrics_by_size_np = to_numpy(val_metrics_by_size_agg)
+val_metrics_by_size_agg_np = to_numpy(val_metrics_by_size_agg)
+formal_metrics_by_size_np = to_numpy(val_formal_by_size)
 
 # save parsed results
 run_name_ = run_name
@@ -293,7 +313,8 @@ os.makedirs(out_path, exist_ok=True)
 
 if not args.debug:
     np.save(os.path.join(out_path, 'val_metrics_by_size.npy'), val_metrics_by_size_np)
-    np.save(os.path.join(out_path, 'val_metrics_by_size_agg.npy'), val_metrics_by_size_np)
+    np.save(os.path.join(out_path, 'val_metrics_by_size_agg.npy'), val_metrics_by_size_agg_np)
+    np.save(os.path.join(out_path, 'formal_metrics_by_size.npy'), formal_metrics_by_size_np)
     np.save(os.path.join(out_path, 'sample_preds.npy'), sample_preds)
     np.save(os.path.join(out_path, 'specs.npy'), specs)
 
@@ -324,9 +345,20 @@ print('Generating plots for results...')
 
 # Final Prediction
 print('Final Prediction Metrics')
-df = pd.DataFrame({'# Nodes': val_sizes, '% Completely Solved': [val_metrics_by_size_np[d]['final_label_full_acc'] for d in val_sizes]})
+df = pd.DataFrame({'# Nodes': val_sizes, '% Completely Solved': [formal_metrics_by_size_np[d]['final_strict_graph_acc'] for d in val_sizes]})
 for spec_key in ['min_depth', 'mean_depth', 'max_depth', 'min_non_pad_len', 'mean_non_pad_len', 'max_non_pad_len']:
     df.insert(1, spec_key, [specs[d][spec_key] for d in val_sizes])
+
+formal_df = pd.DataFrame({
+    '# Nodes': val_sizes,
+    'Value Node Acc': [formal_metrics_by_size_np[d]['final_value_node_acc'] for d in val_sizes],
+    'Graph Value All': [formal_metrics_by_size_np[d]['final_value_graph_all_acc'] for d in val_sizes],
+    'Strict First-4': [formal_metrics_by_size_np[d]['final_strict_graph_acc'] for d in val_sizes],
+})
+print('Formal metrics:')
+print(formal_df.to_string(index=False))
+if args.log_wandb:
+    wandb.log({'Formal Metrics/Formal Table': wandb.Table(dataframe=formal_df)})
 
 fig = px.line(df, x='# Nodes', y='% Completely Solved', title='% Completely Solved by Graph Size')
 add_vline(fig, x=data_config.dag_config.num_nodes, annotation_text='Max Train # Nodes')
@@ -334,7 +366,7 @@ fig.update_layout(yaxis_tickformat = '.1%')
 fig.show()
 if args.log_wandb:
     table = wandb.Table(dataframe=df)
-    wandb.log({'Summary Metrics/Final Prediction Average Accuracy': np.mean([val_metrics_by_size_np[d]['final_label_full_acc'] for d in val_sizes])})
+    wandb.log({'Summary Metrics/Final Prediction Average Accuracy': np.mean([formal_metrics_by_size_np[d]['final_strict_graph_acc'] for d in val_sizes])})
     wandb.log({'Final Prediction/Final Full Accuracy Table': table})
     wandb.log({'Final Prediction/Final Full Accuracy': fig})
     wandb.log({'Final Prediction/Final Full Accuracy (W&B)': wandb.plot.line(table, x='# Nodes', y='% Completely Solved', title='% Completely Solved by # Nodes')})
