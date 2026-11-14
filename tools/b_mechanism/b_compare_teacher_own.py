@@ -5,7 +5,7 @@ Reads existing JSONL sidecars; no model execution.  Keys use the public
 target identity (graph, chain/target, timing, start), excluding source, so a
 teacher64 record can be matched to the own record for the same target.
 Outputs per model/start/timing/condition match/missing/duplicate/conflict
-counts and whether the serialized rounds are identical.
+counts and whether the serialized rounds are identical, including clean.
 """
 from __future__ import annotations
 
@@ -56,8 +56,6 @@ def add_records(paths):
         with open(path) as f:
             for line in f:
                 rec = json.loads(line)
-                if rec.get('condition') == 'clean':
-                    continue
                 start, timing = M.S.record_start_timing(rec, args)
                 cond = str(rec.get('condition'))
                 key = (model, timing, cond, record_identity(rec))

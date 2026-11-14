@@ -105,6 +105,8 @@ graph-equal 稳定率为 0.9784–0.9979、H=16 为 100%。但 teacher64 只有
 
 ### 4.1 teacher64 与 own 的同链配对
 
+> 2026-11-14 23:22 GPT复核范围更正：本节所引12行CSV来自跳过clean的旧比较入口，直接支持每个模型/时点的276条干预记录一致；包含clean的368条一致尚待统一入口复核，不能把12行CSV当成完整证明。入口现已纳入clean，执行agent将用同一批原轨迹补比较，历史数字暂保留。
+
 按同图、同链（`event_id`）、同 timing、同 condition 筛取 own 对应记录
 （`b_subset_records.py`），每个 timing 得到 92 链 × 4 条件 = 368 条，
 与 teacher64 对齐。可复跑入口 `b_compare_teacher_own.py` 输出
