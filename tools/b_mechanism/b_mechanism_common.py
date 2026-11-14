@@ -185,6 +185,64 @@ def all_numeric_correct(preds, label_b, numeric):
     return bool((preds[..., V][numeric] == label_b[..., V][numeric]).all().item())
 
 
+_EARLY_SUFFIX = {'before_u': 'before', 'after_u': 'after'}
+
+
+def early_flag_key(start, timing):
+    """Canonical manifest key for a common early-eligibility flag."""
+    if start not in ('own', 'teacher'):
+        raise ValueError(f'unknown early start: {start!r}')
+    if timing not in _EARLY_SUFFIX:
+        raise ValueError(f'unknown early timing: {timing!r}')
+    return f'early_{start}_{_EARLY_SUFFIX[timing]}'
+
+
+def set_early_flag(chain, start, timing, a_ok, b_ok):
+    """Write the common flag and the two per-model flags for audit."""
+    key = early_flag_key(start, timing)
+    chain[key] = bool(a_ok and b_ok)
+    chain[key + '_a'] = bool(a_ok)
+    chain[key + '_b'] = bool(b_ok)
+    return key
+
+
+def early_common_flag(chain, start, timing):
+    """Read the common flag; reject missing or internally inconsistent data.
+
+    Old manifests may only contain the common flag.  New manifests also store
+    ``_a``/``_b`` so a case where only one model is eligible can be audited;
+    both runners must still skip it because the common flag is false.
+    """
+    key = early_flag_key(start, timing)
+    if key not in chain:
+        eid = chain.get('event_id', '?')
+        raise SystemExit(f'manifest chain {eid} missing {key}; regenerate manifest')
+    common = bool(chain[key])
+    a_key, b_key = key + '_a', key + '_b'
+    if a_key in chain and b_key in chain:
+        if common != (bool(chain[a_key]) and bool(chain[b_key])):
+            eid = chain.get('event_id', '?')
+            raise SystemExit(
+                f'manifest chain {eid} has inconsistent {key}: '
+                f'common={common}, a={chain[a_key]}, b={chain[b_key]}')
+    return common
+
+
+def validate_manifest_graphs(manifest):
+    """Enforce the R3 invariant: every accepted T fits its per-graph budget."""
+    for g in manifest.get('graphs', []):
+        try:
+            T = int(g['T'])
+            n_loops = int(g['n_loops'])
+        except (KeyError, TypeError, ValueError):
+            raise SystemExit(f'manifest graph {g.get("graph_id")} has invalid T/n_loops')
+        if not (0 <= T < n_loops):
+            raise SystemExit(
+                f'manifest graph {g.get("graph_id")} violates 0 <= T < n_loops: '
+                f'T={T}, n_loops={n_loops}')
+    return True
+
+
 def build_meta(data_b, label_b, info_b, tok, teacher):
     """Per-graph structural metadata used by both selection and runners."""
     numeric, valid, depth = numeric_mask(data_b, label_b, info_b, tok)

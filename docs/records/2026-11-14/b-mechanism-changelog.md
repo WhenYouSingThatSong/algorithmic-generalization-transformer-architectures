@@ -1,8 +1,26 @@
-# B mechanism code v2 — changelog
+# B mechanism code — changelog
 
 Date: 2026-11-14.
 
-## Review fixes
+## GPT review fixes (post-v2)
+
+- R1: `early_*` flag schema is unified through `early_flag_key`; selection
+  writes common and per-model `_a`/`_b` flags plus `event_id`; runners reject
+  missing/inconsistent flags instead of silently proceeding.
+- R3: selection searches `T` only within each graph's own `n_loops`; runners
+  validate `0 <= T < n_loops`; batch-size changes no longer alter accepted
+  graph budgets.
+- R2: summary keys include source/run identity and full target identity; clean
+  and injected records are paired without merging A′/B, start/timing, or
+  different input files; duplicate clean records are checked.
+- R7: controls records carry `condition`/`start`/`timing`, emit a same-start
+  clean, and reject `switch_at` outside `[1, hold_rounds]`.
+- R8: D1/D2/D3 records carry `new_truth` plus `input_nodes_new` /
+  `output_nodes_new`; old-label fields are marked `truth_ref=old`.
+- Summary output now states `post_round_1` / `any_later_round` scope explicitly;
+  metric definitions remain unsettled.
+
+## v2 review fixes
 
 - Entrypoints insert their own directory before importing `b_mechanism_common`;
   `python -I ... --help` passes for all six entrypoints.
@@ -35,4 +53,4 @@ must not be cited.
 
 ## Smoke
 
-See `docs/b-mechanism-smoke.md`.  Smoke is pipeline-only; no scientific claim.
+See `b-mechanism-smoke.md`.  Smoke is pipeline-only; no scientific claim.

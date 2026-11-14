@@ -41,9 +41,11 @@ def ckpt_path(args):
                         args['ckpt_name'])
 
 
-def find_common_T(outputs_a, outputs_b, label, numeric):
-    """First round where both models are numerically complete."""
+def find_common_T(outputs_a, outputs_b, label, numeric, max_rounds=None):
+    """First common complete round within the per-graph budget."""
     n = min(len(outputs_a), len(outputs_b))
+    if max_rounds is not None:
+        n = min(n, int(max_rounds))
     for t in range(n):
         if C.all_numeric_correct(outputs_a[t], label, numeric) and \
            C.all_numeric_correct(outputs_b[t], label, numeric):
@@ -118,7 +120,9 @@ def main():
     counts = dict(scanned=0, common_complete=0, chains=0, sinks=0, leaves=0,
                   same_all=0, same_numeric=0, skipped_no_chain=0,
                   early_own_before=0, early_own_after=0,
-                  early_teacher_before=0, early_teacher_after=0)
+                  early_teacher_before=0, early_teacher_after=0,
+                  early_own_before_disagree=0, early_own_after_disagree=0,
+                  early_teacher_before_disagree=0, early_teacher_after_disagree=0)
     selected = 0
     scanned = 0
     with torch.no_grad():
@@ -131,10 +135,9 @@ def main():
             data, label, info = C.split_batch(batch, mc)
             depths = info[..., 0].long()
             B = data.size(0)
-            D = int(depths.max()) + 1
-            n_loops = D + a.extra_rounds
-            _, out_a = C.rollout(lit_a, teacher, data, n_loops)
-            _, out_b = C.rollout(lit_b, teacher, data, n_loops)
+            batch_loops = int(depths.max().item()) + 1 + a.extra_rounds
+            _, out_a = C.rollout(lit_a, teacher, data, batch_loops)
+            _, out_b = C.rollout(lit_b, teacher, data, batch_loops)
             S_a, _, _ = lit_a.get_teacher_batch_with_depth(data, label, depths)
             S_b, _, _ = lit_b.get_teacher_batch_with_depth(data, label, depths)
             for bi in range(B):
@@ -143,38 +146,55 @@ def main():
                 gid = batch_idx * a.batch_size + bi
                 scanned += 1
                 counts['scanned'] += 1
+                graph_loops = int(depths[bi].max().item()) + 1 + a.extra_rounds
                 meta = C.build_meta(data[bi], label[bi], info[bi], tok, teacher)
                 T = find_common_T([o[bi] for o in out_a], [o[bi] for o in out_b],
-                                  label[bi], meta['numeric'])
+                                  label[bi], meta['numeric'], max_rounds=graph_loops)
                 if T is None:
                     continue
+                if not (0 <= T < graph_loops):
+                    raise AssertionError(f'graph {gid}: T={T} outside [0,{graph_loops})')
                 counts['common_complete'] += 1
                 chains = C.pick_chain(meta, data[bi], label[bi], tok, k=a.k)
-                # Early eligibility for both models, for own and teacher states.
-                for ch in chains:
+                # Early eligibility is recorded per model, then stored as a
+                # common flag.  Both runners must use the common flag.
+                for ci, ch in enumerate(chains):
+                    ch['event_id'] = f'g{gid}:c{ci}'
                     d = int(ch['d'])
-                    ch['early_own_before'] = False
-                    ch['early_own_after'] = False
+                    a_before = b_before = False
                     if d > 0:
-                        ch['early_own_before'] = (
-                            check_early_state(out_a[d - 1][bi:bi + 1], ch, 'before_u', tok) and
-                            check_early_state(out_b[d - 1][bi:bi + 1], ch, 'before_u', tok))
-                    ch['early_own_after'] = (
-                        check_early_state(out_a[d][bi:bi + 1], ch, 'after_u', tok) and
-                        check_early_state(out_b[d][bi:bi + 1], ch, 'after_u', tok))
-                    ch['early_teacher_before'] = False
-                    ch['early_teacher_after'] = False
-                    if d < S_a.size(0) and d + 1 < S_a.size(0):
-                        ch['early_teacher_before'] = (
-                            check_early_state(S_a[d][bi:bi + 1], ch, 'before_u', tok) and
-                            check_early_state(S_b[d][bi:bi + 1], ch, 'before_u', tok))
-                        ch['early_teacher_after'] = (
-                            check_early_state(S_a[d + 1][bi:bi + 1], ch, 'after_u', tok) and
-                            check_early_state(S_b[d + 1][bi:bi + 1], ch, 'after_u', tok))
+                        a_before = check_early_state(out_a[d - 1][bi:bi + 1], ch, 'before_u', tok)
+                        b_before = check_early_state(out_b[d - 1][bi:bi + 1], ch, 'before_u', tok)
+                    a_after = check_early_state(out_a[d][bi:bi + 1], ch, 'after_u', tok)
+                    b_after = check_early_state(out_b[d][bi:bi + 1], ch, 'after_u', tok)
+                    a_teacher_before = b_teacher_before = False
+                    a_teacher_after = b_teacher_after = False
+                    if (d < S_a.size(0) and d + 1 < S_a.size(0) and
+                            d < S_b.size(0) and d + 1 < S_b.size(0)):
+                        a_teacher_before = check_early_state(
+                            S_a[d][bi:bi + 1], ch, 'before_u', tok)
+                        b_teacher_before = check_early_state(
+                            S_b[d][bi:bi + 1], ch, 'before_u', tok)
+                        a_teacher_after = check_early_state(
+                            S_a[d + 1][bi:bi + 1], ch, 'after_u', tok)
+                        b_teacher_after = check_early_state(
+                            S_b[d + 1][bi:bi + 1], ch, 'after_u', tok)
+                    C.set_early_flag(ch, 'own', 'before_u', a_before, b_before)
+                    C.set_early_flag(ch, 'own', 'after_u', a_after, b_after)
+                    C.set_early_flag(ch, 'teacher', 'before_u',
+                                     a_teacher_before, b_teacher_before)
+                    C.set_early_flag(ch, 'teacher', 'after_u',
+                                     a_teacher_after, b_teacher_after)
                     counts['early_own_before'] += int(ch['early_own_before'])
                     counts['early_own_after'] += int(ch['early_own_after'])
                     counts['early_teacher_before'] += int(ch['early_teacher_before'])
                     counts['early_teacher_after'] += int(ch['early_teacher_after'])
+                    counts['early_own_before_disagree'] += int(a_before != b_before)
+                    counts['early_own_after_disagree'] += int(a_after != b_after)
+                    counts['early_teacher_before_disagree'] += int(
+                        a_teacher_before != b_teacher_before)
+                    counts['early_teacher_after_disagree'] += int(
+                        a_teacher_after != b_teacher_after)
                 late = build_late_targets(meta, label[bi], tok, k=a.k)
                 unrelated = []
                 for ch in chains:
@@ -201,7 +221,7 @@ def main():
                     counts['same_numeric'] += 1
                 graphs.append(dict(
                     graph_id=gid, T=T, T_kind='first_common_complete',
-                    n_loops=int(depths[bi].max().item()) + 1 + a.extra_rounds,
+                    n_loops=graph_loops,
                     n_numeric=int(meta['numeric'].sum().item()),
                     chains=chains, late=late, unrelated=unrelated,
                     same_all=same_all, same_numeric=same_numeric,

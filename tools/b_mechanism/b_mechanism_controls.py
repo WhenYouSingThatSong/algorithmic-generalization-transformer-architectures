@@ -32,6 +32,20 @@ def values_at(state, tok, positions):
     return {str(p): C.tok_str(tok, int(state[0, p, C.V])) for p in positions}
 
 
+def round_records(inputs, outputs, tok, positions, label_b, pre_forward_round):
+    rows = []
+    for t in range(len(inputs)):
+        rows.append(dict(
+            post_round=t + 1,
+            pre_forward_round=pre_forward_round,
+            input=values_at(inputs[t], tok, positions),
+            output=values_at(outputs[t], tok, positions),
+            input_nodes=C.node_state(inputs[t], label_b, tok, positions),
+            output_nodes=C.node_state(outputs[t], label_b, tok, positions),
+        ))
+    return rows
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument('--manifest', required=True)
@@ -51,16 +65,22 @@ def main():
     p.add_argument('--horizon', type=int, default=10)
     p.add_argument('--out', required=True)
     a = p.parse_args()
+    if a.mode == 'switch_held_r' and not (1 <= a.switch_at <= a.hold_rounds):
+        raise SystemExit(
+            'switch_held_r requires 1 <= switch_at <= hold_rounds; '
+            'otherwise the hold branch masks the switch or the switch becomes a second injection')
 
     with open(a.manifest) as f:
         manifest = json.load(f)
     C.verify_manifest_identity(manifest, a.ds_file, C.checkpoint_path(a.base, a.group, a.run, a.ckpt))
+    C.validate_manifest_graphs(manifest)
     graphs = {g['graph_id']: g for g in manifest['graphs']}
     ctx = C.load_eval_context(a.config, a.group, a.run, a.base, a.ckpt,
                               a.ds_file, batch_size=a.batch_size, num_workers=0)
     lit, tok, teacher, mc = ctx['lit'], ctx['tok'], ctx['teacher'], ctx['mc']
     records = []
-    counts = dict(processed=0, emitted=0, skipped=0)
+    clean_done = set()
+    counts = dict(processed=0, emitted=0, clean_emitted=0, skipped=0)
 
     with torch.no_grad():
         for batch_idx, raw in enumerate(ctx['dm'].val_dataloader()):
@@ -82,9 +102,8 @@ def main():
                 base = outs[T].clone()
                 counts['processed'] += 1
                 for ci, ch in enumerate(mg['chains']):
-                    # Only early-eligible chains are meaningful for this control.
-                    flag = ch.get('early_own_after')
-                    if flag is False:
+                    # Only common early-eligible chains are meaningful here.
+                    if not C.early_common_flag(ch, 'own', 'after_u'):
                         counts['skipped'] += 1
                         continue
                     r_pos = ch['r_pos']
@@ -93,6 +112,23 @@ def main():
                     r_other = (r_wrong + a.delta) % tok.mod_val
                     positions = sorted((set(meta['nodes']) |
                                         {r_pos, ch['pos'], ch.get('q1'), ch.get('q2')}) - {None})
+
+                    clean_key = (gid, ci)
+                    if clean_key not in clean_done:
+                        clean_done.add(clean_key)
+                        clean_inputs, clean_outputs = C.rollout(
+                            lit, teacher, base[0:1], a.horizon)
+                        records.append(dict(
+                            graph_id=gid, mode=a.mode, condition='clean',
+                            start='control', timing=a.mode,
+                            target_index=ci, event_id=ch.get('event_id'), chain=ch,
+                            r_true=r_true, r_wrong=r_wrong, r_other=r_other,
+                            hold_rounds=a.hold_rounds, switch_at=a.switch_at,
+                            pre_forward_round=T + 1,
+                            rounds=round_records(clean_inputs, clean_outputs, tok,
+                                                 positions, label[bi], T + 1),
+                            node_truth=mg['nodes']))
+                        counts['clean_emitted'] += 1
 
                     def hook(t, cur, r_pos=r_pos, r_wrong=r_wrong, r_other=r_other):
                         # Hold the first wrong value for hold_rounds.
@@ -105,21 +141,15 @@ def main():
 
                     inputs, outputs = C.rollout(lit, teacher, base[0:1], a.horizon,
                                                 input_hook=hook)
-                    rounds = []
-                    for t in range(a.horizon):
-                        rounds.append(dict(
-                            post_round=t + 1,
-                            pre_forward_round=T + 1,
-                            input=values_at(inputs[t], tok, positions),
-                            output=values_at(outputs[t], tok, positions),
-                            input_nodes=C.node_state(inputs[t], label[bi], tok, positions),
-                            output_nodes=C.node_state(outputs[t], label[bi], tok, positions),
-                        ))
                     records.append(dict(
-                        graph_id=gid, mode=a.mode, target_index=ci, chain=ch,
+                        graph_id=gid, mode=a.mode, condition=a.mode,
+                        start='control', timing=a.mode,
+                        target_index=ci, event_id=ch.get('event_id'), chain=ch,
                         r_true=r_true, r_wrong=r_wrong, r_other=r_other,
                         hold_rounds=a.hold_rounds, switch_at=a.switch_at,
-                        pre_forward_round=T + 1, rounds=rounds,
+                        pre_forward_round=T + 1,
+                        rounds=round_records(inputs, outputs, tok, positions,
+                                             label[bi], T + 1),
                         node_truth=mg['nodes']))
                     counts['emitted'] += 1
 

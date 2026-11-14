@@ -36,3 +36,22 @@ batch and is not yet a training-history conclusion.
 The smoke verifies code paths, shapes, identity hashes, output fields, and the
 `S[:-1]` fix.  It does not establish any scientific result; full runs still
 need manifest eligibility checks and the planned denominators.
+
+## Post-review fix smoke (2026-11-14, second pass)
+
+Pipeline-only checks after R1/R3/R2/R7/R8 fixes:
+
+- selection, 4 heldout graphs, batch 8: 4 common-complete, 9 chains, 16 sinks,
+  16 leaves; all `early_*` common flags equal `_a and _b`; all graphs satisfy
+  `0 <= T < n_loops`.
+- same selection with batch 4 gives the same `(T, n_loops)` for all 4 graphs.
+- early own after: 36 records (9 chains x 4 conditions), `event_id` present.
+- late: 66 records; D1/D2/D3 contain `new_truth` and
+  `input_nodes_new`/`output_nodes_new`; 25 unique clean records after
+  target-level dedup.
+- controls: sustained 9 records + 9 clean; switch 9 records + 9 clean;
+  `condition` and `start/timing` populated.
+- summary over early/late/controls: 7 rows, A/B sources separate, input-order
+  invariant, `duplicate_cleans=0`.
+
+These are still pipeline checks, not mechanism results.

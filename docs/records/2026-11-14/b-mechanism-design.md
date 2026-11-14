@@ -190,11 +190,13 @@ D2 是从原始图/空状态做 clean rollout 解新题，只用于判断“不�
 - 在 after_u 与 complete 两个时点各做一次；
 - 比较“u 刚算完就被覆盖”和“整图完成后是否还会覆盖”。
 
-### 6.4 自洽歧义的切换控制
+### 6.4 held-state 父值切换（当前实现）
 
-- `r=5,u=7` 稳定后，把 r 从 5 切到 8；
-- 看 u 是否跟着切换；
-- 即使跟随，只能说明“测试过的改变会触发/影响更新”，不能区分每轮重算与检测不一致才重算；层间干预留到后续。
+- 从整图完成状态开始，先把 r 固定为第一个错值 `hold_rounds` 轮；
+- `switch_held_r` 在 `1 <= switch_at <= hold_rounds` 时把 r 换成第二个错值一次，然后释放；
+- `sustained_r` 是同一时点直接释放的 no-switch 对照；
+- 该操作比较的是“释放”与“释放时追加一次干扰”，**不是“稳定错误状态之间切换”**；
+  不能沿用旧自洽切换的解释。本阶段不纳入必跑项。
 
 ## 7. 训练腐蚀审计
 
@@ -248,6 +250,21 @@ B/cyh 训练于 2026-11-07/08；比对当前 `randomly_corrupt_values` 与训练
 - controls 移除局部自洽，switch 从持续错父状态切换并保留 no-switch 对照；
 - summary 增加 N0/N1/N2 与 first-four/VALUE 两套统计。
 
+### 8.2 GPT review 修复（2026-11-14，post-v2）
+
+- R1：`early_*` 资格键统一；selection 写 common + `_a`/`_b` + `event_id`，
+  runner 缺键或共同键不一致直接报错。
+- R3：selection 按单图 `n_loops` 截断 `T` 搜索；runner 校验 `0 <= T < n_loops`；
+  batch_size 改变不改变同一图的 T/预算。
+- R2：summary 保留 source/run 身份、完整目标键和分组键；A′/B、start/timing、
+  不同输入文件不再串行合并；重复 clean 显式检查。
+- R7：controls 记录 `condition`/`start`/`timing`，新增同起点 clean，
+  并限制 `switch_at` 在 `[1, hold_rounds]`。
+- R8：D1/D2/D3 记录 `new_truth` 与 `output_nodes_new`/`input_nodes_new`，
+  旧 label 字段标 `truth_ref=old`。
+- summary 输出显式标注 `post_round_1` / `any_later_round` 的统计范围；
+  指标定义仍未定稿。
+
 所有脚本支持：
 - `--ds_file`、`--n_graphs`、`--batch_size`、`--seed`；
 - 输出 JSONL/JSON + 汇总 CSV；
@@ -268,6 +285,7 @@ B/cyh 训练于 2026-11-07/08；比对当前 `randomly_corrupt_values` 与训练
 
 - 同一 forward 内看不到层间先后；只能按轮边界说“同轮/下一轮”；
 - 共同 T 可能样本不足；需报告 n，并用 matched-depth 复核；
-- 自洽值 `7` 保持无法区分重算与保留；必须用切换控制；
+- 自洽值 `7` 保持无法区分重算与保留；现有 `switch_held_r` 也不是稳定错误状态切换，
+  不能仅凭它区分每轮重算与“检测到不一致才重算”；该问题留到后续针对性干预/层内分析；
 - `Graph/strict` 不是这里的主指标；机制表以事件级覆盖/恢复为主；
 - 不把 `4→5` 的恢复直接解释为训练内纠错，除非腐蚀审计证明训练覆盖了已填值。

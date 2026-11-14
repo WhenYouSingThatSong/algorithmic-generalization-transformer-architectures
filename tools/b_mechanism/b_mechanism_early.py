@@ -64,6 +64,7 @@ def main():
     with open(a.manifest) as f:
         manifest = json.load(f)
     C.verify_manifest_identity(manifest, a.ds_file, C.checkpoint_path(a.base, a.group, a.run, a.ckpt))
+    C.validate_manifest_graphs(manifest)
     graphs = {g['graph_id']: g for g in manifest['graphs']}
     ctx = C.load_eval_context(a.config, a.group, a.run, a.base, a.ckpt,
                               a.ds_file, batch_size=a.batch_size, num_workers=0)
@@ -86,8 +87,7 @@ def main():
                 _, outs = C.rollout(lit, teacher, data[bi:bi + 1], mg['n_loops'])
                 counts['processed'] += 1
                 for ci, ch in enumerate(mg['chains']):
-                    flag_key = f'early_{a.start}_{a.timing}'
-                    if flag_key in ch and not ch[flag_key]:
+                    if not C.early_common_flag(ch, a.start, a.timing):
                         counts['skipped'] += 1
                         continue
                     d = int(ch['d'])
@@ -138,7 +138,8 @@ def main():
                                 output_nodes=C.node_state(outputs[t], label[bi], tok, positions),
                             ))
                         records.append(dict(
-                            graph_id=gid, chain_index=ci, chain=ch, timing=a.timing,
+                            graph_id=gid, chain_index=ci, event_id=ch.get('event_id'),
+                            chain=ch, timing=a.timing,
                             start=a.start, condition=cond, injection=inj,
                             base_round=(d if a.timing == 'before_u' else d + 1),
                             rounds=rounds, node_truth=mg['nodes']))

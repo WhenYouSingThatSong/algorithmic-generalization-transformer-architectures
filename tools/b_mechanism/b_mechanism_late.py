@@ -63,6 +63,16 @@ def recompute_truth(meta, label_b, tok, teacher, constant_override=None):
     return vals
 
 
+def truth_label(label_b, truth_values, tok):
+    """Label tensor with VALUE overridden by the new-problem truth."""
+    out = label_b.clone()
+    for p, v in truth_values.items():
+        if v is None:
+            continue
+        out[int(p), C.V] = tok.value_tok2idx[str(int(v))]
+    return out
+
+
 def tracked_positions(meta, manifest_graph, target, kind):
     pos = set(meta['nodes'])
     if kind.startswith('late'):
@@ -124,19 +134,28 @@ def make_injected(base, manifest_graph, meta, tok, label_b, kind, target, delta)
 
 
 def rollout_records(lit, teacher, tok, start, meta, manifest_graph, target, kind,
-                    horizon, label_b, pre_forward_round, input_hook=None):
+                    horizon, label_b, pre_forward_round, input_hook=None,
+                    new_truth_values=None):
     positions = tracked_positions(meta, manifest_graph, target, kind)
+    label_new = (truth_label(label_b, new_truth_values, tok)
+                 if new_truth_values is not None else None)
     inputs, outputs = C.rollout(lit, teacher, start, horizon, input_hook=input_hook)
     rows = []
     for t in range(horizon):
-        rows.append(dict(
+        row = dict(
             post_round=t + 1,
             pre_forward_round=pre_forward_round,
             input=token_values(inputs[t], tok, positions),
             output=token_values(outputs[t], tok, positions),
             input_nodes=C.node_state(inputs[t], label_b, tok, positions),
             output_nodes=C.node_state(outputs[t], label_b, tok, positions),
-        ))
+            truth_ref='old',
+        )
+        if label_new is not None:
+            row['input_nodes_new'] = C.node_state(inputs[t], label_new, tok, positions)
+            row['output_nodes_new'] = C.node_state(outputs[t], label_new, tok, positions)
+            row['truth_ref_new'] = 'new'
+        rows.append(row)
     return rows
 
 
@@ -164,6 +183,7 @@ def main():
     with open(a.manifest) as f:
         manifest = json.load(f)
     C.verify_manifest_identity(manifest, a.ds_file, C.checkpoint_path(a.base, a.group, a.run, a.ckpt))
+    C.validate_manifest_graphs(manifest)
     graphs = {g['graph_id']: g for g in manifest['graphs']}
     ctx = C.load_eval_context(a.config, a.group, a.run, a.base, a.ckpt,
                               a.ds_file, batch_size=a.batch_size, num_workers=0)
@@ -219,7 +239,8 @@ def main():
                         else:
                             delta = a.delta
                         # Same-start, no-injection continuation; one per target.
-                        clean_key = (gid, cond, ti)
+                        # Key by graph+target so late_r and late_u share it.
+                        clean_key = (gid, json.dumps(target, sort_keys=True))
                         if cond not in ('leaf_constant_scratch',) and clean_key not in clean_done:
                             clean_done.add(clean_key)
                             clean_rows = rollout_records(lit, teacher, tok, base[0:1], meta, mg,
@@ -242,14 +263,16 @@ def main():
                                        from_value=target['true'], to_value=new_const,
                                        truth_unchanged=False)
                             scratch_horizon = max(a.horizon, mg['n_loops'])
+                            new_truth = recompute_truth(
+                                meta, label[bi], tok, teacher,
+                                {target['const_pos']: new_const})
                             rows = rollout_records(lit, teacher, tok, start, meta, mg,
-                                                   target, cond, scratch_horizon, label[bi], 0)
+                                                   target, cond, scratch_horizon, label[bi], 0,
+                                                   new_truth_values=new_truth)
                             records.append(dict(graph_id=gid, condition=cond,
                                                 target_index=ti, target=target,
                                                 injection=inj, T=None, pre_forward_round=0,
-                                                rounds=rows, new_truth=recompute_truth(
-                                                    meta, label[bi], tok, teacher,
-                                                    {target['const_pos']: new_const}),
+                                                rounds=rows, new_truth=new_truth,
                                                 node_truth=mg['nodes']))
                             counts['emitted'] += 1
                             continue
@@ -261,9 +284,13 @@ def main():
                             def pin_hook(t, cur, cpos=target['const_pos'], v=new_const):
                                 cur[0, cpos, C.V] = tok.value_tok2idx[str(v)]
                                 return cur
+                            new_truth = recompute_truth(
+                                meta, label[bi], tok, teacher,
+                                {target['const_pos']: new_const})
                             rows = rollout_records(lit, teacher, tok, start, meta, mg,
                                                    target, cond, a.horizon, label[bi],
-                                                   T + 1, input_hook=pin_hook)
+                                                   T + 1, input_hook=pin_hook,
+                                                   new_truth_values=new_truth)
                             inj = dict(kind=cond, pos=target['var_pos'],
                                        const_pos=target['const_pos'],
                                        from_value=target['true'], to_value=new_const,
@@ -271,22 +298,24 @@ def main():
                             records.append(dict(graph_id=gid, condition=cond,
                                                 target_index=ti, target=target,
                                                 injection=inj, T=T, pre_forward_round=T + 1,
-                                                rounds=rows, new_truth=recompute_truth(
-                                                    meta, label[bi], tok, teacher,
-                                                    {target['const_pos']: new_const}),
+                                                rounds=rows, new_truth=new_truth,
                                                 node_truth=mg['nodes']))
                             counts['emitted'] += 1
                             continue
                         start, inj = make_injected(base[0:1], mg, meta, tok, label[bi],
                                                    cond, target, delta)
-                        rows = rollout_records(lit, teacher, tok, start, meta, mg,
-                                               target, cond, a.horizon, label[bi], T + 1)
-                        extra = {}
+                        new_truth = None
                         if cond == 'leaf_constant':
                             new_const = int(inj['to_value'])
-                            extra['new_truth'] = recompute_truth(
+                            new_truth = recompute_truth(
                                 meta, label[bi], tok, teacher,
                                 {target['const_pos']: new_const})
+                        rows = rollout_records(lit, teacher, tok, start, meta, mg,
+                                               target, cond, a.horizon, label[bi], T + 1,
+                                               new_truth_values=new_truth)
+                        extra = {}
+                        if new_truth is not None:
+                            extra['new_truth'] = new_truth
                         records.append(dict(graph_id=gid, condition=cond, target_index=ti,
                                             target=target, injection=inj,
                                             T=T, pre_forward_round=T + 1, rounds=rows,

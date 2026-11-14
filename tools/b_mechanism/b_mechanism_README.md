@@ -54,7 +54,11 @@ python -I tools/b_mechanism/b_mechanism_select.py \
 Manifest records:
 
 - `T` = **first** common complete round, `T_kind=first_common_complete`;
-- per-chain `early_own_before/after` and `early_teacher_before/after`;
+  every graph satisfies `0 <= T < n_loops`, with `n_loops` computed from that
+  graph's own depth;
+- per-chain common `early_own_before/after` and `early_teacher_before/after`,
+  plus `_a`/`_b` per-model audit flags; missing or inconsistent flags are
+  rejected by the runners; each chain has an `event_id`;
 - primary chains only: single-parent u, q1 not directly r, q2 present and not
   directly r;
 - late sinks, leaf `var_pos`/`const_pos`, unrelated nodes that cannot reach
@@ -109,12 +113,17 @@ Local self-consistent-error is **deferred and not implemented**.  Use:
 python -I tools/b_mechanism/b_mechanism_controls.py ... --mode sustained_r \
   --hold_rounds 4 --horizon 10 --out .../B_sustained.json
 
-# hold r wrong, then switch r to a second wrong value at round 5
+# hold r wrong, then switch r to a second wrong value at round 4
 python -I tools/b_mechanism/b_mechanism_controls.py ... --mode switch_held_r \
-  --hold_rounds 4 --switch_at 5 --horizon 10 --out .../B_switch.json
+  --hold_rounds 4 --switch_at 4 --horizon 10 --out .../B_switch.json
 ```
 
-`sustained_r` is the no-switch control for `switch_held_r`.
+`switch_held_r` requires `1 <= switch_at <= hold_rounds`; it holds the first
+wrong value through `hold_rounds`, changes to the second wrong value at
+`switch_at`, then releases.  It is **not** a switch between stable error states.
+`sustained_r` is the no-switch control.  Both modes emit a same-start `clean`
+record per target and tag records with `condition`/`start`/`timing` so summary
+can pair them.
 
 ## 5. Training corruption audit
 
@@ -144,12 +153,18 @@ python -I tools/b_mechanism/b_mechanism_summary.py \
 N0 = nodes correct in the same-start clean continuation at post_round 1; N1 =
 N0 nodes wrong under injection at post_round 1; N2 = N1 nodes correct in a later
 round.  Reports first-four and VALUE separately, EMPTY at first round, and max
-descendant edge distance.  D1/D2/D3 truth-changing conditions are excluded from
-this summary and analyzed separately.
+descendant edge distance.  N1 is explicitly post-round-1 and N2 is any-later;
+these are not full-window or sustained-recovery statistics.
+
+Summary keys include the source file/run identity, so A′/B and different
+start/timing are never merged.  `controls` records are included when their
+same-start clean exists.  D1/D2/D3 truth-changing conditions are excluded from
+this summary; their records carry `new_truth` and `input_nodes_new`/
+`output_nodes_new` for a separately-defined future summary.
 
 ## 7. Smoke status
 
-Small smoke was run on GPU1 on 4 heldout graphs:
+Initial smoke (pre-review code) on GPU1, 4 heldout graphs:
 
 - selection: 4 common-complete, 7 chains, 8 sinks, 8 leaves;
 - early own after: 28 records; early teacher before: 28 records;
@@ -157,6 +172,15 @@ Small smoke was run on GPU1 on 4 heldout graphs:
 - controls: sustained 7 records; switch 7 records;
 - audit: 128 candidates, all before=EMPTY; 200 normal trials, 692 actual
   replacements, all before=EMPTY, after mostly numeric.
+
+Post-review fix smoke (2026-11-14, second pass):
+
+- selection: 4 common-complete, 9 chains, 16 sinks, 16 leaves; flags consistent;
+  batch 4 and batch 8 give the same `(T, n_loops)`;
+- early own after: 36 records; late: 66 records; D1/D2/D3 carry new-truth fields;
+- controls: 9 injected + 9 clean for each mode;
+- summary: 7 rows, A′/B-like sources separate, input-order invariant,
+  `duplicate_cleans=0`.
 
 These are pipeline checks, not results.
 

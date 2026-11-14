@@ -1,18 +1,20 @@
 #!/usr/bin/env python3
 """Summarize B mechanism trajectories.
 
-Computes the fixed N0 -> N1 -> N2 denominators from a clean continuation and an
-injected continuation, separately for VALUE and first-four fields.
+Computes the provisional N0 -> N1 -> N2 denominators from a clean continuation
+and an injected continuation, separately for VALUE and first-four fields.
 
 N0 = nodes correct in the clean continuation at post_round 1
 N1 = N0 nodes that are wrong under the injection at post_round 1
 N2 = N1 nodes that become correct in any later injection round
 
-Also reports EMPTY/N/A at the first round and the maximum descendant edge
-distance of N1 nodes from the injected position.
+Scope warning: N1 is post_round_1 only, N2 is any-later only, and
+max_propagation_edges is measured from the first-round queue.  These are not
+full-window propagation or sustained-recovery statistics.
 
 D1/D2/D3 leaf-constant conditions are skipped here because their truth changes
-or their start is the new problem; analyze them separately.
+or their start is the new problem; their raw records carry ``new_truth`` and
+``output_nodes_new`` for a later, separately-defined summary.
 """
 from __future__ import annotations
 
@@ -22,15 +24,48 @@ import json
 import os
 from collections import defaultdict, deque
 
+LEAF_DYNAMIC = {'leaf_constant', 'leaf_constant_pinned', 'leaf_constant_scratch'}
 
-def target_key(rec):
+
+def source_identity(path, data):
+    """Stable per-file run identity, used so A' and B never share a key."""
+    args = data.get('args', {}) or {}
+    keys = ('config', 'group', 'run', 'ckpt', 'ds_file',
+            'value_mode', 'r_delta', 'u_delta', 'delta', 'out')
+    vals = [args.get(k) for k in keys]
+    if any(v is not None for v in vals):
+        return '|'.join('' if v is None else str(v) for v in vals)
+    return os.path.abspath(path)
+
+
+def record_kind(rec):
+    if rec.get('mode'):
+        return 'control'
     if 'chain_index' in rec:
-        return (rec['graph_id'], 'early', rec.get('chain_index'))
-    return (rec['graph_id'], 'late', rec.get('target_index'), json.dumps(rec.get('target'), sort_keys=True))
+        return 'early'
+    return 'late'
 
 
-def clean_key(rec):
-    return target_key(rec)
+def record_start_timing(rec, args):
+    kind = record_kind(rec)
+    if kind == 'control':
+        return 'control', str(rec.get('mode') or args.get('mode') or 'control')
+    if kind == 'early':
+        return (str(rec.get('start') or args.get('start') or 'own'),
+                str(rec.get('timing') or args.get('timing') or 'unknown'))
+    return 'late', 'complete'
+
+
+def target_key(rec, source, args):
+    """Pair clean and injected records; condition is intentionally excluded."""
+    kind = record_kind(rec)
+    start, timing = record_start_timing(rec, args)
+    gid = rec.get('graph_id')
+    if kind == 'early':
+        eid = rec.get('event_id') or (rec.get('chain') or {}).get('event_id')
+        return (source, kind, gid, rec.get('chain_index'), eid, start, timing)
+    target_json = json.dumps(rec.get('target'), sort_keys=True)
+    return (source, kind, gid, rec.get('target_index'), target_json, start, timing)
 
 
 def child_map(node_truth):
@@ -69,31 +104,45 @@ def main():
     records = []
     for path in a.inputs:
         with open(path) as f:
-            d = json.load(f)
-        for r in d.get('records', []):
-            records.append(r)
+            data = json.load(f)
+        args = data.get('args', {}) or {}
+        source = source_identity(path, data)
+        for rec in data.get('records', []):
+            records.append((source, args, rec))
 
     cleans = {}
-    for r in records:
-        if r.get('condition') == 'clean' and r.get('rounds'):
-            cleans[clean_key(r)] = r
+    duplicate_cleans = 0
+    for source, args, rec in records:
+        if rec.get('condition') != 'clean' or not rec.get('rounds'):
+            continue
+        key = target_key(rec, source, args)
+        if key in cleans:
+            old = cleans[key]
+            same = (json.dumps(old.get('rounds'), sort_keys=True) ==
+                    json.dumps(rec.get('rounds'), sort_keys=True))
+            if not same:
+                raise SystemExit(
+                    f'conflicting duplicate clean records for target {key}; '
+                    'check inputs or regenerate without duplicate cleans')
+            duplicate_cleans += 1
+            continue
+        cleans[key] = rec
 
     rows = defaultdict(list)
     skipped = 0
-    for r in records:
-        cond = r.get('condition')
+    for source, args, rec in records:
+        cond = rec.get('condition')
         if cond in (None, 'clean'):
             continue
-        if cond in ('leaf_constant', 'leaf_constant_pinned', 'leaf_constant_scratch'):
-            # truth changes / start changes; analyzed separately
+        if cond in LEAF_DYNAMIC:
             skipped += 1
             continue
-        c = cleans.get(clean_key(r))
-        if c is None:
+        clean = cleans.get(target_key(rec, source, args))
+        if clean is None:
             skipped += 1
             continue
-        cr = c.get('rounds', [])
-        ir = r.get('rounds', [])
+        cr = clean.get('rounds', [])
+        ir = rec.get('rounds', [])
         if not cr or not ir:
             skipped += 1
             continue
@@ -102,7 +151,6 @@ def main():
         if not nodes:
             skipped += 1
             continue
-        # later injection correctness by node
         later = {}
         for rr in ir[1:]:
             for k, v in rr.get('output_nodes', {}).items():
@@ -134,27 +182,30 @@ def main():
             pred = i0[k].get('pred4', {}).get('VALUE')
             if pred in ('EMPTY', 'N/A'):
                 empty += 1
-        # propagation edge distance from injected position, if known
-        inj = r.get('injection', {}) or {}
+        inj = rec.get('injection', {}) or {}
         start = inj.get('pos')
         if start is None:
-            ch = r.get('chain') or {}
-            start = ch.get('r_pos') if cond in ('r', 'ur') else ch.get('pos')
+            ch = rec.get('chain') or {}
+            if rec.get('mode') or cond in ('r', 'ur'):
+                start = ch.get('r_pos')
+            else:
+                start = ch.get('pos')
         max_edge = None
         if start is not None:
-            dist = distances_from(int(start), child_map(r.get('node_truth', {})))
+            dist = distances_from(int(start), child_map(rec.get('node_truth', {})))
             ds = [dist[x] for x in corrupted_nodes if x in dist]
             if ds:
                 max_edge = max(ds)
-        key = (r.get('start', ''), r.get('timing', ''), cond)
+        start_label, timing = record_start_timing(rec, args)
+        key = (source, record_kind(rec), start_label, timing, cond)
         rows[key].append(dict(
-            graph_id=r.get('graph_id'), target_index=r.get('target_index'),
+            graph_id=rec.get('graph_id'), target_index=rec.get('target_index'),
             n0=n0, n1=n1, n2=n2, n0v=n0v, n1v=n1v, n2v=n2v,
             empty=empty, max_edge=max_edge,
         ))
 
     out = []
-    for (start, timing, cond), rr in sorted(rows.items(), key=lambda kv: str(kv[0])):
+    for (source, kind, start, timing, cond), rr in sorted(rows.items(), key=lambda kv: str(kv[0])):
         n0 = sum(x['n0'] for x in rr)
         n1 = sum(x['n1'] for x in rr)
         n2 = sum(x['n2'] for x in rr)
@@ -163,18 +214,24 @@ def main():
         n2v = sum(x['n2v'] for x in rr)
         edges = [x['max_edge'] for x in rr if x['max_edge'] is not None]
         out.append(dict(
-            start=start, timing=timing, condition=cond,
+            source=source, kind=kind, start=start, timing=timing, condition=cond,
             n_graphs=len({x['graph_id'] for x in rr}),
             n_targets=len(rr), n_nodes=n0,
             first4_n0=n0, first4_n1=n1, first4_n2=n2,
             first4_corrupt_rate=(n1 / n0 if n0 else None),
             first4_recovery_rate=(n2 / n1 if n1 else None),
+            first4_n1_scope='post_round_1',
+            first4_n2_scope='any_later_round',
             value_n0=n0v, value_n1=n1v, value_n2=n2v,
             value_corrupt_rate=(n1v / n0v if n0v else None),
             value_recovery_rate=(n2v / n1v if n1v else None),
+            value_n1_scope='post_round_1',
+            value_n2_scope='any_later_round',
             empty_at_first_round=sum(x['empty'] for x in rr),
             max_propagation_edges=(max(edges) if edges else None),
-            skipped=skipped,
+            max_propagation_edges_scope='post_round_1',
+            skipped_total=skipped,
+            duplicate_cleans=duplicate_cleans,
         ))
     os.makedirs(os.path.dirname(os.path.abspath(a.out_csv)), exist_ok=True)
     with open(a.out_csv, 'w', newline='') as f:
