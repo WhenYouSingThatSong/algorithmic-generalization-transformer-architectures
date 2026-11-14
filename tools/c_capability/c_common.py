@@ -191,7 +191,7 @@ def parse_parents(info_row: Any) -> list[int]:
     row = as_numpy(info_row)
     parents: list[int] = []
     # columns 1: are alternating parent position / operator id
-    for j in range(1, len(row) - 1, 2):
+    for j in range(1, len(row), 2):
         parent = int(row[j])
         if parent >= 0:
             parents.append(parent)
@@ -241,61 +241,81 @@ def first_true_index(values: Any) -> int | None:
 
 
 def completion_drift(all_correct: Any, completion_round: int | None) -> dict[str, Any]:
-    """Post-completion behavior of one graph-level correctness series.
+    """Graph-level drift after first completion; times are relative to completion.
 
-    completion_round is 1-based; observations after the completion round are
-    all_correct[completion_round:].  "recovered" is None when there was no
-    degradation to recover from.
+    No post-completion observation is not evidence of stability. Recovery and
+    recurrence are measured after the first degradation; stable means the last
+    two POST-completion observations are correct, not permanent stability.
     """
-    all_correct = as_numpy(all_correct).astype(bool)
-    if completion_round is None or completion_round < 1 or completion_round > len(all_correct):
-        return dict(observed=False, post_rounds=0, ever_degraded=False,
-                    first_degradation_rel_round=None, recovered=None,
-                    final_correct=None)
-    post = all_correct[completion_round:]
-    if len(post) == 0:
-        return dict(observed=True, post_rounds=0, ever_degraded=False,
-                    first_degradation_rel_round=None, recovered=None,
-                    final_correct=None)
-    degraded = ~post
-    ever = bool(degraded.any())
-    first_rel = int(np.flatnonzero(degraded)[0]) + 1 if ever else None
-    return dict(
-        observed=True,
-        post_rounds=int(len(post)),
-        ever_degraded=ever,
-        first_degradation_rel_round=first_rel,
-        recovered=(bool(post[-1]) if ever else None),
-        final_correct=bool(post[-1]),
-    )
+    series = as_numpy(all_correct).astype(bool)
+    valid = completion_round is not None and 1 <= completion_round <= len(series)
+    post = series[completion_round:] if valid else np.asarray([], dtype=bool)
+    result = dict(observed=bool(valid), post_observed=bool(len(post)),
+                  post_rounds=len(post), ever_degraded=False,
+                  first_degradation_rel_round=None, ever_recovered=None,
+                  first_recovery_rel_round=None, recovery_then_error=None,
+                  degradation_episodes=0, last_correct_run_rel_round=None,
+                  stable_recovered=None, recovered=None, final_correct=None)
+    if not len(post):
+        return result
+    result['final_correct'] = bool(post[-1])
+    starts = np.flatnonzero(~post & np.r_[True, post[:-1]])
+    result['degradation_episodes'] = int(len(starts))
+    if post[-1]:
+        last = len(post) - 1
+        while last > 0 and post[last - 1]:
+            last -= 1
+        result['last_correct_run_rel_round'] = last + 1
+    if len(starts):
+        first = int(starts[0])
+        recovery = next((i for i in range(first + 1, len(post)) if post[i]), None)
+        result.update(ever_degraded=True, first_degradation_rel_round=first + 1,
+                      ever_recovered=recovery is not None,
+                      first_recovery_rel_round=None if recovery is None else recovery + 1,
+                      recovery_then_error=bool(recovery is not None and (~post[recovery + 1:]).any()),
+                      stable_recovered=bool(len(post) >= 2 and post[-2:].all()),
+                      # Compatibility alias: explicitly final-after-degradation, not ever.
+                      recovered=bool(post[-1]))
+    return result
 
 
 def other_field_drift(value_all: Any, first4_all: Any,
-                      value_completion_round: int | None) -> dict[str, Any]:
-    """After VALUE completion, whether first-four fields alone degrade."""
-    value_all = as_numpy(value_all).astype(bool)
-    first4_all = as_numpy(first4_all).astype(bool)
-    if value_completion_round is None or value_completion_round < 1:
-        return dict(observed=False, post_rounds=0, ever_other_only_degraded=False,
-                    first_other_only_rel_round=None, final_value_correct=None,
-                    final_first4_correct=None)
-    post_value = value_all[value_completion_round:]
-    post_first4 = first4_all[value_completion_round:]
-    if len(post_value) == 0:
-        return dict(observed=True, post_rounds=0, ever_other_only_degraded=False,
-                    first_other_only_rel_round=None, final_value_correct=None,
-                    final_first4_correct=None)
-    other_only = post_value & ~post_first4
-    ever = bool(other_only.any())
-    first_rel = int(np.flatnonzero(other_only)[0]) + 1 if ever else None
-    return dict(
-        observed=True,
-        post_rounds=int(len(post_value)),
-        ever_other_only_degraded=ever,
-        first_other_only_rel_round=first_rel,
-        final_value_correct=bool(post_value[-1]),
-        final_first4_correct=bool(post_first4[-1]),
-    )
+                      value_completion_round: int | None,
+                      other_fields_correct: Any = None) -> dict[str, Any]:
+    """Separate existing auxiliary errors from newly wrong previously correct fields.
+
+    With per-node first-three-field correctness [round,node,3], a drift event
+    requires an actual correct->wrong transition in a field while VALUE is
+    globally correct. Without it, use first4 graph transitions conservatively.
+    """
+    values = as_numpy(value_all).astype(bool)
+    first4 = as_numpy(first4_all).astype(bool)
+    valid = value_completion_round is not None and 1 <= value_completion_round <= len(values)
+    start = value_completion_round if valid else len(values)
+    post_value, post_first4 = values[start:], first4[start:]
+    result = dict(observed=bool(valid), post_rounds=len(post_value),
+                  other_error_at_value_completion=None,
+                  ever_other_only_error=False, first_other_only_error_rel_round=None,
+                  ever_other_only_degraded=False, first_other_only_rel_round=None,
+                  final_value_correct=None, final_first4_correct=None)
+    if valid:
+        result['other_error_at_value_completion'] = not bool(first4[start - 1])
+    if not len(post_value):
+        return result
+    errors = post_value & ~post_first4
+    if other_fields_correct is None:
+        transitions = first4[:-1] & ~first4[1:]
+    else:
+        fields = as_numpy(other_fields_correct).astype(bool)
+        transitions = (fields[:-1] & ~fields[1:]).reshape(len(values) - 1, -1).any(axis=1)
+    drift = post_value & transitions[start - 1:]
+    result.update(ever_other_only_error=bool(errors.any()),
+                  first_other_only_error_rel_round=first_true_index(errors),
+                  ever_other_only_degraded=bool(drift.any()),
+                  first_other_only_rel_round=first_true_index(drift),
+                  final_value_correct=bool(post_value[-1]),
+                  final_first4_correct=bool(post_first4[-1]))
+    return result
 
 
 def weight_path(name: str) -> Path:

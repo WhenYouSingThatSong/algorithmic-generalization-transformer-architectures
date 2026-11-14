@@ -429,3 +429,8 @@ docs/records/2026-11-14/b-main-report.md
    覆盖，需增加运行时间。
 5. H=16 主、H=8 报告、long32 64 轮是否按本单执行；sustained 主实验总
    horizon 20（4+16）是否正确。
+
+
+## 2026-11-14 19:13 实现状态补充（GPT）
+
+§7中 D1/D2/D3 专用汇总已由本次修复补入：`b_new_truth_summary.py`，`b_main_summary.py` 自动分流，D2无需clean；unrelated新增原目标/共享后代分解，fixed selection保留early-only图。旧“仍缺”描述为历史状态，模型端小验证仍待B agent。当前256图全部共同完成的manifest可复用，详见 `ai-collab/handoff/2026-11-14-1913-bc-review-fixes.md`。

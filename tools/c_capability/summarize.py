@@ -96,6 +96,28 @@ def load_all(run_root: Path):
     return runs
 
 
+
+def add_node_counts(acc, values, first4):
+    """One graph per call: macro and micro must use the same eligible nodes."""
+    n = int(values.size)
+    vc, fc = int(values.sum()), int(first4.sum())
+    for key, value in (('vc', vc), ('vn', n), ('f4c', fc), ('f4n', n)):
+        acc[key] = acc.get(key, 0) + value
+    if n:
+        acc['vg'] = acc.get('vg', 0.0) + vc / n
+        acc['fg'] = acc.get('fg', 0.0) + fc / n
+        acc['support'] = acc.get('support', 0) + 1
+    else:
+        acc['zero_support'] = acc.get('zero_support', 0) + 1
+
+
+def macro_fields(acc):
+    support = acc.get('support', 0)
+    return dict(value_node_acc_graph_equal=c_common.fmt_float(ratio(acc.get('vg', 0), support)),
+                first4_node_acc_graph_equal=c_common.fmt_float(ratio(acc.get('fg', 0), support)),
+                n_graphs_with_nodes=support, n_graphs_without_nodes=acc.get('zero_support', 0))
+
+
 def summarize(run_root: Path, horizons: tuple[int, ...]):
     runs = load_all(run_root)
 
@@ -112,6 +134,7 @@ def summarize(run_root: Path, horizons: tuple[int, ...]):
     completion_t4: dict[tuple[str, str], list[int]] = defaultdict(list)
     n_graphs: dict[tuple[str, str], int] = defaultdict(int)
     drift_rows: list[dict[str, Any]] = []
+    relative_acc = defaultdict(lambda: dict(n=0, correct=0, retained=0, wrong_nodes=0, total_nodes=0))
     examples: dict[str, list[dict[str, Any]]] = defaultdict(list)
 
     for weight, run in runs.items():
@@ -135,10 +158,7 @@ def summarize(run_root: Path, horizons: tuple[int, ...]):
 
             for round_idx in range(rounds):
                 acc = round_acc[key][round_idx]
-                acc["vc"] += int(value_correct[round_idx].sum())
-                acc["vn"] += n_nodes
-                acc["f4c"] += int(first4_correct[round_idx].sum())
-                acc["f4n"] += n_nodes
+                add_node_counts(acc, value_correct[round_idx], first4_correct[round_idx])
                 acc["gv"] += int(graph_value_all[round_idx])
                 acc["gf"] += int(graph_first4_all[round_idx])
                 acc["n"] += 1
@@ -155,22 +175,36 @@ def summarize(run_root: Path, horizons: tuple[int, ...]):
                 idx = H - 1
                 for node_type, mask in masks.items():
                     cell = type_acc[(weight, stratum, H, node_type)]
-                    cell["vc"] += int(value_correct[idx][mask].sum())
-                    cell["vn"] += int(mask.sum())
-                    cell["f4c"] += int(first4_correct[idx][mask].sum())
-                    cell["f4n"] += int(mask.sum())
-                for depth in np.unique(depths):
-                    bucket = depth_bucket(int(depth))
+                    add_node_counts(cell, value_correct[idx][mask], first4_correct[idx][mask])
+                # Visit each bucket once PER GRAPH, including empty buckets.
+                buckets = np.asarray([depth_bucket(int(d)) for d in depths])
+                for bucket in ('0', '1-3', '4-6', '7-9', '10-12', '13+'):
                     cell = depth_acc[(weight, stratum, H, bucket)]
-                    mask = depths == depth
-                    cell["vc"] += int(value_correct[idx][mask].sum())
-                    cell["vn"] += int(mask.sum())
-                    cell["f4c"] += int(first4_correct[idx][mask].sum())
-                    cell["f4n"] += int(mask.sum())
+                    mask = buckets == bucket
+                    add_node_counts(cell, value_correct[idx][mask], first4_correct[idx][mask])
 
             value_drift = c_common.completion_drift(graph_value_all, tV)
             first4_drift = c_common.completion_drift(graph_first4_all, t4)
-            other = c_common.other_field_drift(graph_value_all, graph_first4_all, tV)
+            other_fields = np.stack([
+                arrays['pred_' + f] == arrays['true_' + f][None, :]
+                for f in ('syntax', 'variable', 'operation')], axis=-1)
+            other = c_common.other_field_drift(graph_value_all, graph_first4_all, tV,
+                                               other_fields_correct=other_fields)
+            for metric, completion, series, nodes_correct in (
+                    ('value', tV, graph_value_all, value_correct),
+                    ('first4', t4, graph_first4_all, first4_correct)):
+                if completion is None:
+                    continue
+                retained = True
+                for absolute in range(completion, rounds):
+                    lag = absolute - completion + 1
+                    cell = relative_acc[(weight, stratum, metric, lag)]
+                    retained = retained and bool(series[absolute])
+                    cell['n'] += 1
+                    cell['correct'] += int(series[absolute])
+                    cell['retained'] += int(retained)
+                    cell['wrong_nodes'] += int((~nodes_correct[absolute]).sum())
+                    cell['total_nodes'] += n_nodes
             drift = dict(
                 weight=weight, stratum=stratum, graph_id=record["graph_id"],
                 tV=tV, t4=t4,
@@ -189,6 +223,13 @@ def summarize(run_root: Path, horizons: tuple[int, ...]):
                 other_only_final_value_correct=other["final_value_correct"],
                 other_only_final_first4_correct=other["final_first4_correct"],
             )
+            for prefix, result in (('value', value_drift), ('first4', first4_drift)):
+                for field in ('post_observed', 'ever_recovered', 'first_recovery_rel_round',
+                              'recovery_then_error', 'degradation_episodes',
+                              'last_correct_run_rel_round', 'stable_recovered'):
+                    drift[prefix + '_' + field] = result[field]
+            drift['other_error_at_value_completion'] = other['other_error_at_value_completion']
+            drift['other_only_error_ever'] = other['ever_other_only_error']
             drift_rows.append(drift)
 
             base = dict(weight=weight, stratum=stratum, graph_id=record["graph_id"],
@@ -207,7 +248,7 @@ def summarize(run_root: Path, horizons: tuple[int, ...]):
                 examples["other_field_drift"].append({**base, **other})
             if value_drift["ever_degraded"] and value_drift["recovered"]:
                 examples["value_recovered"].append({**base, **value_drift})
-            if tV is not None and not value_drift["ever_degraded"]:
+            if value_drift["post_observed"] and not value_drift["ever_degraded"]:
                 examples["stable_after_tV"].append({**base, **value_drift})
 
     # ---- curves ----
@@ -221,6 +262,7 @@ def summarize(run_root: Path, horizons: tuple[int, ...]):
                 value_node_acc=c_common.fmt_float(ratio(acc["vc"], acc["vn"])),
                 first4_node_correct=acc["f4c"], first4_node_total=acc["f4n"],
                 first4_node_acc=c_common.fmt_float(ratio(acc["f4c"], acc["f4n"])),
+                **macro_fields(acc),
                 graph_value_all=acc["gv"], graph_first4_all=acc["gf"],
                 n_graphs=acc["n"],
                 graph_value_all_rate=c_common.fmt_float(ratio(acc["gv"], acc["n"])),
@@ -242,6 +284,7 @@ def summarize(run_root: Path, horizons: tuple[int, ...]):
                 value_node_acc=c_common.fmt_float(ratio(acc["vc"], acc["vn"])),
                 first4_node_correct=acc["f4c"], first4_node_total=acc["f4n"],
                 first4_node_acc=c_common.fmt_float(ratio(acc["f4c"], acc["f4n"])),
+                **macro_fields(acc),
                 graph_value_all=acc["gv"], graph_first4_all=acc["gf"],
                 n_graphs=acc["n"],
                 graph_value_all_rate=c_common.fmt_float(ratio(acc["gv"], acc["n"])),
@@ -257,6 +300,7 @@ def summarize(run_root: Path, horizons: tuple[int, ...]):
             value_node_acc=c_common.fmt_float(ratio(acc["vc"], acc["vn"])),
             first4_node_correct=acc["f4c"], first4_node_total=acc["f4n"],
             first4_node_acc=c_common.fmt_float(ratio(acc["f4c"], acc["f4n"])),
+                **macro_fields(acc),
         ))
     depth_rows = []
     for (weight, stratum, H, bucket), acc in sorted(depth_acc.items()):
@@ -266,6 +310,7 @@ def summarize(run_root: Path, horizons: tuple[int, ...]):
             value_node_acc=c_common.fmt_float(ratio(acc["vc"], acc["vn"])),
             first4_node_correct=acc["f4c"], first4_node_total=acc["f4n"],
             first4_node_acc=c_common.fmt_float(ratio(acc["f4c"], acc["f4n"])),
+                **macro_fields(acc),
         ))
 
     # ---- completion ----
@@ -297,8 +342,18 @@ def summarize(run_root: Path, horizons: tuple[int, ...]):
         value_deg = [r for r in tV_rows if r["value_ever_degraded"]]
         first4_deg = [r for r in t4_rows if r["first4_ever_degraded"]]
         other_only = [r for r in tV_rows if r["other_only_ever"]]
+        coverage_fields = {}
+        for prefix, completed in (('value', tV_rows), ('first4', t4_rows)):
+            observed = [r for r in completed if r[prefix + '_post_observed']]
+            coverage_fields['n_' + prefix + '_post_observed'] = len(observed)
+            coverage_fields['n_' + prefix + '_no_post_observation'] = len(completed) - len(observed)
+            for field in ('ever_recovered', 'recovery_then_error', 'stable_recovered'):
+                coverage_fields['n_' + prefix + '_' + field] = sum(bool(r[prefix + '_' + field]) for r in observed)
+        coverage_fields['n_other_error_at_value_completion'] = sum(bool(r['other_error_at_value_completion']) for r in tV_rows)
+        coverage_fields['n_other_only_error_ever'] = sum(bool(r['other_only_error_ever']) for r in tV_rows)
         drift_agg.append(dict(
             weight=weight, stratum=stratum, n_graphs=n_graphs[(weight, stratum)],
+            **coverage_fields,
             n_value_completed=len(tV_rows),
             n_value_ever_degraded=len(value_deg),
             n_value_recovered=sum(1 for r in value_deg if r["value_recovered"]),
@@ -324,8 +379,18 @@ def summarize(run_root: Path, horizons: tuple[int, ...]):
                 1 for r in other_only if r["other_only_final_value_correct"]),
         ))
 
+    relative_rows = []
+    for (weight, stratum, metric, lag), cell in sorted(relative_acc.items()):
+        completed = (completion_tV if metric == 'value' else completion_t4)[(weight, stratum)]
+        relative_rows.append(dict(weight=weight, stratum=stratum, metric=metric,
+                                  relative_round=lag, n_completed=len(completed),
+                                  n_observable=cell['n'], n_current_correct=cell['correct'],
+                                  n_never_degraded=cell['retained'],
+                                  current_correct_rate=cell['correct'] / cell['n'],
+                                  retention_rate=cell['retained'] / cell['n'],
+                                  wrong_nodes=cell['wrong_nodes'], total_nodes=cell['total_nodes']))
     return dict(
-        runs=runs, round_acc=round_acc, n_graphs=n_graphs,
+        relative_rows=relative_rows, runs=runs, round_acc=round_acc, n_graphs=n_graphs,
         curve_rows=curve_rows, cap_rows=cap_rows,
         type_rows=type_rows, depth_rows=depth_rows,
         completion_rows=completion_rows, drift_agg=drift_agg,
@@ -340,7 +405,7 @@ def write_report(path: Path, result: dict, horizons: tuple[int, ...]) -> None:
         "> Generated by `tools/c_capability/summarize.py`.  This is an exploratory report;",
         "> 64 rounds is a fixed observation cap, not a final evaluation protocol.",
         "",
-        "## Capability at selected horizons",
+        "## Capability at selected horizons (graph-equal)",
         "",
         "| weight | stratum | H | VALUE node | first-4 node | graph VALUE all | graph first-4 all | n |",
         "|---|---|---:|---:|---:|---:|---:|---:|",
@@ -350,7 +415,7 @@ def write_report(path: Path, result: dict, horizons: tuple[int, ...]) -> None:
             continue
         lines.append(
             f"| {row['weight']} | {row['stratum']} | {row['H']} | "
-            f"{row.get('value_node_acc', '')} | {row.get('first4_node_acc', '')} | "
+            f"{row.get('value_node_acc_graph_equal', '')} | {row.get('first4_node_acc_graph_equal', '')} | "
             f"{row.get('graph_value_all_rate', '')} | {row.get('graph_first4_all_rate', '')} | "
             f"{row.get('n_graphs', '')} |")
     lines += ["", "## Completion", "",
@@ -361,7 +426,7 @@ def write_report(path: Path, result: dict, horizons: tuple[int, ...]) -> None:
             f"| {row['weight']} | {row['stratum']} | {row['n_graphs']} | "
             f"{row['value_completed']} | {row['tV_median']} | "
             f"{row['first4_completed']} | {row['t4_median']} |")
-    lines += ["", "## Post-completion drift", "",
+    lines += ["", "## Post-completion drift (recovered below = final correct after degradation)", "",
               "| weight | stratum | VALUE completed | ever degraded | recovered | final correct | first-4 ever degraded | other-only ever |",
               "|---|---|---:|---:|---:|---:|---:|---:|"]
     for row in result["drift_agg"]:
@@ -375,7 +440,10 @@ def write_report(path: Path, result: dict, horizons: tuple[int, ...]) -> None:
               "- `capability_by_H.csv`: H=2/4/8/16/32/64 slices.",
               "- `by_node_type.csv` / `by_depth.csv`: decomposition.",
               "- `completion.csv`: tV/t4 completion counts and times.",
-              "- `drift.csv` / `drift_by_graph.csv`: post-completion behavior.",
+              "- `drift.csv` / `drift_by_graph.csv`: ever/final/stable recovery and recurrence; no post-observation is separate.",
+              "- `post_completion_curves.csv`: completion-relative curves with the observable denominator at every lag.",
+              "- CSV *_acc are node-weighted; *_acc_graph_equal are graph-equal. internal means non-leaf (includes sinks).",
+              "- other_only_error denotes error presence; other_only_ever denotes a correct-to-wrong transition in a first-three field.",
               "- `examples.json`: representative graph IDs.",
               ""]
     path.write_text("\n".join(lines), encoding="utf-8")
@@ -400,21 +468,25 @@ def main() -> int:
     write_csv(out_dir / "curves.csv", result["curve_rows"], [
         "weight", "stratum", "round", "value_node_correct", "value_node_total",
         "value_node_acc", "first4_node_correct", "first4_node_total",
-        "first4_node_acc", "graph_value_all", "graph_first4_all", "n_graphs",
+        "first4_node_acc", "value_node_acc_graph_equal", "first4_node_acc_graph_equal",
+        "n_graphs_with_nodes", "n_graphs_without_nodes", "graph_value_all", "graph_first4_all", "n_graphs",
         "graph_value_all_rate", "graph_first4_all_rate"])
     write_csv(out_dir / "capability_by_H.csv", result["cap_rows"], [
         "weight", "stratum", "H", "value_node_correct", "value_node_total",
         "value_node_acc", "first4_node_correct", "first4_node_total",
-        "first4_node_acc", "graph_value_all", "graph_first4_all", "n_graphs",
+        "first4_node_acc", "value_node_acc_graph_equal", "first4_node_acc_graph_equal",
+        "n_graphs_with_nodes", "n_graphs_without_nodes", "graph_value_all", "graph_first4_all", "n_graphs",
         "graph_value_all_rate", "graph_first4_all_rate"])
     write_csv(out_dir / "by_node_type.csv", result["type_rows"], [
         "weight", "stratum", "H", "node_type", "value_node_correct",
         "value_node_total", "value_node_acc", "first4_node_correct",
-        "first4_node_total", "first4_node_acc"])
+        "first4_node_total", "first4_node_acc", "value_node_acc_graph_equal",
+        "first4_node_acc_graph_equal", "n_graphs_with_nodes", "n_graphs_without_nodes"])
     write_csv(out_dir / "by_depth.csv", result["depth_rows"], [
         "weight", "stratum", "H", "depth_bucket", "value_node_correct",
         "value_node_total", "value_node_acc", "first4_node_correct",
-        "first4_node_total", "first4_node_acc"])
+        "first4_node_total", "first4_node_acc", "value_node_acc_graph_equal",
+        "first4_node_acc_graph_equal", "n_graphs_with_nodes", "n_graphs_without_nodes"])
 
     completion_fields = ["weight", "stratum", "n_graphs", "value_completed",
                          "value_completed_rate", "tV_mean", "tV_median",
@@ -424,23 +496,14 @@ def main() -> int:
         completion_fields += [f"value_completed_by_H{H}", f"first4_completed_by_H{H}"]
     write_csv(out_dir / "completion.csv", result["completion_rows"], completion_fields)
 
-    drift_fields = ["weight", "stratum", "n_graphs", "n_value_completed",
-                    "n_value_ever_degraded", "n_value_recovered",
-                    "n_value_final_correct", "value_first_deg_mean",
-                    "value_first_deg_median", "n_first4_completed",
-                    "n_first4_ever_degraded", "n_first4_recovered",
-                    "n_first4_final_correct", "first4_first_deg_mean",
-                    "first4_first_deg_median", "n_other_only_ever",
-                    "n_other_only_final_value_correct"]
-    write_csv(out_dir / "drift.csv", result["drift_agg"], drift_fields)
-    write_csv(out_dir / "drift_by_graph.csv", result["drift_rows"], [
-        "weight", "stratum", "graph_id", "tV", "t4", "value_post_rounds",
-        "value_ever_degraded", "value_first_degradation_rel_round",
-        "value_recovered", "value_final_correct", "first4_post_rounds",
-        "first4_ever_degraded", "first4_first_degradation_rel_round",
-        "first4_recovered", "first4_final_correct", "other_only_ever",
-        "other_only_first_rel_round", "other_only_final_value_correct",
-        "other_only_final_first4_correct"])
+    # All rows have the same schema; retain every explicit recovery/coverage field.
+    write_csv(out_dir / "drift.csv", result["drift_agg"],
+              list(result['drift_agg'][0]) if result['drift_agg'] else [])
+    write_csv(out_dir / "drift_by_graph.csv", result["drift_rows"],
+              list(result['drift_rows'][0]) if result['drift_rows'] else [])
+    write_csv(out_dir / "post_completion_curves.csv", result['relative_rows'],
+              list(result['relative_rows'][0]) if result['relative_rows'] else
+              ['weight', 'stratum', 'metric', 'relative_round', 'n_observable'])
 
     examples = {key: values[:3] for key, values in result["examples"].items()}
     c_common.write_json(out_dir / "examples.json", examples)
@@ -450,7 +513,7 @@ def main() -> int:
         weights=sorted(result["runs"]),
         files=["curves.csv", "capability_by_H.csv", "by_node_type.csv",
                "by_depth.csv", "completion.csv", "drift.csv",
-               "drift_by_graph.csv", "examples.json"],
+               "drift_by_graph.csv", "post_completion_curves.csv", "examples.json"],
     ))
     write_report(out_dir / "report.md", result, args.horizons)
     print(f"wrote summary to {out_dir}")

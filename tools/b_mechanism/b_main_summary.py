@@ -22,6 +22,7 @@ from collections import defaultdict, deque
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import b_mechanism_horizon_summary as H  # noqa: E402
 import b_mechanism_summary as S  # noqa: E402
+import b_new_truth_summary as D  # noqa: E402
 
 HORIZONS = (8, 16, 64)
 METRICS = ('value', 'first4')
@@ -116,6 +117,19 @@ def roles_for(rec):
         'downstream_d2plus': {p for p, d in dist.items() if d >= 2} - set(direct),
     }
     roles['all_affected'] = set().union(*roles.values())
+    if rec.get('condition') == 'unrelated':
+        target = rec.get('target') or {}
+        if target.get('for_u') is None:
+            raise ValueError('unrelated target lacks for_u: cannot identify protected branch')
+        protected = int(target['for_u'])
+        protected_dist = H.descendants(children, protected)
+        roles['protected_target'] = {protected}
+        roles['protected_d1'] = {p for p, d in protected_dist.items() if d == 1}
+        roles['protected_d2plus'] = {p for p, d in protected_dist.items() if d >= 2}
+        roles['protected_all'] = {protected} | set(protected_dist)
+        injected_reachable = set(dist) | {center}
+        roles['protected_shared_descendants'] = roles['protected_all'] & injected_reachable
+        roles['protected_exclusive'] = roles['protected_all'] - injected_reachable
     return roles
 
 
@@ -126,7 +140,7 @@ def build_cache(rec, clean, roles, max_rounds):
     if n < 1:
         return None
     cache = {}
-    for role in ROLES:
+    for role in roles:
         for metric in METRICS:
             entries = []
             for pos in sorted(roles[role]):
@@ -215,12 +229,20 @@ def main():
     coverage = defaultdict(lambda: dict(n_targets=0, n_graphs=set(),
                                         n_skipped_no_clean=0, n_skipped_short=0))
     direct_rows = []
+    condition_inventory = []
     drift_rows = []
     pair_keys = defaultdict(lambda: dict(early=set(), complete=set()))
 
     for path in a.inputs:
         with open(path) as f:
             data = json.load(f)
+        for item in data.get('records', []):
+            condition = item.get('condition')
+            route = ('clean' if condition == 'clean' else 'new_truth' if condition in D.CONDITIONS
+                     else 'main' if condition_label(item) is not None else 'unsupported')
+            condition_inventory.append(dict(source=S.source_identity(path, data),
+                                            graph_id=item.get('graph_id'), condition=condition,
+                                            route=route))
         for model, source, args, rec, clean, cond in pair_file(path, data):
             start, timing = run_label(rec)
             key = (model, source, start, timing, cond)
@@ -320,6 +342,12 @@ def main():
             w.writeheader()
             w.writerows(rows)
 
+    write_csv('condition_inventory.csv', condition_inventory)
+    unsupported = [r for r in condition_inventory if r['route'] == 'unsupported']
+    if unsupported:
+        raise ValueError(f'{len(unsupported)} unsupported records; see condition_inventory.csv')
+    d123_records = D.summarize_files(a.inputs, a.out_dir, horizons, a.stable_len)
+
     main_rows = []
     for (model, source, start, timing, cond, role, metric, Hn), gstats in sorted(h_stats.items()):
         n_targets = len(h_targets[(model, source, start, timing, cond, role, metric, Hn)])
@@ -395,7 +423,7 @@ def main():
     write_csv('paired_intersection.csv', pair_rows)
 
     print(json.dumps(dict(main_rows=len(main_rows), direct=len(direct_rows),
-                          coverage=len(cov_rows), pairs=pair_rows), indent=2))
+                          coverage=len(cov_rows), d123_records=d123_records, pairs=pair_rows), indent=2))
     print('WROTE', a.out_dir)
 
 

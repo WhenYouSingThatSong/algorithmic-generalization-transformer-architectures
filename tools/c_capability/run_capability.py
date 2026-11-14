@@ -28,7 +28,8 @@ if str(B_DIR) not in sys.path:
     sys.path.insert(0, str(B_DIR))
 from trajectory_io import add_runtime_arguments, configure_runtime  # noqa: E402
 
-configure_runtime()
+if __name__ == "__main__":
+    configure_runtime()
 
 import numpy as np  # noqa: E402
 import torch  # noqa: E402
@@ -80,8 +81,6 @@ def parse_args() -> argparse.Namespace:
                         help="torch.compile the recurrent model (eval speed only)")
     parser.add_argument("--limit-graphs", type=int, default=None,
                         help="write at most N graphs per stratum (smoke/tests only)")
-    parser.add_argument("--overwrite-ok", action="store_true",
-                        help="allow writing into an output dir with an existing index.jsonl")
     return parser.parse_args()
 
 
@@ -208,8 +207,8 @@ def main() -> int:
             out_root.mkdir(parents=True, exist_ok=True)
             run_meta_path = out_root / "run_meta.json"
             index_path = out_root / "index.jsonl"
-            if index_path.exists() and not args.overwrite_ok:
-                raise FileExistsError(f"{index_path} exists; use a new --out-dir or --overwrite-ok")
+            if index_path.exists():
+                raise FileExistsError(f"{index_path} exists; use a new --out-dir (this runner does not resume)")
             index_append, index_close = c_common.jsonl_writer(index_path)
             c_common.write_json(run_meta_path, dict(
                 status="running", weight=weight_name, weight_meta=weight_meta,
@@ -250,8 +249,8 @@ def main() -> int:
                 k = len(node["positions"])
                 histories.append(np.empty((args.rounds, k, 4), dtype=np.int16))
 
-            hidden = litmodel.model.token_embedder(data)
             with torch.no_grad():
+                hidden = litmodel.model.token_embedder(data)
                 for round_idx in range(args.rounds):
                     hidden, factor_preds = litmodel.model(hidden, True)
                     decodes = litmodel.generate_factor_decodes(factor_preds, temperature=0.0)

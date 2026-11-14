@@ -235,16 +235,20 @@ def early_common_flag(chain, start, timing):
 
 
 def validate_manifest_graphs(manifest):
-    """Enforce the R3 invariant: every accepted T fits its per-graph budget."""
+    """Complete starts must fit the budget; explicit early-only graphs have no T."""
     for g in manifest.get('graphs', []):
         try:
-            T = int(g['T'])
             n_loops = int(g['n_loops'])
+            if n_loops < 1:
+                raise ValueError('nonpositive budget')
+            if g.get('T') is None and g.get('common_complete') is False:
+                continue
+            T = int(g['T'])
         except (KeyError, TypeError, ValueError):
             raise SystemExit(f'manifest graph {g.get("graph_id")} has invalid T/n_loops')
-        if not (0 <= T < n_loops):
+        if g.get('common_complete') is False or not (0 <= T < n_loops):
             raise SystemExit(
-                f'manifest graph {g.get("graph_id")} violates 0 <= T < n_loops: '
+                f'manifest graph {g.get("graph_id")} violates complete-state budget: '
                 f'T={T}, n_loops={n_loops}')
     return True
 

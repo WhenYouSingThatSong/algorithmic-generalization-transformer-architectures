@@ -54,7 +54,8 @@ def subset_data(data: dict, indices: list[int]) -> tuple[torch.Tensor, torch.Ten
 
 def make_meta(stratum: str, spec: dict, cfg: dict, selection_seed: int,
               selected: list[int], eligible: int, source: Path | None,
-              generated: bool, generation_seed: int | None) -> dict:
+              generated: bool, generation_seed: int | None,
+              generation_config: dict | None = None) -> dict:
     meta = dict(
         stratum=stratum,
         n_nodes=cfg["n_nodes"],
@@ -67,7 +68,7 @@ def make_meta(stratum: str, spec: dict, cfg: dict, selection_seed: int,
         source_sha256=c_common.sha256_file(source) if source is not None and source.exists() else None,
         generated=bool(generated),
         generation_seed=generation_seed,
-        generation_config=(cfg if generated else None),
+        generation_config=(dict(generation_config) if generated and generation_config is not None else None),
         tokenizer_n_vars=c_common.N_VARS,
         vocab_sizes=[7, c_common.N_VARS + 1, 2, 25, 2, 2],
         spec=spec,
@@ -125,7 +126,8 @@ def build_generated(stratum: str, cfg: dict, count: int, selection_seed: int,
         {"tokenized_dataset": tokens, "dataset_info": info}, selected)
     spec = c_common.spec_from_tensors(tokens, info, pad_idx)
     meta = make_meta(stratum, spec, cfg, selection_seed, selected, eligible,
-                     source=None, generated=True, generation_seed=generation_seed)
+                     source=None, generated=True, generation_seed=generation_seed,
+                     generation_config=dict(dag_config))
     return dict(shortfall=False, tokens=tokens, info=info, spec=spec, meta=meta,
                 source="generated", eligible=eligible, selected=selected)
 

@@ -39,6 +39,10 @@ class SelectionTests(unittest.TestCase):
 
 
 class NodeMetadataTests(unittest.TestCase):
+    def test_third_parent_is_not_dropped(self):
+        self.assertEqual(c_common.parse_parents(np.array([2, 3, 1, 7, 1, 9])),
+                         [3, 7, 9])
+
     def test_parents_and_sink(self):
         info = np.full((6, 6), -1, dtype=np.int64)
         # numeric nodes are positions 2..5; 0 and 1 are value-token parents
@@ -68,6 +72,23 @@ class NodeMetadataTests(unittest.TestCase):
 
 
 class CompletionTests(unittest.TestCase):
+    def test_preexisting_field_error_is_not_drift(self):
+        fields = np.ones((3, 1, 3), dtype=bool)
+        fields[:, 0, 1] = False
+        result = c_common.other_field_drift([True] * 3, [False] * 3, 1, fields)
+        self.assertTrue(result['other_error_at_value_completion'])
+        self.assertTrue(result['ever_other_only_error'])
+        self.assertFalse(result['ever_other_only_degraded'])
+
+    def test_recovery_then_error_and_final_only_completion(self):
+        result = c_common.completion_drift([True, False, True, False, True], 1)
+        self.assertTrue(result['ever_recovered'])
+        self.assertTrue(result['recovery_then_error'])
+        self.assertTrue(result['recovered'])
+        self.assertFalse(result['stable_recovered'])
+        self.assertEqual(result['degradation_episodes'], 2)
+        self.assertFalse(c_common.completion_drift([False, True], 2)['post_observed'])
+
     def test_first_true(self):
         self.assertEqual(c_common.first_true_index([False, False, True, False]), 3)
         self.assertIsNone(c_common.first_true_index([False, False]))

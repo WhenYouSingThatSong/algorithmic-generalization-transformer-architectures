@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Select common clean-complete graphs and freeze mechanism targets.
+"""Select fixed candidates and freeze independently eligible mechanism targets.
 
-Runs A' and B clean free rollouts on the same data, requires a **first common
-round T** where all numeric VALUE labels are correct for both, and records
-per-model early eligibility.  It also freezes:
+Runs A' and B clean free rollouts on the same data. Fixed mode retains early
+eligibility independently of the first common complete round T; late/control
+runners only use graphs with T. Legacy topup remains complete-only.  It also freezes:
 
 - primary chains: single-parent u, q1 not directly reading r, q2 present and not
   directly reading r;
@@ -197,18 +197,19 @@ def main():
                 meta = C.build_meta(data[bi], label[bi], info[bi], tok, teacher)
                 T = find_common_T([o[bi] for o in out_a], [o[bi] for o in out_b],
                                   label[bi], meta['numeric'], max_rounds=graph_loops)
-                if T is None:
-                    candidates.append(dict(
-                        graph_id=gid, common_complete=False, status='not_common_complete',
-                        T=None, n_loops=graph_loops, n_chains=0,
-                        n_sinks=0, n_leaves=0, n_unrelated=0,
-                        early_own_before=0, early_own_after=0,
-                        early_teacher_before=0, early_teacher_after=0,
-                        same_all=False, same_numeric=False))
+                common_complete = T is not None
+                # Fixed candidate mode retains early-eligible graphs even when
+                # no common complete state exists. Legacy topup still selects
+                # complete graphs until its requested count is reached.
+                if T is None and a.selection_mode == 'topup':
+                    candidates.append(dict(graph_id=gid, common_complete=False,
+                                           status='not_common_complete', T=None,
+                                           n_loops=graph_loops, n_chains=0))
                     continue
-                if not (0 <= T < graph_loops):
-                    raise AssertionError(f'graph {gid}: T={T} outside [0,{graph_loops})')
-                counts['common_complete'] += 1
+                if common_complete:
+                    if not (0 <= T < graph_loops):
+                        raise AssertionError(f'graph {gid}: T={T} outside [0,{graph_loops})')
+                    counts['common_complete'] += 1
                 chains = C.pick_chain(meta, data[bi], label[bi], tok, k=a.k)
                 # Early eligibility is recorded per model, then stored as a
                 # common flag.  Both runners must use the common flag.
@@ -257,9 +258,10 @@ def main():
                         a_teacher_before != b_teacher_before)
                     counts['early_teacher_after_disagree'] += int(
                         a_teacher_after != b_teacher_after)
-                late = build_late_targets(meta, label[bi], tok, k=a.k)
+                late = (build_late_targets(meta, label[bi], tok, k=a.k)
+                        if common_complete else dict(sinks=[], leaves=[]))
                 unrelated = []
-                for ch in chains:
+                for ch in (chains if common_complete else []):
                     forbidden = {ch['pos'], ch['r_pos']}
                     for node in (ch['pos'], ch.get('q1'), ch.get('q2')):
                         if node is None:
@@ -273,16 +275,18 @@ def main():
                     cand.sort(key=lambda x: (abs(int(meta['depth'][x]) - ch['d']), x))
                     unrelated.append(dict(pos=cand[0], d=int(meta['depth'][cand[0]]),
                                           true=C.tok_str(tok, int(label[bi, cand[0], C.V])),
-                                          for_u=ch['pos']))
-                same_all = bool((out_a[T][bi] == out_b[T][bi]).all().item())
-                same_numeric = bool((out_a[T][bi][..., C.V][meta['numeric']] ==
+                                          for_u=ch['pos'], for_chain_event_id=ch['event_id'],
+                                          for_chain=dict(ch)))
+                same_all = common_complete and bool((out_a[T][bi] == out_b[T][bi]).all().item())
+                same_numeric = common_complete and bool((out_a[T][bi][..., C.V][meta['numeric']] ==
                                      out_b[T][bi][..., C.V][meta['numeric']]).all().item())
                 if same_all:
                     counts['same_all'] += 1
                 if same_numeric:
                     counts['same_numeric'] += 1
                 candidates.append(dict(
-                    graph_id=gid, common_complete=True, status='selected',
+                    graph_id=gid, common_complete=common_complete,
+                    status='selected' if common_complete else 'early_only',
                     T=T, n_loops=graph_loops, n_chains=len(chains),
                     n_sinks=len(late['sinks']), n_leaves=len(late['leaves']),
                     n_unrelated=len(unrelated),
@@ -300,7 +304,8 @@ def main():
                     early_teacher_after_b=sum(int(ch.get('early_teacher_after_b', False)) for ch in chains),
                     same_all=same_all, same_numeric=same_numeric))
                 graphs.append(dict(
-                    graph_id=gid, T=T, T_kind='first_common_complete',
+                    graph_id=gid, T=T, common_complete=common_complete,
+                    T_kind='first_common_complete' if common_complete else 'no_common_complete',
                     n_loops=graph_loops,
                     n_numeric=int(meta['numeric'].sum().item()),
                     chains=chains, late=late, unrelated=unrelated,
@@ -321,6 +326,8 @@ def main():
         1 for c in candidates if not c['common_complete'])
     counts['candidates_with_chains'] = sum(
         1 for c in candidates if c['n_chains'] > 0)
+    for key in ('early_own_before', 'early_own_after', 'early_teacher_before', 'early_teacher_after'):
+        counts[key + '_graphs'] = sum(int(c.get(key, 0) > 0) for c in candidates)
     if a.selection_mode == 'fixed':
         if len(candidates) != a.candidate_count:
             raise SystemExit(
@@ -343,6 +350,7 @@ def main():
         scan_graphs=a.scan_graphs, batch_size=a.batch_size, k=a.k,
         extra_rounds=a.extra_rounds,
         selection_mode=a.selection_mode,
+        eligibility_protocol="independent_early_complete_v2",
         candidate_start=a.candidate_start,
         candidate_count=a.candidate_count,
         candidate_end=candidate_end_out,

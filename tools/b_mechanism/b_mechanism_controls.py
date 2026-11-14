@@ -89,12 +89,13 @@ def main():
         manifest = json.load(f)
     C.verify_manifest_identity(manifest, a.ds_file, C.checkpoint_path(a.base, a.group, a.run, a.ckpt))
     C.validate_manifest_graphs(manifest)
-    graphs = {g['graph_id']: g for g in manifest['graphs']}
+    graphs = {g['graph_id']: g for g in manifest['graphs'] if g.get('T') is not None}
     ctx = C.load_eval_context(a.config, a.group, a.run, a.base, a.ckpt,
                               a.ds_file, batch_size=a.batch_size, num_workers=0)
     lit, tok, teacher, mc = ctx['lit'], ctx['tok'], ctx['teacher'], ctx['mc']
     clean_done = set()
     counts = dict(processed=0, emitted=0, clean_emitted=0, skipped=0)
+    counts['skipped_no_common_complete'] = len(manifest['graphs']) - len(graphs)
     records = C.RecordWriter(a, counts, len(graphs))
 
     with torch.no_grad():

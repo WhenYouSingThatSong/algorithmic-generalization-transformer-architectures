@@ -43,14 +43,23 @@ def main():
         out['candidates'] = [
             c for c in parent['candidates']
             if a.start_graph <= int(c['graph_id']) < a.end_graph]
-    counts = dict(parent.get('counts', {}))
+    out['parent_counts'] = parent.get('counts', {})
+    cs = out.get('candidates', graphs)
+    counts = dict(scanned=len(cs), candidates_total=len(cs),
+                  common_complete=sum(bool(g.get('common_complete', g.get('T') is not None)) for g in cs),
+                  not_common_complete=sum(not bool(g.get('common_complete', g.get('T') is not None)) for g in cs),
+                  candidates_with_chains=sum(bool(g.get('chains')) for g in graphs))
+    for key, getter in (
+            ('chains', lambda g: g.get('chains', [])),
+            ('sinks', lambda g: (g.get('late') or {}).get('sinks', [])),
+            ('leaves', lambda g: (g.get('late') or {}).get('leaves', [])),
+            ('unrelated', lambda g: g.get('unrelated', []))):
+        counts[key] = sum(len(getter(g)) for g in graphs)
+        counts['subset_' + key] = counts[key]
     counts['subset_graphs'] = len(graphs)
-    counts['subset_chains'] = sum(len(g.get('chains', [])) for g in graphs)
-    counts['subset_sinks'] = sum(len((g.get('late') or {}).get('sinks', []))
-                                 for g in graphs)
-    counts['subset_leaves'] = sum(len((g.get('late') or {}).get('leaves', []))
-                                  for g in graphs)
-    counts['subset_unrelated'] = sum(len(g.get('unrelated', [])) for g in graphs)
+    for key in ('early_own_before', 'early_own_after', 'early_teacher_before', 'early_teacher_after'):
+        counts[key] = sum(bool(ch.get(key)) for g in graphs for ch in g.get('chains', []))
+        counts[key + '_graphs'] = sum(any(ch.get(key) for ch in g.get('chains', [])) for g in graphs)
     out['counts'] = counts
 
     os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True)
