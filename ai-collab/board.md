@@ -1,6 +1,6 @@
 # 工作看板
 
-> 最近更新：2026-11-14 17:46 CST · [gpt]
+> 最近更新：2026-11-14 18:12 CST · [claude]
 > 活看板：任务可以移动；状态变化在 `log.md` 记一行。条目格式 `[YYYY-MM-DD HH:MM][author]`。
 
 ## 当前决策
@@ -40,17 +40,21 @@ B 试跑作为预算/现象参考保留，不能并入独立主实验冒充新�
 
 - [2026-11-14 17:51][claude] **本 agent 领取 B 线**：负责 B1 已有轨迹 CPU 整理与报告口径补正，以及 B2 主实验执行单和选样材料；不领取 C 线。B1 不用 GPU；B2 等用户定稿后再串行运行（4 线程、空闲 GPU、单进程），不与 C agent 同时编辑共享文件。代码基线 `reproduction@a4ce43a`，产物 `tmp/analysis/b-main-20261114/`。
 
-**B1：现在执行，已有数据整理，无需再跑六项试跑。**
+**B1：已完成（2026-11-14 18:12），已有数据整理，无需再跑六项试跑。**
 
-- [ ] 保留当前pilot原始数据/manifest/报告；在报告追加补充或更正，不删除历史。明确27张有链图、42目标、单seed的范围。
-- [ ] 各H并列 observed / damaged / stable；直接点单列“实际注错数/首轮修回数”，避免把0输出损伤当成0恢复率；宏平均与原始计数分列。
-- [ ] 从完整轨迹统计“回正后再错”，包括最后又回正的情况；第一次回正与持续正确起点分开。不要用target类别是否出现recover_then_error替代逐节点全轨迹统计。
-- [ ] 整理r→u→q1→q2实际输入/输出、错值代入是否匹配、恢复沿依赖的顺序；核实A′ R-only中3/42例外的节点类型。交几条代表轨迹，不预先认定成因。
-- [ ] 更新 `docs/records/2026-11-14/b-horizon-pilot.md`，保留这是选H和观察现象的参考实验。原始数据已足够完成以上CPU分析。
+- [x] 保留当前pilot原始数据/manifest/报告；在报告追加补充或更正，不删除历史。明确27张有链图、42目标、单seed的范围。
+- [x] 各H并列 observed / damaged / stable；直接点单列“实际注错数/首轮修回数”，避免把0输出损伤当成0恢复率；宏平均与原始计数分列。
+- [x] 从完整轨迹统计“回正后再错”，包括最后又回正的情况；第一次回正与持续正确起点分开。不要用target类别是否出现recover_then_error替代逐节点全轨迹统计。
+- [x] 整理r→u→q1→q2实际输入/输出、错值代入是否匹配、恢复沿依赖的顺序；核实A′ R-only中3/42例外的节点类型。交几条代表轨迹，不预先认定成因。
+- [x] 更新 `docs/records/2026-11-14/b-horizon-pilot.md`，保留这是选H和观察现象的参考实验。原始数据已足够完成以上CPU分析。
 
-**B2：现在准备主实验执行单和选样材料，不直接铺开正式注错运行。**
+**B1 交付（18:12）**：报告 §9；脚本 `tools/b_mechanism/b_pilot_analysis.py`；产物 `tmp/analysis/b-main-20261114/b1/`。要点：B direct 首轮修回 42/42（各条件），A′ U 0/42、R 3/42；B complete_R 20/360、complete_U 7/323 个节点回正→再错但最终稳定，after_u/sustained 为 0；A′ 无恢复；3 个 A′ R-only 例外均为 depth0、parents=[]，但另有 18 个 depth0 r 未修回，结构成因未定。
 
-- [ ] 新建 `docs/records/2026-11-14/b-main-execution-plan.md`，把下面建议整理成确切条件清单/命令/预期记录数/数据身份及合格数；缺少实现的项目明确列出。必要的固定候选图clean选样可做，不按干预结果换图。
+**B2：执行单已交（2026-11-14 18:12），主实验仍未启动，待用户定稿。**
+
+- [x] 新建 `docs/records/2026-11-14/b-main-execution-plan.md`，把下面建议整理成确切条件清单/命令/预期记录数/数据身份及合格数；缺少实现的项目明确列出。必要的固定候选图clean选样可做，不按干预结果换图。
+
+**B2 交付（18:12）**：执行单按用户固定选择整理：graph_id 32–287 共 256 张、不补样、每图最多 2 条主链；teacher 固定 32–95；long32 固定 32–63；主 H=16、报告 H=8；sustained 4+16（总 horizon 20）；五模块为 M0 选样、M1 early、M2 complete、M3 sustained、M4 D1/D2/D3+审计。已核实 B pilot 用 0–31、B smoke 用 0–3，本批与 pilot 不重叠；不称独立 heldout（与 C 共享同一 heldout 池）。尚缺固定区间 selection、主汇总、D1/D2/D3 新旧真值汇总、审计分图/轮次聚合；M0 selection 也未启动。
 - **推荐规模（待定稿）：**A′ s42 e86 / B-M6 s42 e92；固定256张N32候选图，与本次pilot图隔离；每图最多2条主链。候选数固定，分别报告before/after/complete合格数，不不断补样凑满256合格图。
 - **推荐预算（待定稿）：**主H16并截取H8；按graph_id预先固定小部分样本做64轮。持续错父仍先保持4轮，释放后H16；不要拿N32的H直接保证N128。
 
@@ -67,6 +71,10 @@ B 试跑作为预算/现象参考保留，不能并入独立主实验冒充新�
 - 跨seed/N128作为后续验证；局部自洽仍暂缓，switch暂不纳入本轮必跑。C不必等B2定稿。
 
 ## 需要 review（GPT）
+
+- [ ] **B1 补充 + B2 执行单（待 GPT review）**
+  - [2026-11-14 18:12][claude] B1 报告 `docs/records/2026-11-14/b-horizon-pilot.md` §9；B2 执行单 `docs/records/2026-11-14/b-main-execution-plan.md`。
+  - 重点：256 张 32–287 是否足以作为固定候选；teacher 32–95、long32 32–63 的截取是否合理；每图 k=2 同时限制 sink/leaf 是否可接受；sustained 总 horizon 20（4+16）与长观察 68 的口径；M4 审计 256 batch/100 trials 的覆盖；§7 尚缺实现是否还有遗漏。只审文档/计划，不启动 B 主实验。
 
 - [x] **B 长轮数 runner 性能修改（GPT 已实现；执行 agent 已验证并完成六项重跑）**
   - [2026-11-14 17:03][gpt] 用户授权后基于最新 `968129a` 完成 CPU 批量记录/按图真值缓存、默认4线程、逐条 JSONL/进度、串行启动器；19项 CPU 检查和语法检查通过。服务器模型等价、加速倍数、训练资源影响未测；不启动任务。交接见 [性能优化交付](handoff/2026-11-14-1703-b-runner-performance-fix.md)。
@@ -90,6 +98,7 @@ B 试跑作为预算/现象参考保留，不能并入独立主实验冒充新�
 
 ## 进行中
 
+- [2026-11-14 18:12][claude] **B1 完成，B2 执行单已交；B 主实验未启动、selection 未跑。** B1 报告 §9 已补 observed/damaged/stable、direct 首轮修回、逐节点回正→再错、r→u→q1→q2 时序和 A′ R-only 例外；B2 固定 256 张 graph_id 32–287、teacher 32–95、long32 32–63、主 H16/H8、sustained 4+16，命令与记录数见 `docs/records/2026-11-14/b-main-execution-plan.md`。等待用户定稿及 §7 缺失实现（固定区间 selection、主汇总、D1/D2/D3 汇总、审计聚合）。
 - [2026-11-14 17:31][claude] B 长轮数小试跑 v2 已完成：GPT 性能版 `24e586c`，六项串行约 7–8 分钟，GPU4/5，训练 GPU0 未动；产物 `tmp/analysis/b-horizon-pilot-v2-20261114/`，汇总同目录 `summary/`，报告 `docs/records/2026-11-14/b-horizon-pilot.md`。结果待用户/GPT 讨论正式 H。
 - [2026-11-14 10:12][claude] 旧 C0 seed2026 150 epoch，GPU0；输出 `tmp/runs/oldC0-newseed-150ep/`；14:42 检查 epoch 61/150，约 5.9 it/s，val 1.540。不要停止/重启。
 - [2026-11-14 13:44][claude] B review 包：commit `ab80594`；GPT review 完成，R1/R2/R3/R7/R8 及后续 F1/F2 已修，当前不启动实验。
@@ -97,7 +106,7 @@ B 试跑作为预算/现象参考保留，不能并入独立主实验冒充新�
 ## 待办 / 下一步
 
 - [2026-11-14 17:40][gpt] 已读取 c386f8d 的完整B试跑报告与新增汇总改动。下一阶段建议见 [试跑后规划](../docs/records/2026-11-14/next-stage-after-horizon-pilot.md)。B主H16及N32正式扩展仍为建议，未写入共识/未启动；C首批已获批准，B试跑结束后可按原设计单开始串行实现和运行，无需等待B正式扩样或s2026。
-- [ ] [执行agent，已有B轨迹补充，无需GPU重跑] 按上述规划区分observed/damaged/stable分母；直接注入点另报首轮修回数；检查完整轨迹的“回正→再错”，不要以target分类不存在recover_then_error证明全程无反复；给r/u/q1/q2轨迹及A′ R-only 3/42例外的节点类型。保留原结果，更正解释口径。
+- [x] [执行agent，B1 已完成] 按上述规划区分observed/damaged/stable分母；直接注入点另报首轮修回数；检查完整轨迹的“回正→再错”，不要以target分类不存在recover_then_error证明全程无反复；给r/u/q1/q2轨迹及A′ R-only 3/42例外的节点类型。保留原结果，更正解释口径。结果见 `b-horizon-pilot.md` §9。
 
 - [x] **[执行 agent] B 长轮数窗口探索（六项 v2 已完成，结果见报告）**
   - 结果：B-M6 在 after_u/complete/sustained 的受损节点到 H=8 稳定恢复约 99.5–100%，H=16 全部 100%；A′ 所有条件 never。报告建议主 H=16，另设 64 轮长期稳定性检查；最终 H 由用户决定。详见 `docs/records/2026-11-14/b-horizon-pilot.md`。
@@ -128,11 +137,12 @@ B 试跑作为预算/现象参考保留，不能并入独立主实验冒充新�
 
 ## 阻塞 / 等待
 
-- B 全量实验：四项评估原则已确认，长轮数试跑已完成；等待主H和正式运行预算/范围讨论。C已批准的能力探索无需等待此项。
+- B 全量实验：B1 已完成、B2 执行单已交；等待用户对固定 256 张（32–287）、teacher64/long32、H16/H8 和审计预算定稿，并补 §7 缺失实现。M0 selection 与正式注错均未启动；C 已批准的能力探索无需等待此项。
 - 局部自洽控制：构造可能不自洽，DEFERRED / NOT RUN。
 
 ## 最近完成
 
+- [2026-11-14 18:12][claude] B1 完成：`b-horizon-pilot.md` §9 + `tools/b_mechanism/b_pilot_analysis.py`；B2 执行单 `b-main-execution-plan.md`。B1 关键：B direct 首轮修回 42/42（各条件），A′ U 0/42、R 3/42；B complete_R 20/360、complete_U 7/323 个节点回正→再错但最终稳定；A′ 无恢复。B 主实验未启动。
 - [2026-11-14 17:31][claude] B 长轮数六项 v2 完成：性能版 `24e586c`，串行 7–8 分钟；B 到 H=8 稳定恢复约 99.5–100%、H=16 全部 100%，A′ 全部 never；报告 `docs/records/2026-11-14/b-horizon-pilot.md`，产物 `tmp/analysis/b-horizon-pilot-v2-20261114/`。
 - [2026-11-14 17:12][claude] 验证 GPT 性能版：19 项 CPU 测试通过；early A′ 126 条×8 轮、late B 37 条（含 leaf_constant 新真值）、controls B 84 条×4 轮与旧版逐值 0 diff；early 单项 126 条×64 轮约 75 s，训练保持约 6 it/s。
 - [2026-11-14 15:05][claude] 从 `origin/reproduction` 更新到 `23553a2`，核对 `c91b6fe`：8 项 CPU 回归通过；GPU 小样本确认 switch 实际注入第二错值一次、D1/D2/D3 常数新真值生效；未启动全量实验。
@@ -154,6 +164,7 @@ B 试跑作为预算/现象参考保留，不能并入独立主实验冒充新�
 
 ## 共享发现 / 证据
 
+- [2026-11-14 18:12][claude] **B1 pilot 补充（单 seed/42 targets，非最终）**：每个条件 42 个 direct 实际注错；B 首轮全部修回，A′ U 0/42、R 3/42。逐节点全轨迹：B complete_R 20/360、complete_U 7/323 个节点出现回正→再错，最终稳定；after_u/sustained 为 0；A′ 无恢复。A′ R-only 3 个例外均 depth0、parents=[]，但另有 18 个 depth0 r 未修回，结构成因未定。详见报告 §9。
 - [2026-11-14 17:31][claude] **B 长轮数 v2（pilot，非最终）**：B-M6 在 after_u U/R、complete U/R、sustained_R 的 all_affected 稳定恢复 H=8 约 0.995–1.000、H=16 全部 1.000，受损节点 first recovery 均在 2–8 轮；A′ 全部 never（direct U 42/42、R 39/42 等持续错）。clean 分支 64 轮无漂移。建议主 H=16 + 64 轮长期稳定性检查；最终 H 待用户/GPT。
 - [2026-11-14 16:46][claude] **仅 early 的优化前预览，不是最终结果**：B-M6 after_u U/R 的受损节点在 H=8 时稳定恢复已约 100%；A′ 同期全部 never（direct U 42/42、R 39/42 持续错）。late/sustained 未跑，H 未定；性能修复后六项重跑再正式分析。
 - [2026-11-14 14:41][claude] Post-review fix smoke（4 图）：selection 9 chains / 16 sinks / 16 leaves；batch 4 与 8 的 `(T, n_loops)` 一致；early 36 条、late 66 条、controls 9+9 clean；summary 7 行，A′/B 来源分离、输入顺序不变、`duplicate_cleans=0`。**仅 pipeline smoke**。
