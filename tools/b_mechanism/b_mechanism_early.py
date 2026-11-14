@@ -57,9 +57,17 @@ def main():
     p.add_argument('--timing', choices=['before_u', 'after_u'], required=True)
     p.add_argument('--value_mode', choices=['a_plus_1', 'four_to_five'], default='a_plus_1')
     p.add_argument('--r_delta', type=int, default=3)
+    p.add_argument('--conditions', default='clean,u,r,ur',
+                   help='comma-separated subset of clean,u,r,ur')
     p.add_argument('--horizon', type=int, default=6)
     p.add_argument('--out', required=True)
     a = p.parse_args()
+    conditions = [c.strip() for c in a.conditions.split(',') if c.strip()]
+    bad = [c for c in conditions if c not in ('clean', 'u', 'r', 'ur')]
+    if bad:
+        raise SystemExit(f'unknown early conditions: {bad}')
+    if not conditions:
+        raise SystemExit('no early conditions selected')
 
     with open(a.manifest) as f:
         manifest = json.load(f)
@@ -120,7 +128,7 @@ def main():
                             continue
                     positions = sorted(set(meta['nodes']) | {ch['r_pos'], ch['pos'],
                                         ch.get('q1'), ch.get('q2')} - {None})
-                    for cond in ('clean', 'u', 'r', 'ur'):
+                    for cond in conditions:
                         start, inj = make_state(base, tok, ch, cond,
                                                 r_delta=a.r_delta,
                                                 value_mode=a.value_mode)

@@ -72,6 +72,28 @@ Local self-consistent-error is deferred: see
 `b-local-self-consistent-deferred.md`.  It is not run and
 must not be cited.
 
+## Long-horizon pilot summary (2026-11-14)
+
+- Added `b_mechanism_horizon_summary.py`, which consumes early/late/controls
+  trajectory JSONs and implements the four user-approved evaluation choices:
+  full-window per-round curves, stable recovery = last two in-window rounds
+  correct (`L=2`), graph-equal primary with node-weighted secondary, and
+  VALUE / first-four correctness reported in parallel.
+- H = 2/4/8/16/32/64 is truncated from the same trajectory; no re-runs.
+- Direct injected positions are derived from the actual intervention: early
+  2x2 conditions for `b_mechanism_early.py`, `injection.pos` for late/control
+  records.  Damage is assessed on model outputs; the injected input state
+  itself is not counted as damage, so a slot rewritten in the first forward is
+  reported as no direct damage, not as a trivial one-round recovery.
+- For `sustained_r`, H starts after release (`hold_rounds` offset).  The forced
+  hold window is reported separately in `sustained_hold.csv` and excluded from
+  the H table.
+- Zero-denominator graphs are reported explicitly and never assigned 0%/100%.
+- Added `tests/test_horizon_summary.py` (7 CPU checks: H truncation, L=2
+  stability, only-last, graph/node weighting, clean-referenced damage,
+  injected-position roles, post-release offset).  Together with the existing
+  8 review regressions, 15/15 pass.  This is pipeline validation only.
+
 ## Smoke
 
 See `b-mechanism-smoke.md`.  Smoke is pipeline-only; no scientific claim.

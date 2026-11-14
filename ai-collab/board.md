@@ -15,6 +15,13 @@
 
 ## 需要 review（GPT）
 
+- [ ] **B 长轮数 runner 性能修改（待 GPT 实现）**
+  - **先读**：`handoff/2026-11-14-1645-b-horizon-performance.md` 和 `log.md` 的 16:30 条目
+  - **问题**：`node_state`/`factor_strings` 对每个 position、每个 factor 从 GPU 逐标量 `int()`，每轮约 580 次同步；126 条 × 64 轮约 470 万次/任务。runner 未限制线程，六进程各约 224 线程，与 seed2026 共用 84 核 cgroup，训练 epoch 从 4:23 拖到 34:07；输出只在最后一次性写盘。
+  - **要求**：每轮/每图只做一次 `.cpu()`，CPU 侧构造记录并缓存 label 真值；加 `--num_threads`（默认 4–8）；进度日志 + JSONL 增量落盘；启动端最多 2 项并行。保持 manifest/资格/条件/轮数/JSON schema 不变。
+  - **代码位置**：`tools/b_mechanism/b_mechanism_common.py:354,366`；`b_mechanism_early.py:26,145`；`b_mechanism_late.py:39,140,154`；`b_mechanism_controls.py:31,35`。
+  - **验收**：CPU 等价测试、4 图 horizon 2/8 GPU 等价、现有 15 项 CPU 检查通过、4 图 horizon 64 至少 5× 加速且不拖慢训练。完成后在 board/log 记提交；**不要直接启动六项重跑**，由执行 agent 做。
+
 - [x] **B 机制代码 v2 + 指标实现**（GPT 已完成；发现 P1 缺陷，见“Review 结论”）
   - 审查对象：`origin/reproduction` 的 B 包提交 `ab80594`；review 修复提交 `66440b8` + `c91b6fe`（分支最新提交另含本协作目录）
   - **先读日志**：`log.md` 的 2026-11-14 11:35 / 13:44 条目，了解为什么改、改了哪些
@@ -27,12 +34,13 @@
 
 ## 进行中
 
+- [2026-11-14 16:40][claude] B 长轮数试跑暂停，等待 GPT 性能修改后整体重跑。A′/B early after_u 已在 16:34 完成并各写盘 126 条/260 MB；late/sustained 四项已停止且无输出。用户要求六项都重跑，early 旧文件保留作对照，优化版输出另放 `_v2`/新目录。GPU0 训练未动。
 - [2026-11-14 10:12][claude] 旧 C0 seed2026 150 epoch，GPU0；输出 `tmp/runs/oldC0-newseed-150ep/`；14:42 检查 epoch 61/150，约 5.9 it/s，val 1.540。不要停止/重启。
 - [2026-11-14 13:44][claude] B review 包：commit `ab80594`；GPT review 完成，R1/R2/R3/R7/R8 及后续 F1/F2 已修，当前不启动实验。
 
 ## 待办 / 下一步
 
-- [ ] **[执行 agent，优先] B 长轮数窗口探索（用户已批准，待领取/启动）**
+- [ ] **[执行 agent，优先] B 长轮数窗口探索（暂停；early 已完成，六项待性能修复后整体重跑）**
   - **目的：**观察恢复需要多久，以及长循环会否再次出错；根据曲线决定正式 H，不按哪个 H 最能拉开 A′/B 差距来选。
   - **模型/样本：**A′ s42 e86 与 B-M6 s42 e92，沿用已核对的权重和 clean 回灌；固定约 32 张 heldout N32 图，每图 1–2 个共同合格目标，优先 own-state。记录图 ID、目标、深度、扫描/合格数量及权重身份；本批为预算探索样本，后续独立验证另留样本。合格不足如实报告，不按注错结果重选。
   - **起点：**沿用已有 before/after/complete 的资格和预算规则；本项只跑 after_u 与 complete。64 轮仅用于干预后的观察，不用它扩大起点搜索或选样预算。早晚直接比较标明对应共同事件交集及实际 n。
