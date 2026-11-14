@@ -59,15 +59,16 @@ stable 分母与 damage 分母相同。
 - A′ 六个条件在 H=8/H=16 的 stable 都是 0。
 - 12 个模型的 clean 分支在 H=16 全节点正确率均为 100%。
 
-### 直接位置首轮改回（own early H=16）
+### 直接位置首轮改回（own early after_u，H=16）
 
 | 模型 | U-only | R-only | U+R（两个 direct 位置） |
 |---|---:|---:|---:|
 | A′ | 0/365 改回，365 错 | 33/365 改回，332 错 | 33 改回，697 错（共 730） |
 | B | 365/365 改回，0 错 | 365/365 改回，0 错 | 365 改回，365 首轮仍错（共 730） |
 
-B 的 U+R 首轮有一个 direct 位置仍错，但到 H=16 全部稳定恢复；单看
-U-only 或 R-only 时两个 direct 条件都在首轮改回。
+本表只对应 `after_u`；`before_u_U` 是 EMPTY→数值口径，见下一节，不能
+与本表的 actual 替换混读。B 的 U+R 首轮有一个 direct 位置仍错，但到
+H=16 全部稳定恢复；单看 U-only 或 R-only 时两个 direct 条件都在首轮改回。
 
 ### `before_u_U` 的边界
 
@@ -106,14 +107,16 @@ graph-equal 稳定率为 0.9784–0.9979、H=16 为 100%。但 teacher64 只有
 
 按同图、同链（`event_id`）、同 timing、同 condition 筛取 own 对应记录
 （`b_subset_records.py`），每个 timing 得到 92 链 × 4 条件 = 368 条，
-与 teacher64 完全对齐。A′/B 各 before_u/after_u 四个组合均为 368/368
-记录，且 `rounds` 与 teacher 记录逐值相同；H=8/H=16 的 damage/stable
-也逐值相同（`summary/teacher_pair_own/teacher_vs_own_subset.csv`）。
+与 teacher64 对齐。可复跑入口 `b_compare_teacher_own.py` 输出
+`summary/teacher_pair_own/teacher_vs_own_compare.csv`：12 行
+（2 模型 × 2 timing × 3 条件），每行 teacher 92、own 365、
+intersection 92、`missing_in_own=0`、`rounds_identical=92`、
+`rounds_different=0`、duplicate/conflict 均为 0。A′/B ×
+before_u/after_u 四个组合的 368 条记录 `rounds` 与 teacher 逐值相同；
+H=8/H=16 的 damage/stable 也相同（`teacher_vs_own_subset.csv`）。
 
-因此在这批 92 条链上，own rollout 与 teacher 记录的 `rounds` 逐值相同；
-H=8/H=16 的 damage/stable 也相同。这里只记录该事实，是否把 teacher
-视为独立起点对照由 GPT/用户判断；原 teacher 与 own 全集结果保留作
-可复现记录。
+这里只记录该事实，是否把 teacher 视为独立起点对照由 GPT/用户判断；
+原 teacher 与 own 全集结果保留作可复现记录。
 
 ## 5. long32 H=64
 
@@ -137,21 +140,25 @@ H 的最终选择待 GPT/用户判断，这里保留 H=8/16/64 的原始截取�
 
 现有 summary 的 `stable` 是 H 窗口最后两轮正确；这不能证明第 16 轮正确
 的节点在 17–64 轮从未再错。`b_long_window.py` 直接从 long32 逐轮记录
-统计（all_affected，VALUE）：
+统计（all_affected，VALUE）。该脚本已按 review 修正：使用公共
+`target_key`（late 多目标按完整 target 身份配对）、重复 clean 一致性
+校验、`checkpoint_round` 真正参数化、`statistics.median`，并在 per-node
+CSV 保留 source/event/target/pos；修后重算的 M1 early 计数与本表一致，
+旧汇总保留为 `long_window_pre_fix.csv`。
 
-| B 条件 | 第16轮正确 | 17–64 再错 | 曾恢复→再错 | 末尾两轮稳定 | 最终连续正确段起点 |
+| B 条件 | 第16轮正确 | 17–64 再错 | 曾恢复→再错（全窗口 / 17–64） | 末尾两轮稳定 | 最终连续正确段起点 |
 |---|---:|---:|---:|---:|---:|
-| after_u R | 404 | 0/404 | 0/354 | 354/354 | 中位数 4，全部 ≤16 |
-| after_u U | 355 | 0/355 | 0/261 | 261/261 | 中位数 3，全部 ≤16 |
-| after_u U+R | 404 | 0/404 | 0/355 | 355/355 | 中位数 4，全部 ≤16 |
-| before_u R | 404 | 0/404 | 0/332 | 332/332 | 中位数 4，全部 ≤16 |
-| before_u U+R | 404 | 0/404 | 0/331 | 331/331 | 中位数 4，全部 ≤16 |
+| after_u R | 404 | 0/404 | 0/354 / 0 | 354/354 | 中位数 4，全部 ≤16 |
+| after_u U | 355 | 0/355 | 0/261 / 0 | 261/261 | 中位数 3，全部 ≤16 |
+| after_u U+R | 404 | 0/404 | 0/355 / 0 | 355/355 | 中位数 4，全部 ≤16 |
+| before_u R | 404 | 0/404 | 0/332 / 0 | 332/332 | 中位数 4，全部 ≤16 |
+| before_u U+R | 404 | 0/404 | 0/331 / 0 | 331/331 | 中位数 4，全部 ≤16 |
 
 B 在该 64 轮窗口内没有“第 16 轮已正确、17–64 又错”的节点；所有曾恢复
-的节点也没有再错。A′ 的 stable 仍为 0；A′ 第 16 轮未正确的节点大多
-没有最终连续正确段。该结果只能表述为“在本观察窗口内保持”，不能外推
-永久稳定；详见 `summary/long32_early/long_window.csv` 与
-`long_window_nodes.csv`。
+的节点也没有再错（全窗口和 17–64 的复错计数都为 0）。A′ 的 stable
+仍为 0；A′ 第 16 轮未正确的节点大多没有最终连续正确段。该结果只能
+表述为“在本观察窗口内保持”，不能外推永久稳定；详见
+`summary/long32_early/long_window.csv` 与 `long_window_nodes.csv`。
 
 ## 6. 数据观察与待判断项（不作机制结论）
 
@@ -188,12 +195,14 @@ B 在该 64 轮窗口内没有“第 16 轮已正确、17–64 又错”的节�
 - `tmp/analysis/b-main-20261114/summary/early_own/`
 - `tmp/analysis/b-main-20261114/summary/teacher64/`
 - `tmp/analysis/b-main-20261114/summary/long32_early/`
-- `tmp/analysis/b-main-20261114/summary/teacher_pair_own/`
+- `tmp/analysis/b-main-20261114/summary/teacher_pair_own/teacher_vs_own_subset.csv`
+- `tmp/analysis/b-main-20261114/summary/teacher_pair_own/teacher_vs_own_compare.csv`
 - `tmp/analysis/b-main-20261114/summary/long32_early/long_window.csv`
 - `tmp/analysis/b-main-20261114/summary/long32_early/long_window_nodes.csv`
 - `tmp/analysis/b-main-20261114/summary/m1_field_errors.csv`
 - 本报告附带 `b-main-m1-key-metrics.csv`（84 行，graph-equal 与
-  node-weighted 关键行）。
+  node-weighted 关键行）、`b-main-m1-long-window.csv`、
+  `b-main-m1-teacher-vs-own.csv`、`b-main-m1-field-errors.csv`。
 
 汇总入口：
 

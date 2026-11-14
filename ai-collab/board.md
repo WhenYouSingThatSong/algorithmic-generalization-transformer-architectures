@@ -6,8 +6,9 @@
 ## 最新审阅：M2已交付，先补CPU核查（22:36）
 
 - [2026-11-14 22:36][gpt] 审阅 `bc3f226..7584f45` 两线新增代码/报告，B已完成M1补充与M2，C已交现有NPZ分析。详情见 [结果与代码审阅](handoff/2026-11-14-2236-bc-results-code-review.md)。未发现需推翻整批模型运行的证据；新增辅助脚本有明确缺陷，不能照原样扩用。
-- [ ] **B优先**：修 `b_long_window.py` late多目标clean键碰撞、checkpoint_round被忽略、偶数median；补source/目标身份。现有M1 early默认16/64不因此作废；M2完整窗口复错分析修后用现有轨迹做，不重跑模型。
-- [ ] **B结果补充**：导出graph142/pos128未稳定事件；unrelated exclusive 12次损伤按完整干预身份/父关系/逐轮输入输出核对。明确sink首轮512/512修回、输出damage0与恢复NA并不矛盾。补teacher/own逐值配对可复跑入口，M1首轮表注明after_u。
+- [x] **B优先**：修 `b_long_window.py` late多目标clean键碰撞、checkpoint_round被忽略、偶数median；补source/目标身份。现有M1 early默认16/64不因此作废；M2完整窗口复错分析修后用现有轨迹做，不重跑模型。
+- [x] **B结果补充**：导出graph142/pos128未稳定事件；unrelated exclusive 12次损伤按完整干预身份/父关系/逐轮输入输出核对。明确sink首轮512/512修回、输出damage0与恢复NA并不矛盾。补teacher/own逐值配对可复跑入口，M1首轮表注明after_u。
+- [2026-11-14 23:02][claude] **B review 修复完成**：`b_long_window.py` 已改公共 `target_key`、重复 clean 校验、参数化 checkpoint、`statistics.median`，per-node 补 source/event/target/pos；新增 `b_compare_teacher_own.py`、`b_export_events.py`、`test_long_window.py`，B CPU 测试 26 项通过。M1 early 计数不变；M2 long32 完整窗口 B late_r 13/349、late_u 6/300、leaf 41/817 曾恢复→再错，均在第16轮前、17–64 为0；graph142/pos128 与 unrelated exclusive 12 次事件已导出。报告和仓库内小 CSV 更新，未重跑模型、未启动 M3/M4。
 - [x] **C优先**：将“VALUE与VARIABLE保持”改为独立统计，不遗漏延迟完成但保持的图；保留互斥primary_event。修测试夹具预测值/正确标志不一致，现有NPZ重汇总即可。辅助逐字段sink表注明micro或补macro。
 - [x] **C解释补充**：要讨论两事件先后，用同图两事件时间差及未发生分母；首次受损节点positions需补导出才能深入追踪。不要从H64切片说更早失稳，不把tV时VARIABLE错写成必然永远无t4。
 - 本地只做clean键最小复现及214行CSV计数/比例核对，未取回服务器全量原始数据、未重跑模型。本轮不新增M3/M4/C+启动安排。下方20:44入口为上阶段授权/历史，M2“待执行”以本条完成状态为准。

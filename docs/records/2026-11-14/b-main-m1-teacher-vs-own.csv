@@ -1,0 +1,13 @@
+model,timing,condition,teacher_start,own_start,teacher_n,own_n,intersection,missing_in_own,missing_in_teacher,duplicate_teacher,duplicate_own,conflict_teacher,conflict_own,rounds_identical,rounds_different
+A_prime,after_u,r,teacher,own,92,365,92,0,273,0,0,0,0,92,0
+A_prime,after_u,u,teacher,own,92,365,92,0,273,0,0,0,0,92,0
+A_prime,after_u,ur,teacher,own,92,365,92,0,273,0,0,0,0,92,0
+A_prime,before_u,r,teacher,own,92,365,92,0,273,0,0,0,0,92,0
+A_prime,before_u,u,teacher,own,92,365,92,0,273,0,0,0,0,92,0
+A_prime,before_u,ur,teacher,own,92,365,92,0,273,0,0,0,0,92,0
+B_M6,after_u,r,teacher,own,92,365,92,0,273,0,0,0,0,92,0
+B_M6,after_u,u,teacher,own,92,365,92,0,273,0,0,0,0,92,0
+B_M6,after_u,ur,teacher,own,92,365,92,0,273,0,0,0,0,92,0
+B_M6,before_u,r,teacher,own,92,365,92,0,273,0,0,0,0,92,0
+B_M6,before_u,u,teacher,own,92,365,92,0,273,0,0,0,0,92,0
+B_M6,before_u,ur,teacher,own,92,365,92,0,273,0,0,0,0,92,0

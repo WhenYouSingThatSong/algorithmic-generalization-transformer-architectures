@@ -86,6 +86,49 @@ long32：A′ R 9/40、U 0/49、leaf 16/48、sink 0/64、unrelated 0/49；
 B 对应为 49/0、49/0、64/0、64/0、49/0。所有条件 `actual` 与条件
 target 数一致，未出现 empty-to-value 混入。
 
+### 4.1 sink 的原始首轮记录
+
+main256 的 sink 条件 target 数为 512，`actual=512`。以 graph 32 /
+target 182 为例：
+
+- A′：round 1 输入 `3`，输出 `3`，真值 `0`，`value_correct=False`。
+- B：round 1 输入 `3`，输出 `0`，真值 `0`，`value_correct=True`；
+  后续轮输出仍为 `0`。
+- 直接位置首轮计数：B 512/512 改回、0 仍错；A′ 0/512 改回、512 仍错。
+- all_affected damage：B 0/512，stable 0/0（NA）；A′ 512/512，
+  stable 0/512。
+
+### 4.2 complete long32 的完整窗口复错（修正后 `b_long_window.py`）
+
+该表现在使用公共 `target_key`、重复 clean 校验、参数化
+`checkpoint_round=16` 和 `statistics.median`；B all_affected / VALUE：
+
+| 条件 | 第16轮正确 | 17–64 再错 | 曾恢复→再错（全窗口 / 17–64） | 末尾两轮稳定 | 最终段起点中位数 |
+|---|---:|---:|---:|---:|---:|
+| late_r | 404 | 0/404 | 13/349 / 0 | 349/349 | 4 |
+| late_u | 355 | 0/355 | 6/300 / 0 | 300/300 | 3 |
+| leaf_value | 886 | 0/886 | 41/817 / 0 | 817/817 | 4 |
+| sink | 64 | 0/64 | 0/0 / 0 | 0/0 (NA) | NA |
+| unrelated | 128 | 0/128 | 0/79 / 0 | 79/79 | 2 |
+
+A′ 的 stable 仍为 0；A′ 的 n_cp 分别为 364/306/838/0/79，
+17–64 再错均为 0，曾恢复→再错分母为 0。B 的 13/349、6/300、41/817
+复错均发生在第 16 轮之前；17–64 的复错计数为 0。这里只记录计数，
+不解释复错原因；逐节点行见 `long_window_nodes.csv`。
+
+### 4.3 两个待核对的原始事件导出
+
+- graph 142 / pos 128：B `late_u`，event `g142:c0`，target_index 0，
+  target_pos 26，injection_pos 26，node_pos 128；parents `[22,64,92]`，
+  children `[]`；第 2 轮首次受损，16 轮内无恢复，最终连续正确段为空。
+  逐轮 clean/injected 输入输出、字段错误和角色见
+  `graph142_pos128_rounds.csv`（32 行，两个 role 各 16 轮）。
+- unrelated exclusive：main256 H=16 的 12 次节点×干预事件，来自
+  4 张图（graph 146/149/275/276）；192 行逐轮记录，含 graph/target/
+  injection_pos/node_pos/parents/children、clean/injected 输入输出、
+  字段错误、首次受损/恢复和最终段。文件：
+  `unrelated_exclusive_events.csv`。
+
 ## 5. 我认为
 
 以下是我的看法，单独列出，不混入上面的计数：
@@ -110,7 +153,14 @@ target 数一致，未出现 empty-to-value 混入。
 - 原始轨迹：`tmp/analysis/b-main-20261114/late/`
 - 汇总：`tmp/analysis/b-main-20261114/summary/complete_main256/`、
   `summary/complete_long32/`
-- 关键计数：`docs/records/2026-11-14/b-main-m2-key-metrics.csv`
+- 完整窗口：`summary/complete_long32/long_window.csv`、
+  `long_window_nodes.csv`（修正后 `b_long_window.py`）
+- 事件导出：`summary/complete_main256/graph142_pos128_rounds.csv`、
+  `summary/complete_main256/unrelated_exclusive_events.csv`
+  （`b_export_events.py`）
+- 关键计数：`docs/records/2026-11-14/b-main-m2-key-metrics.csv`；
+  报告仓库内小表：`b-main-m2-long-window.csv`、
+  `b-main-m2-graph142-pos128.csv`、`b-main-m2-unrelated-exclusive.csv`。
 - 运行命令：`b_mechanism_late.py`，`--conditions
   late_r,late_u,sink,leaf_value,unrelated`，`--delta 3 --u_delta 1
   --value_mode a_plus_1`，main256 H=16 / long32 H=64，4 threads，GPU3
