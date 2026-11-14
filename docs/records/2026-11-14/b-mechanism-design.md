@@ -2,6 +2,8 @@
 
 状态：设计稿，未执行。供外部审查。代码在 `tools/b_mechanism/*.py`。
 
+当前边界：指标、分母、聚合方式与恢复观察窗口尚未定稿；本文相关选项是待讨论方案，不是已确认的实验验收标准。代码修复与小样本流水线检查不等于正式机制实验已经完成。
+
 ## 0. 目标与非目标
 
 要回答三个机制问题：
@@ -31,12 +33,12 @@
 记 teacher 快照：
 - `S[d]`：u 尚未算出，输入中 u 为 EMPTY；
 - `S[d+1]`：u 已算出，输入中 u 为正确值；
-- `S[T]`：整图所有数值节点已正确。
+- 整图完成起点使用各自 clean rollout 的 `outs[T]`；T 是模型输出轮次下标，不与 teacher 快照 S 的下标混用。
 
 own-state 单独记录：
 - `before_u`：u 的 own clean 输出必须为 EMPTY/N/A；r 在改之前必须正确；
 - `after_u`：u 的 own clean 输出必须为正确值；r 在改之前必须正确；
-- `complete`：双方在同一预定轮次 T 的所有数值节点都正确；q 已到期。
+- `complete`：当前实现搜索双方所有数值节点 VALUE **首次共同正确**的轮次 T，并冻结该起点；这不保证四字段全对，也不保证之后持续稳定。稳定窗口是否加入仍待讨论。
 
 主比较使用**共同合格样本**：A′ 和 B 都满足对应条件、同一图同一节点。分别报告每个时点/条件的合格 n。若两边 VARIABLE 等字段不同，记录差异，并用共同 teacher 起点复核差异是否影响结果。
 
@@ -142,9 +144,9 @@ D2 是从原始图/空状态做 clean rollout 解新题，只用于判断“不�
 - 每节点状态：correct / wrong / EMPTY / not_yet / padded；
 - 对 D 格，新真值、旧真值、实际输出。
 
-## 5. 分母与输出指标
+## 5. 分母与输出指标（候选方案，未定稿）
 
-必须固定两类分母：
+以下三类集合及汇总方式是候选方案；当前 summary 只实现首轮受损、后续曾经恢复的统计，不能解释为全窗口传播或持续恢复：
 
 1. 从 clean 分支取“本来应该正确”的节点集合 N0；
 2. 注错后实际被改坏的 N1；
@@ -193,7 +195,7 @@ D2 是从原始图/空状态做 clean rollout 解新题，只用于判断“不�
 ### 6.4 held-state 父值切换（当前实现）
 
 - 从整图完成状态开始，先把 r 固定为第一个错值 `hold_rounds` 轮；
-- `switch_held_r` 在 `1 <= switch_at <= hold_rounds` 时把 r 换成第二个错值一次，然后释放；
+- `switch_held_r` 要求 `switch_at == hold_rounds + 1 <= horizon`，在固定窗口结束后的下一轮把 r 换成第二个错值一次，然后释放；
 - `sustained_r` 是同一时点直接释放的 no-switch 对照；
 - 该操作比较的是“释放”与“释放时追加一次干扰”，**不是“稳定错误状态之间切换”**；
   不能沿用旧自洽切换的解释。本阶段不纳入必跑项。
@@ -259,9 +261,9 @@ B/cyh 训练于 2026-11-07/08；比对当前 `randomly_corrupt_values` 与训练
 - R2：summary 保留 source/run 身份、完整目标键和分组键；A′/B、start/timing、
   不同输入文件不再串行合并；重复 clean 显式检查。
 - R7：controls 记录 `condition`/`start`/`timing`，新增同起点 clean，
-  并限制 `switch_at` 在 `[1, hold_rounds]`。
+  切换约束经后续复核修正为 `switch_at == hold_rounds + 1 <= horizon`，防止被 hold 分支覆盖。
 - R8：D1/D2/D3 记录 `new_truth` 与 `output_nodes_new`/`input_nodes_new`，
-  旧 label 字段标 `truth_ref=old`。
+  旧 label 字段标 `truth_ref=old`；后续复核补齐被修改题面常数的新真值，不能只更新图节点。
 - summary 输出显式标注 `post_round_1` / `any_later_round` 的统计范围；
   指标定义仍未定稿。
 

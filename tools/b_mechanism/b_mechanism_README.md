@@ -100,6 +100,8 @@ python -I tools/b_mechanism/b_mechanism_late.py \
 - `late_r`: time-matched R-only; `late_u`: time-matched U-only/internal.
 - Each target gets a same-start `clean` continuation (except D2 scratch).
 - D1 `leaf_constant` stores `new_truth`.
+- D1/D2/D3 `new_truth` includes the changed input constant as well as graph
+  nodes, so `*_nodes_new` uses the new constant label at `const_pos` too.
 - D2 `leaf_constant_scratch` uses `max(horizon, manifest n_loops)`.
 - D3 `leaf_constant_pinned` forces the new constant every round.
 - Records include VALUE and first-four node states per round.
@@ -113,15 +115,17 @@ Local self-consistent-error is **deferred and not implemented**.  Use:
 python -I tools/b_mechanism/b_mechanism_controls.py ... --mode sustained_r \
   --hold_rounds 4 --horizon 10 --out .../B_sustained.json
 
-# hold r wrong, then switch r to a second wrong value at round 4
+# hold r wrong for 4 rounds, then inject the second wrong value once at round 5
 python -I tools/b_mechanism/b_mechanism_controls.py ... --mode switch_held_r \
-  --hold_rounds 4 --switch_at 4 --horizon 10 --out .../B_switch.json
+  --hold_rounds 4 --switch_at 5 --horizon 10 --out .../B_switch.json
 ```
 
-`switch_held_r` requires `1 <= switch_at <= hold_rounds`; it holds the first
-wrong value through `hold_rounds`, changes to the second wrong value at
-`switch_at`, then releases.  It is **not** a switch between stable error states.
-`sustained_r` is the no-switch control.  Both modes emit a same-start `clean`
+`switch_held_r` requires `switch_at == hold_rounds + 1 <= horizon`; it holds the
+first wrong value for `hold_rounds` forwards, changes to the second wrong value
+for the next forward, then releases. `sustained_r` releases directly after the
+hold window. This compares release with release plus one extra disturbance;
+it is **not** a switch between stable error states and remains optional/deferred
+for mechanism interpretation. Both modes emit a same-start `clean`
 record per target and tag records with `condition`/`start`/`timing` so summary
 can pair them.
 
@@ -183,6 +187,18 @@ Post-review fix smoke (2026-11-14, second pass):
   `duplicate_cleans=0`.
 
 These are pipeline checks, not results.
+
+## CPU regression checks (post-review follow-up)
+
+```bash
+python -I tools/b_mechanism/tests/test_review_regressions.py
+```
+
+Uses only the Python standard library. Selected source functions are compiled
+from their AST with small tensor/model doubles; summary runs as its actual CLI
+on synthetic records. Covers common eligibility, per-graph budgets, source
+pairing, controls integration, switch execution and changed-constant truth.
+These tests do not perform model inference or establish mechanism results.
 
 ## 8. Pre-run checks
 

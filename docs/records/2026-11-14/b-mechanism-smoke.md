@@ -55,3 +55,28 @@ Pipeline-only checks after R1/R3/R2/R7/R8 fixes:
   invariant, `duplicate_cleans=0`.
 
 These are still pipeline checks, not mechanism results.
+
+## GPT follow-up CPU regressions (2026-11-14 14:53 CST)
+
+The previous switch smoke did not assert that the second value was actually
+written. At `66440b8`, its accepted switch rounds were all masked by the hold
+branch. The existence/count of switch records is not evidence of a switch.
+
+After the follow-up fix:
+
+- `python -I tools/b_mechanism/tests/test_review_regressions.py`: 8 tests pass.
+- Common eligibility includes one-model-ineligible cases, missing keys and
+  inconsistent common/per-model flags; out-of-budget T is rejected.
+- Actual summary CLI tests keep A/B, own/teacher and before/after separate,
+  accept controls, reject conflicting clean records, and give identical output
+  under reversed input order.
+- Source-extracted controls hook writes first-wrong N times, second-wrong once
+  at N+1, then releases; all tested accepted schedules execute the switch.
+- D1/D2/D3 new-truth labels agree at changed constant, leaf and descendant;
+  unchanged constants and original labels are preserved.
+- Syntax compilation of all 8 Python files and `git diff --check` pass.
+
+These are standard-library CPU tests. Functions are loaded from source AST with
+tensor/model doubles; no checkpoint, real tensor rollout or GPU smoke was run
+locally. Server follow-up should inspect actual input trajectories and new-truth
+fields on a small model sample before interpreting affected experiment results.

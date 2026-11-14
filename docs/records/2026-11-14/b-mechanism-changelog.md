@@ -2,7 +2,28 @@
 
 Date: 2026-11-14.
 
+## GPT follow-up: switch execution and constant truth
+
+User authorized necessary fixes after reviewing `reproduction@e27cc6b`.
+
+- Fixed the switch range: the previous `[1, hold_rounds]` validation accepted
+  only rounds masked by the hold branch. The implemented schedule is now
+  validated as `switch_at == hold_rounds + 1 <= horizon`: hold N forwards,
+  inject the second value once, then release. The sustained control releases
+  directly after N forwards. This is not a stable-error-state switch experiment.
+- Include changed input constants in `recompute_truth()` as well as graph
+  nodes. D1/D2/D3 `*_nodes_new[const_pos]` now uses the modified problem label.
+  Old-truth fields retain their old-reference meaning.
+- Added eight CPU regression tests for common eligibility, graph budgets,
+  summary pairing, controls, switching and new truth. All pass; no GPU model
+  inference was performed locally. See `b-mechanism-smoke.md` for scope.
+- Clarified first-common-complete T and provisional evaluation definitions in
+  the design. No changes to training or metric formulas.
+
 ## GPT review fixes (post-v2)
+
+Historical first fix pass (`66440b8`); its switch-range claim below is superseded
+by the follow-up above, and constant truth needed the additional correction.
 
 - R1: `early_*` flag schema is unified through `early_flag_key`; selection
   writes common and per-model `_a`/`_b` flags plus `event_id`; runners reject

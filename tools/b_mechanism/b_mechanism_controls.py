@@ -7,8 +7,8 @@ implemented here.
 
 Modes:
   sustained_r   : force r wrong for hold_rounds, then release.
-  switch_held_r : force r wrong for hold_rounds, then at switch_at set r to a
-                  second wrong value once and release.
+  switch_held_r : force r wrong for hold_rounds, then at hold_rounds + 1 set r
+                  to a second wrong value once and release.
 """
 from __future__ import annotations
 
@@ -46,6 +46,23 @@ def round_records(inputs, outputs, tok, positions, label_b, pre_forward_round):
     return rows
 
 
+def validate_control_schedule(mode, hold_rounds, switch_at, horizon):
+    """Validate the implemented hold -> optional one-shot switch -> release.
+
+    A switch inside the hold window is masked by the hold branch; a later
+    switch leaves a free-running gap. Neither is the advertised experiment.
+    """
+    if hold_rounds < 1 or horizon < 1:
+        raise ValueError('hold_rounds and horizon must both be positive')
+    if mode == 'switch_held_r':
+        if switch_at != hold_rounds + 1:
+            raise ValueError(
+                'switch_held_r requires switch_at == hold_rounds + 1: '
+                'hold the first wrong value, switch once, then release')
+        if switch_at > horizon:
+            raise ValueError('horizon must include the requested switch round')
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument('--manifest', required=True)
@@ -60,15 +77,15 @@ def main():
     p.add_argument('--hold_rounds', type=int, default=4,
                    help='rounds with r held at the first wrong value')
     p.add_argument('--switch_at', type=int, default=0,
-                   help='1-based round at which r switches to the second wrong value; 0 disables')
+                   help='switch_held_r requires hold_rounds + 1; unused in sustained_r')
     p.add_argument('--delta', type=int, default=3)
     p.add_argument('--horizon', type=int, default=10)
     p.add_argument('--out', required=True)
     a = p.parse_args()
-    if a.mode == 'switch_held_r' and not (1 <= a.switch_at <= a.hold_rounds):
-        raise SystemExit(
-            'switch_held_r requires 1 <= switch_at <= hold_rounds; '
-            'otherwise the hold branch masks the switch or the switch becomes a second injection')
+    try:
+        validate_control_schedule(a.mode, a.hold_rounds, a.switch_at, a.horizon)
+    except ValueError as exc:
+        p.error(str(exc))
 
     with open(a.manifest) as f:
         manifest = json.load(f)

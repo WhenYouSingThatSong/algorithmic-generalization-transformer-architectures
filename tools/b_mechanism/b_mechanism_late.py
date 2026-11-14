@@ -41,9 +41,13 @@ def token_values(state, tok, positions):
 
 
 def recompute_truth(meta, label_b, tok, teacher, constant_override=None):
-    """Topological replay of node values; constant_override maps c_pos -> value."""
+    """New truth for graph nodes AND changed input constants.
+
+    Constants are excluded from meta['nodes'], but leaf experiments track the
+    changed constant too. Its new label must agree with the new problem.
+    """
     constant_override = constant_override or {}
-    vals = {}
+    vals = dict(constant_override)
     nodes = sorted(meta['nodes'], key=lambda p: (int(meta['depth'][p]), p))
     for p in nodes:
         d = int(meta['depth'][p])
