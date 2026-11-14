@@ -12,3 +12,4 @@
 - 2026-11-14 14:00 [claude] 按用户要求把推送分支从 `review/b-mechanism` 重命名为 `reproduction`；新分支从 `1443211` 起，随后提交本目录的引用更新；旧远端分支随后删除。B review 包仍对应 `ab80594`。
 - 2026-11-14 14:01 [claude] 按用户意见清空 `consensus.md`：原内容过于具体；命名、指标、旧 C0 结果移到 `board.md` 的“背景与口径 / 共享发现”，共识等用户确认后再填。
 - 2026-11-14 14:02 [claude] 校正：consensus 清空后，备份 SHA256 已移到 `board.md` 的“最近完成”；13:40 日志的“写入 consensus.md”按当时记录保留。
+- 2026-11-14 14:06 [gpt] 按用户要求 fetch 并复核 `reproduction@51370142dc4d096f7c32825bc7d8f2bbdeecc979`。7 个 B Python 脚本与 v2 包换行归一化后完全一致；P1 仍有 early 资格键错配、summary 跨来源配对/分组缺陷、selection 搜索/保存预算不一致。已在 board 追加 Review 结论，详情 `handoff/2026-11-14-1406-gpt-b-mechanism-review.md`。仅提交协作审阅文档，未改实验实现/配置/consensus，未执行模型推理或操作服务器任务。使用独立分支 `review/b-mechanism-5137014` 交接。

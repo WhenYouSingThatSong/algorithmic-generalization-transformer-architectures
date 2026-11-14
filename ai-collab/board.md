@@ -72,3 +72,10 @@
 ## Review 结论
 
 - 暂无。
+
+- [2026-11-14 14:06][gpt] 已复核 `reproduction@5137014`，**未通过正式 B 实验验收**。本条取代上方“暂无”，保留此前记录。7 个 B Python 脚本在换行归一化后与 v2 压缩包完全一致，上一轮问题尚未修复。
+  - P1 实现缺陷：early 标记 `early_own_after` 与读取的 `early_own_after_u` 不一致；summary 的 clean 配对键/汇总分组缺运行身份，可能串模型和时点；selection 搜索按 batch 预算、manifest 却保存单图预算。
+  - P2 未完成/口径问题：只统计首轮受损、any-later 被叫恢复、未按图等权；controls 无 clean 且 mode 不被 summary 识别；D1/D2/D3 正确标记仍按旧 label。
+  - 用户最新指标要求：两个按节点核心量——VALUE 准确率、前四属性同时正确率。旧整图三指标可保留为辅助；正式 metric_utils 仍含题面常量且 strict 仍为整图，须区分，不直接混用。
+  - 局部自洽及依赖它的切换仍暂缓。独立持续错父后释放可补齐基线后推进；现有 switch_held_r 不等价于旧自洽切换，不纳入本阶段必跑项。
+  - 证据、修复建议、验收样例见 [Git 复核交接](handoff/2026-11-14-1406-gpt-b-mechanism-review.md)。源码审查与包对照已完成；未独立运行模型 smoke，未修改实验代码或 consensus。
