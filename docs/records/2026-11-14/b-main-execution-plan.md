@@ -1,11 +1,11 @@
 # B 主实验执行单（2026-11-14，待用户定稿）
 
-状态：**准备稿，未启动主实验；未做任何注错运行**。B1（已有 pilot 轨迹的
-CPU 补充）已完成，见 `b-horizon-pilot.md` §9。本单按用户的固定选择整理
-B2：**固定 256 张 N32 候选图（graph_id 32–287，不补样）、每图最多 2 条
-主链、teacher 固定前 64 张候选、主 H=16、固定前 32 张做 64 轮长观察、五
-模块分阶段交付**。执行前仍需用户对范围/预算做最后确认；代码中尚缺的
-项目列在 §7。
+状态：**M0 固定候选 clean 选样已完成（2026-11-14 18:40）；尚未启动任何注错运行**。
+B1（已有 pilot 轨迹的 CPU 补充）已完成，见 `b-horizon-pilot.md` §9。本单按
+用户的固定选择整理 B2：**固定 256 张 N32 候选图（graph_id 32–287，不补样）、
+每图最多 2 条主链、teacher 固定前 64 张候选、主 H=16、固定前 32 张做 64
+轮长观察、五模块分阶段交付**。M0 结果见 §4.1；正式注错启动仍需用户最后
+确认。
 
 ## 1. 固定选择与样本边界
 
@@ -77,6 +77,12 @@ C 正在运行，本单不读取/不修改 C 的目录，不与其共用 GPU。
 - 同时记录每个 chain 的 own/teacher、before_u/after_u 共同资格。
 - 输出：`manifest_main256.json`（含全部候选状态）、
   `manifest_teacher64.json`（仅 32–95）、`manifest_long32.json`（仅 32–63）。
+- **M0 结果（18:40）**：`scanned=256`、`common_complete=256`、
+  `not_common_complete=0`、有链图 218、`chains=365`、`sinks=512`、
+  `leaves=512`（每图 2 个，k=2）、`unrelated=365`；early own/teacher
+  before/after 共同合格均为 365，`_a/_b` 不一致为 0。teacher64：64 图、
+  92 chains、128 sinks/leaves、92 unrelated；long32：32 图、49 chains、
+  64 sinks/leaves、49 unrelated。manifest 与 subset 均已落盘，未做任何注错。
 - 本模块不产生恢复率结论，只交合格数和身份。
 
 ### 3.2 M1：early 2×2（主分析）
@@ -160,6 +166,16 @@ C 正在运行，本单不读取/不修改 C 的目录，不与其共用 GPU。
   numeric`、明确计数 `before=4,after=5`；并保留原始 row 样本。
 - 目的：判断训练腐蚀是 `EMPTY→随机值` 为主，还是也有 `已填值→错误值`；
   不直接推断 4→5 的测试行为。
+- **结果（2026-11-14 18:44，已完成）**：256 batch / 2048 图 /
+  65,536 candidates / 100 trials；**所有 candidate 和实际替换的 before
+  都是 EMPTY（65,536 / 161,725），before_numeric=0**。实际替换 after：
+  numeric 148,820、NA 6,359、EMPTY 6,546；`after_is_true=6,392`；
+  `before numeric→after numeric=0`；`before=4,after=5=0`。
+  因而在这 4.1% 训练样本中，B 的 `last` 腐蚀只覆盖
+  **EMPTY→数值/NA/EMPTY**，没有覆盖“已填值→错误值”，也不支持把测试中的
+  4→5 直接解释为训练腐蚀。逐图/轮次/位置结果见
+  `audit/B_train_corruption_256b_{candidate,actual}_by_{graph_round,position}.csv`
+  和 `_actual_transitions.csv`。这是单 seed、4.1% 训练集的审计，不称全训练。
 
 ### 3.7 后续（不在本批执行）
 
@@ -168,27 +184,29 @@ C 正在运行，本单不读取/不修改 C 的目录，不与其共用 GPU。
 
 ## 4. 运行矩阵与预期记录数
 
-记号：`C` = 入选 chain 数（≤2×256=512）；`S/L` = sink/leaf 目标数
-（各≤512）；`U` = unrelated 目标数（≤C）；`E_b/E_a` = own before/after
-共同合格 chain 数；`E_tb/E_ta` = teacher64 子集共同合格 chain 数；
-`E_a^L` = long32 子集的 after 合格 chain 数。实际值由 M0 manifest 填入；
-下表上限是 **k=2、所有候选都合格** 的极端值，不是预期产出。
+记号：`C` = 入选 chain 数；`S/L` = sink/leaf 目标数；`U` = unrelated
+目标数；`E_b/E_a` = own before/after 共同合格 chain 数；`E_tb/E_ta` =
+teacher64 子集共同合格 chain 数；`E_a^L` = long32 子集的 after 合格 chain
+数。M0 实测：**C=365、S=512、L=512、U=365、E_b=E_a=365**；
+teacher64 **E_tb=E_ta=92**；long32 **C^L=49、S^L=L^L=64、U^L=49、
+E^L=49**。下表“实际/模型”已按这些值计算；A′/B 各跑一份，主表分开。
 
-| 运行（每个模型一条） | 记录数（轨迹） | 上限/模型 | 说明 |
+| 运行（每个模型一条） | 实际记录数/模型 | 公式/上限 | 说明 |
 |---|---:|---:|---|
-| early own before_u，H=16 | 4·E_b | 2048 | clean/U/R/U+R |
-| early own after_u，H=16 | 4·E_a | 2048 | 同上 |
-| early teacher before_u，H=16 | 4·E_tb | 512 | 仅 32–95 |
-| early teacher after_u，H=16 | 4·E_ta | 512 | 仅 32–95 |
-| complete 第一部分，H=16 | 3C+2S+2L+2U | 4608 | `late_r,late_u,sink,leaf_value,unrelated` + clean |
-| sustained，总 20 轮（4+16） | 2·E_a | 1024 | clean + injected |
-| D1/D2/D3，H=16/`max(16,n_loops)` | 4L | 2048 | 3 个 leaf condition + clean |
-| long32 early，各 timing，H=64 | 4·E_b^L / 4·E_a^L | 256 each | 固定 32–63 |
-| long32 complete，H=64 | 3C^L+2S^L+2L^L+2U^L | 576 | 固定 32–63 |
-| long32 sustained，总 68 | 2·E_a^L | 128 | 固定 32–63 |
+| early own before_u，H=16 | 1460 | 4·E_b（≤2048） | clean/U/R/U+R |
+| early own after_u，H=16 | 1460 | 4·E_a（≤2048） | 同上 |
+| early teacher before_u，H=16 | 368 | 4·E_tb（≤512） | 仅 32–95 |
+| early teacher after_u，H=16 | 368 | 4·E_ta（≤512） | 仅 32–95 |
+| complete 第一部分，H=16 | 3873 | 3C+2S+2L+2U（≤4608） | `late_r,late_u,sink,leaf_value,unrelated` + clean |
+| sustained，总 20 轮（4+16） | 730 | 2·E_a（≤1024） | clean + injected |
+| D1/D2/D3，H=16/`max(16,n_loops)` | 2048 | 4L（≤2048） | 3 个 leaf condition + clean |
+| long32 early，各 timing，H=64 | 196 each | 4·E^L（≤256 each） | 固定 32–63 |
+| long32 complete，H=64 | 501 | 3C^L+2S^L+2L^L+2U^L（≤576） | 固定 32–63 |
+| long32 sustained，总 68 | 98 | 2·E^L（≤128） | 固定 32–63 |
 
-A′/B 各跑一份；主表分开，不合并。M0 的 manifest 生成后，把上表的 `C,S,L,
-U,E_*` 实测值写回本单的“实际合格数”表（模板见 §8），再启动注错运行。
+两模型合计（不含审计）：early own 5,840；teacher 1,472；complete 7,746；
+sustained 1,460；D123 4,096；long32 early 784；long32 complete 1,002；
+long32 sustained 196。合计约 22,596 条轨迹；审计不计入轨迹数。
 
 **early vs complete 直接比较**：只用同一 `graph_id + event_id` 且 early 与
 complete 都合格的 chain 交集；在汇总中输出 `n_pairs`、A′/B 各自 n 和交集
@@ -326,21 +344,19 @@ python -I tools/b_mechanism/b_corruption_audit.py \
 固定 256 个 batch（2048 图，4.1% 训练集）；不称全训练。若实际耗时明显
 超过预算，先缩到 64 batch 并在报告注明覆盖，不改变其他模块。
 
-## 7. 尚缺实现（执行前必须补齐）
+## 7. 实现状态（更新）
 
-1. **selection 固定区间/不补样**：当前 `b_mechanism_select.py` 从 graph_id 0
-   开始、选满 `n_graphs` 即停，不能从 32 开始且会把 pilot 0–31 混入。需加
+1. **selection 固定区间/不补样：已实现并验证**。`b_mechanism_select.py` 现有
    `--candidate_start`、`--candidate_count`、`--selection_mode fixed`、
-   `--no_topup`；逐候选写状态（含不合格），扫描 256 后停止，不向 288 后
-   补样。`graph_id = batch_idx*batch_size+bi` 的索引约定要在 batch_size=8
-   下断言/校验。
-2. **子集 manifest 生成器**：从主 manifest 按 graph_id 区间（32–95、32–63）
-   生成 `manifest_teacher64.json`、`manifest_long32.json`；保留 chain 的
-   early/teacher flag，不重新选样。建议独立小脚本，不放 runner 里。
-3. **主实验汇总**：现有 `b_mechanism_horizon_summary.py` 只识别 pilot 的
-   `after_u_U/R、complete_U/R、sustained_R` 五类，且 role 以 chain u 为
-   中心；不能直接汇总 `before_u`、`ur`、`teacher`、`sink`、`leaf_value`、
-   `unrelated`。需新增/扩展 `b_main_summary.py`：
+   `--no_topup`、`--num_threads`；逐候选写 `candidates` 状态（含不合格），
+   固定模式扫描满 candidate_count 后停止并断言扫描数，不向 288 后补样。
+   已用 32–35 的 4 候选 smoke 和 32–287 的 256 候选正式 M0 验证；
+   `graph_id = batch_idx*batch_size+bi` 仍要求 batch_size=8 且顺序数据。
+2. **子集 manifest 生成器：已实现并生成**。`make_manifest_subset.py` 按
+   graph_id 区间从主 manifest 截取，不重新选样；teacher64（32–95）和
+   long32（32–63）已生成，分别 64/32 图、92/49 chains。
+3. **主实验汇总：已实现 `b_main_summary.py`，待主数据运行**。现有
+   `b_mechanism_horizon_summary.py` 仍只识别 pilot 五类；新脚本覆盖：
    - early：before/after × clean/U/R/U+R，own/teacher 分开；
    - complete：internal U/R、sink、leaf_value、unrelated，各自 direct/
      downstream/无关节点；
@@ -348,19 +364,19 @@ python -I tools/b_mechanism/b_corruption_audit.py \
    - observed/damaged/stable、direct 实际注错/首轮修回、graph-equal/
      node-weighted、VALUE/first4、零分母、clean 漂移；
    - early vs complete 共同合格交集 `n_pairs`。
-4. **D1/D2/D3 新旧真值汇总**：现有 `b_mechanism_summary.py` 明确跳过
+4. **D1/D2/D3 新旧真值汇总：仍缺**。现有 `b_mechanism_summary.py` 明确跳过
    `leaf_constant*`；需按 `truth_ref=old` 与 `output_nodes_new` 分开统计
    old-truth/new-truth 的 correct/wrong/stable，并报告 `const_pos` 的新
    真值。D2 从空题面开始，单独报完成轮次，不与 D1/D3 混算。
-5. **腐蚀审计聚合**：当前 `b_corruption_audit.py` 只输出总数
-   `candidates/actual` 和前 2000 行样本；需增加按 `(batch,b,row)`（图/轮次）
-   和 `pos` 的聚合、`before/after` 转移矩阵、`before=4,after=5` 精确计数、
-   覆盖比例与 depth 分层。
-6. **主实验 manifest 覆盖率表**：把 `scanned=256`、`common_complete`、
-   `chains`、`sinks/leaves/unrelated`、`early_own_before/after`、
-   `early_teacher_before/after`、`_a/_b` 不一致数、teacher64/long32 实际
-   n 写入 CSV/报告；当前 selection 的 counts 只有聚合，缺逐候选表。
-7. **报告模板**：`b-main-report.md` 需分阶段产出，至少包含：
+5. **腐蚀审计聚合：已实现并完成 256 batch 验证**。`b_corruption_audit.py` 现输出
+   `*_candidate_by_graph_round.csv`、`*_actual_by_graph_round.csv`、
+   `*_candidate_by_position.csv`、`*_actual_by_position.csv`、
+   `*_actual_transitions.csv`，含 `before/after` 分类、
+   `before_numeric_after_numeric`、`before_4_after_5` 和覆盖计数；
+   256 batch 实测见 §3.6。
+6. **主实验 manifest 覆盖率表：已随 M0 产出并填入 §4.1**。`manifest_main256.json` 的
+   `counts` 和逐候选 `candidates` 已有全部字段；本单 §4 已填实测数。
+7. **报告模板：仍缺**。`b-main-report.md` 需分阶段产出，至少包含：
    - 样本身份/合格数/与 pilot 的重叠核验；
    - 每个模块的条件表、分母表、逐轮曲线、代表性轨迹；
    - early vs complete 交集表；

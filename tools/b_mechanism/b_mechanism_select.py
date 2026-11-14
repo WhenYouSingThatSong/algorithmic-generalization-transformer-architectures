@@ -19,9 +19,13 @@ import json
 import os
 import sys
 
-import torch
-
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from trajectory_io import configure_runtime, add_runtime_arguments  # noqa: E402
+if __name__ == '__main__':
+    configure_runtime()
+
+import torch  # noqa: E402
+
 import b_mechanism_common as C  # noqa: E402
 
 
@@ -88,6 +92,15 @@ def main():
                    help='alias for n_graphs; 0 uses --n_graphs')
     p.add_argument('--scan_graphs', type=int, default=0,
                    help='maximum graphs scanned; 0 = no separate scan cap')
+    p.add_argument('--candidate_start', type=int, default=0,
+                   help='first graph_id in fixed-candidate mode (default 0)')
+    p.add_argument('--candidate_count', type=int, default=0,
+                   help='number of graph_ids in fixed-candidate mode; 0 = disabled')
+    p.add_argument('--selection_mode', choices=['topup', 'fixed'], default='topup',
+                   help='topup = old select-until-full behavior; fixed = scan a '
+                        'predeclared graph_id range and never top up')
+    p.add_argument('--no_topup', action='store_true',
+                   help='alias for --selection_mode fixed')
     p.add_argument('--batch_size', type=int, default=8)
     p.add_argument('--k', type=int, default=4, help='per-graph targets per type')
     p.add_argument('--extra_rounds', type=int, default=4)
@@ -102,9 +115,25 @@ def main():
     p.add_argument('--b_run', required=True)
     p.add_argument('--b_base', required=True)
     p.add_argument('--b_ckpt', default='last.ckpt')
+    add_runtime_arguments(p)
     a = p.parse_args()
     if a.selected_graphs:
         a.n_graphs = a.selected_graphs
+    if a.no_topup:
+        a.selection_mode = 'fixed'
+    if a.selection_mode == 'fixed':
+        if a.candidate_count <= 0:
+            p.error('--candidate_count must be positive in fixed mode')
+        if a.candidate_start < 0:
+            p.error('--candidate_start must be non-negative')
+        if a.scan_graphs:
+            p.error('--scan_graphs cannot be combined with fixed mode; '
+                    'use --candidate_count')
+        candidate_end = a.candidate_start + a.candidate_count
+    else:
+        if a.candidate_start or a.candidate_count:
+            p.error('--candidate_start/--candidate_count require fixed mode')
+        candidate_end = None
 
     ma, mb = model_args('a', a), model_args('b', a)
     ctx_a = C.load_eval_context(**ma, ds_file=a.ds_file,
@@ -117,20 +146,32 @@ def main():
         raise SystemExit(f'vocab mismatch: {ctx_a["mc"].vocab_sizes} vs {ctx_b["mc"].vocab_sizes}')
 
     graphs = []
-    counts = dict(scanned=0, common_complete=0, chains=0, sinks=0, leaves=0,
+    candidates = []
+    counts = dict(scanned=0, candidates_total=0, not_common_complete=0,
+                  candidates_with_chains=0, common_complete=0,
+                  chains=0, sinks=0, leaves=0,
                   same_all=0, same_numeric=0, skipped_no_chain=0,
                   early_own_before=0, early_own_after=0,
                   early_teacher_before=0, early_teacher_after=0,
+                  early_own_before_a=0, early_own_before_b=0,
+                  early_own_after_a=0, early_own_after_b=0,
+                  early_teacher_before_a=0, early_teacher_before_b=0,
+                  early_teacher_after_a=0, early_teacher_after_b=0,
                   early_own_before_disagree=0, early_own_after_disagree=0,
                   early_teacher_before_disagree=0, early_teacher_after_disagree=0)
     selected = 0
     scanned = 0
     with torch.no_grad():
         for batch_idx, raw in enumerate(ctx_a['dm'].val_dataloader()):
-            if a.scan_graphs and scanned >= a.scan_graphs:
-                break
-            if selected >= a.n_graphs:
-                break
+            batch_start = batch_idx * a.batch_size
+            if a.selection_mode == 'fixed':
+                if batch_start >= candidate_end:
+                    break
+            else:
+                if a.scan_graphs and scanned >= a.scan_graphs:
+                    break
+                if selected >= a.n_graphs:
+                    break
             batch = lit_a.reduce_batch(raw).to(ctx_a['device'])
             data, label, info = C.split_batch(batch, mc)
             depths = info[..., 0].long()
@@ -141,9 +182,15 @@ def main():
             S_a, _, _ = lit_a.get_teacher_batch_with_depth(data, label, depths)
             S_b, _, _ = lit_b.get_teacher_batch_with_depth(data, label, depths)
             for bi in range(B):
-                if a.scan_graphs and scanned >= a.scan_graphs:
-                    break
-                gid = batch_idx * a.batch_size + bi
+                gid = batch_start + bi
+                if a.selection_mode == 'fixed':
+                    if gid < a.candidate_start:
+                        continue
+                    if gid >= candidate_end:
+                        continue
+                else:
+                    if a.scan_graphs and scanned >= a.scan_graphs:
+                        break
                 scanned += 1
                 counts['scanned'] += 1
                 graph_loops = int(depths[bi].max().item()) + 1 + a.extra_rounds
@@ -151,6 +198,13 @@ def main():
                 T = find_common_T([o[bi] for o in out_a], [o[bi] for o in out_b],
                                   label[bi], meta['numeric'], max_rounds=graph_loops)
                 if T is None:
+                    candidates.append(dict(
+                        graph_id=gid, common_complete=False, status='not_common_complete',
+                        T=None, n_loops=graph_loops, n_chains=0,
+                        n_sinks=0, n_leaves=0, n_unrelated=0,
+                        early_own_before=0, early_own_after=0,
+                        early_teacher_before=0, early_teacher_after=0,
+                        same_all=False, same_numeric=False))
                     continue
                 if not (0 <= T < graph_loops):
                     raise AssertionError(f'graph {gid}: T={T} outside [0,{graph_loops})')
@@ -189,6 +243,14 @@ def main():
                     counts['early_own_after'] += int(ch['early_own_after'])
                     counts['early_teacher_before'] += int(ch['early_teacher_before'])
                     counts['early_teacher_after'] += int(ch['early_teacher_after'])
+                    counts['early_own_before_a'] += int(a_before)
+                    counts['early_own_before_b'] += int(b_before)
+                    counts['early_own_after_a'] += int(a_after)
+                    counts['early_own_after_b'] += int(b_after)
+                    counts['early_teacher_before_a'] += int(a_teacher_before)
+                    counts['early_teacher_before_b'] += int(b_teacher_before)
+                    counts['early_teacher_after_a'] += int(a_teacher_after)
+                    counts['early_teacher_after_b'] += int(b_teacher_after)
                     counts['early_own_before_disagree'] += int(a_before != b_before)
                     counts['early_own_after_disagree'] += int(a_after != b_after)
                     counts['early_teacher_before_disagree'] += int(
@@ -219,6 +281,24 @@ def main():
                     counts['same_all'] += 1
                 if same_numeric:
                     counts['same_numeric'] += 1
+                candidates.append(dict(
+                    graph_id=gid, common_complete=True, status='selected',
+                    T=T, n_loops=graph_loops, n_chains=len(chains),
+                    n_sinks=len(late['sinks']), n_leaves=len(late['leaves']),
+                    n_unrelated=len(unrelated),
+                    early_own_before=sum(int(ch['early_own_before']) for ch in chains),
+                    early_own_after=sum(int(ch['early_own_after']) for ch in chains),
+                    early_teacher_before=sum(int(ch['early_teacher_before']) for ch in chains),
+                    early_teacher_after=sum(int(ch['early_teacher_after']) for ch in chains),
+                    early_own_before_a=sum(int(ch.get('early_own_before_a', False)) for ch in chains),
+                    early_own_before_b=sum(int(ch.get('early_own_before_b', False)) for ch in chains),
+                    early_own_after_a=sum(int(ch.get('early_own_after_a', False)) for ch in chains),
+                    early_own_after_b=sum(int(ch.get('early_own_after_b', False)) for ch in chains),
+                    early_teacher_before_a=sum(int(ch.get('early_teacher_before_a', False)) for ch in chains),
+                    early_teacher_before_b=sum(int(ch.get('early_teacher_before_b', False)) for ch in chains),
+                    early_teacher_after_a=sum(int(ch.get('early_teacher_after_a', False)) for ch in chains),
+                    early_teacher_after_b=sum(int(ch.get('early_teacher_after_b', False)) for ch in chains),
+                    same_all=same_all, same_numeric=same_numeric))
                 graphs.append(dict(
                     graph_id=gid, T=T, T_kind='first_common_complete',
                     n_loops=graph_loops,
@@ -233,21 +313,46 @@ def main():
                 if not chains:
                     counts['skipped_no_chain'] += 1
                 selected += 1
-                if selected >= a.n_graphs:
+                if a.selection_mode == 'topup' and selected >= a.n_graphs:
                     break
+
+    counts['candidates_total'] = len(candidates)
+    counts['not_common_complete'] = sum(
+        1 for c in candidates if not c['common_complete'])
+    counts['candidates_with_chains'] = sum(
+        1 for c in candidates if c['n_chains'] > 0)
+    if a.selection_mode == 'fixed':
+        if len(candidates) != a.candidate_count:
+            raise SystemExit(
+                f'fixed candidate range incomplete: expected '
+                f'{a.candidate_count}, got {len(candidates)}')
+        if counts['scanned'] != a.candidate_count:
+            raise SystemExit(
+                f'fixed candidate scan mismatch: expected '
+                f'{a.candidate_count}, scanned {counts["scanned"]}')
+        n_graphs_out = len(graphs)
+        candidate_end_out = candidate_end
+    else:
+        n_graphs_out = a.n_graphs
+        candidate_end_out = None
 
     os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True)
     manifest = dict(
         ds_file=a.ds_file, ds_sha256=C.sha256_file(a.ds_file),
-        n_graphs=a.n_graphs, scan_graphs=a.scan_graphs,
-        batch_size=a.batch_size, k=a.k, extra_rounds=a.extra_rounds,
+        n_graphs=n_graphs_out, requested_n_graphs=a.n_graphs,
+        scan_graphs=a.scan_graphs, batch_size=a.batch_size, k=a.k,
+        extra_rounds=a.extra_rounds,
+        selection_mode=a.selection_mode,
+        candidate_start=a.candidate_start,
+        candidate_count=a.candidate_count,
+        candidate_end=candidate_end_out,
         model_a={**ma, 'ckpt_sha256': C.sha256_file(ckpt_path(ma))},
         model_b={**mb, 'ckpt_sha256': C.sha256_file(ckpt_path(mb))},
         code_sha256={
             'common': C.sha256_file(os.path.join(os.path.dirname(__file__), 'b_mechanism_common.py')),
             'select': C.sha256_file(os.path.abspath(__file__)),
         },
-        counts=counts, graphs=graphs,
+        counts=counts, candidates=candidates, graphs=graphs,
     )
     with open(a.out, 'w') as f:
         json.dump(manifest, f, indent=2)

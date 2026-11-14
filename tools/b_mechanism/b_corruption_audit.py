@@ -12,9 +12,10 @@ The exhaustive table here comes directly from `candidates`.
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import os
-from collections import Counter
+from collections import Counter, defaultdict
 
 import numpy as np
 import torch
@@ -34,6 +35,78 @@ def cat(tok, x):
     if s.isdigit():
         return 'numeric'
     return 'other'
+
+
+CATS = ('EMPTY', 'NA', 'numeric', 'other')
+
+
+def write_csv(path, rows):
+    if not rows:
+        return
+    with open(path, 'w', newline='') as f:
+        w = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
+        w.writeheader()
+        w.writerows(rows)
+
+
+def group_graph_round(rows, with_after=False, batch_size=8):
+    """Aggregate full candidate/actual rows by (batch, graph-in-batch, row)."""
+    groups = defaultdict(list)
+    for r in rows:
+        groups[(int(r['batch']), int(r['b']), int(r['row']))].append(r)
+    out = []
+    for (batch, b, row), rs in sorted(groups.items()):
+        item = dict(batch=batch, b=b, row=row, graph_index=batch * batch_size + b,
+                    n_records=len(rs),
+                    min_depth=min(int(x['node_depth']) for x in rs),
+                    max_depth=max(int(x['node_depth']) for x in rs))
+        for c in CATS:
+            item['before_' + c] = sum(1 for x in rs if x['before'] == c)
+        if with_after:
+            for c in CATS:
+                item['after_' + c] = sum(1 for x in rs if x['after'] == c)
+            item['after_is_true'] = sum(1 for x in rs if x['after_is_true'])
+            item['before_numeric_after_numeric'] = sum(
+                1 for x in rs if x['before'] == 'numeric' and x['after'] == 'numeric')
+            item['before_4_after_5'] = sum(
+                1 for x in rs if int(x['before_token']) == 4 and
+                int(x['after_token']) == 5)
+        out.append(item)
+    return out
+
+
+def transition_rows(rows):
+    counts = Counter((r['before'], r['after']) for r in rows)
+    out = []
+    for (before, after), n in sorted(counts.items()):
+        out.append(dict(before=before, after=after, n=n))
+    return out
+
+
+def group_position(rows, with_after=False, batch_size=8):
+    """Aggregate candidate/actual rows by graph, round and position."""
+    groups = defaultdict(list)
+    for r in rows:
+        groups[(int(r['batch']), int(r['b']), int(r['row']), int(r['pos']))].append(r)
+    out = []
+    for (batch, b, row, pos), rs in sorted(groups.items()):
+        item = dict(batch=batch, b=b, row=row, pos=pos,
+                    graph_index=batch * batch_size + b,
+                    n_records=len(rs),
+                    node_depth=int(rs[0]['node_depth']))
+        for c in CATS:
+            item['before_' + c] = sum(1 for x in rs if x['before'] == c)
+        if with_after:
+            for c in CATS:
+                item['after_' + c] = sum(1 for x in rs if x['after'] == c)
+            item['after_is_true'] = sum(1 for x in rs if x['after_is_true'])
+            item['before_numeric_after_numeric'] = sum(
+                1 for x in rs if x['before'] == 'numeric' and x['after'] == 'numeric')
+            item['before_4_after_5'] = sum(
+                1 for x in rs if int(x['before_token']) == 4 and
+                int(x['after_token']) == 5)
+        out.append(item)
+    return out
 
 
 def main():
@@ -122,10 +195,33 @@ def main():
         out = dict(n=len(rows))
         out['before'] = dict(Counter(r['before'] for r in rows))
         out['node_depth'] = dict(Counter(str(r['node_depth']) for r in rows))
+        out['before_numeric'] = int(sum(1 for r in rows if r['before'] == 'numeric'))
         if with_after:
             out['after'] = dict(Counter(r['after'] for r in rows))
             out['after_is_true'] = int(sum(1 for r in rows if r['after_is_true']))
+            out['after_numeric'] = int(sum(1 for r in rows if r['after'] == 'numeric'))
+            out['before_numeric_after_numeric'] = int(sum(
+                1 for r in rows if r['before'] == 'numeric' and r['after'] == 'numeric'))
+            out['before_4_after_5'] = int(sum(
+                1 for r in rows if int(r['before_token']) == 4 and
+                int(r['after_token']) == 5))
         return out
+
+    base = os.path.splitext(os.path.abspath(a.out))[0]
+    candidate_by_graph_round = group_graph_round(
+        all_candidates, batch_size=a.batch_size)
+    actual_by_graph_round = group_graph_round(
+        actual, with_after=True, batch_size=a.batch_size)
+    candidate_by_position = group_position(
+        all_candidates, batch_size=a.batch_size)
+    actual_by_position = group_position(
+        actual, with_after=True, batch_size=a.batch_size)
+    transitions = transition_rows(actual)
+    write_csv(base + '_candidate_by_graph_round.csv', candidate_by_graph_round)
+    write_csv(base + '_actual_by_graph_round.csv', actual_by_graph_round)
+    write_csv(base + '_candidate_by_position.csv', candidate_by_position)
+    write_csv(base + '_actual_by_position.csv', actual_by_position)
+    write_csv(base + '_actual_transitions.csv', transitions)
 
     result = dict(
         args=vars(a),
@@ -135,12 +231,26 @@ def main():
             script_sha256=C.sha256_file(os.path.abspath(__file__)),
             seed=a.seed,
         ),
+        coverage=dict(
+            n_batches=batch_count,
+            batch_size=a.batch_size,
+            graphs_seen=batch_count * a.batch_size,
+            candidate_rows=len(all_candidates),
+            actual_rows=len(actual),
+        ),
         candidates=summarize(all_candidates),
         actual=summarize(actual, with_after=True),
-        # Keep a bounded sample for manual inspection; full rows are useful but
-        # large.  The summary above is exact over the processed batches.
+        # Keep a bounded sample for manual inspection; the aggregate CSV files
+        # and the counters above are computed over all processed rows.
         candidate_sample=all_candidates[:2000],
         actual_sample=actual[:2000],
+        aggregate_files=dict(
+            candidate_by_graph_round=base + '_candidate_by_graph_round.csv',
+            actual_by_graph_round=base + '_actual_by_graph_round.csv',
+            candidate_by_position=base + '_candidate_by_position.csv',
+            actual_by_position=base + '_actual_by_position.csv',
+            actual_transitions=base + '_actual_transitions.csv',
+        ),
     )
     os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True)
     with open(a.out, 'w') as f:
