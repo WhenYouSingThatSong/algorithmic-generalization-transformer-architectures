@@ -1,17 +1,18 @@
 # 工作看板
 
-> 最近更新：2026-11-14 14:25 CST · [claude]
+> 最近更新：2026-11-14 14:41 CST · [claude]
 > 活看板：任务可以移动；状态变化在 `log.md` 记一行。条目格式 `[YYYY-MM-DD HH:MM][author]`。
 
 ## 当前决策
 
 - [2026-11-14 14:01][claude] `consensus.md` 先留空；具体口径、结果和当前状态放在本看板，待用户确认后再上升为共识。
 - [2026-11-14 14:25][claude] GPT review 已完成：R1/R2/R3 是确定的实现缺陷，暂不进入正式 B 实验；先修实现，再讨论指标和跑 Phase 0。
+- [2026-11-14 14:41][claude] R1/R3/R2/R7/R8 代码修复和 4 图 pipeline smoke 完成；未启动 B 全量实验，R4–R6/R9 指标仍待讨论。
 
 ## 需要 review（GPT）
 
 - [x] **B 机制代码 v2 + 指标实现**（GPT 已完成；发现 P1 缺陷，见“Review 结论”）
-  - 审查对象：`origin/reproduction` 的 B 包提交 `ab80594`（分支最新提交另含本协作目录）
+  - 审查对象：`origin/reproduction` 的 B 包提交 `ab80594`；review 修复提交 `66440b8`（分支最新提交另含本协作目录）
   - **先读日志**：`log.md` 的 2026-11-14 11:35 / 13:44 条目，了解为什么改、改了哪些
   - 代码：`tools/b_mechanism/`
   - 设计与边界：`docs/records/2026-11-14/b-mechanism-design.md`
@@ -23,15 +24,16 @@
 ## 进行中
 
 - [2026-11-14 10:12][claude] 旧 C0 seed2026 150 epoch，GPU0；输出 `tmp/runs/oldC0-newseed-150ep/`；上次检查 epoch 24/150，约 6.3 it/s。不要停止/重启。
-- [2026-11-14 13:44][claude] B review 包：commit `ab80594`；GPT 已完成 review，发现 P1 缺陷，待修，当前不启动实验。
+- [2026-11-14 13:44][claude] B review 包：commit `ab80594`；GPT review 完成，R1/R2/R3/R7/R8 已修，当前不启动实验。
 
 ## 待办 / 下一步
 
 - [x] [gpt] 按上节 review B 代码和文档，给出可执行结论。
-- [ ] [claude] 先修 R1（early 资格键统一）和 R3（selection 搜索/保存预算一致），再生成 manifest；验收含“一边合格一边不合格”和换 batch_size 的用例。
-- [ ] [claude] 修 R2（summary 保留运行身份、完整配对键和分组键），覆盖 A/B 同图、own/teacher、before/after 和输入文件顺序交换。
-- [ ] [claude] 处理 R7（controls condition/clean/汇总）和 R8（D1/D2/D3 新真值参照与汇总）接口缺口。
+- [x] [claude] 先修 R1（early 资格键统一）和 R3（selection 搜索/保存预算一致），再生成 manifest；验收含“一边合格一边不合格”和换 batch_size 的用例。
+- [x] [claude] 修 R2（summary 保留运行身份、完整配对键和分组键），覆盖 A/B 同图、own/teacher、before/after 和输入文件顺序交换。
+- [x] [claude] 处理 R7（controls condition/clean/汇总）和 R8（D1/D2/D3 新真值参照与汇总）接口缺口；仅 pipeline smoke。
 - [ ] [user/claude] 讨论 R4–R6/R9：全窗口统计、曾恢复 vs 持续恢复、节点/图聚合、节点级指标；指标未定稿前不称为正式验收。
+- [ ] [user/claude] 决定是否/何时启动 B Phase 0；当前只做了 4 图 smoke，未跑全量。
 - [ ] [claude] 实现缺陷修复且用户批准后先跑 B Phase 0（A′ s42 + B-M6 s42 的 common-complete manifest），报告合格 n；保留完整原始轨迹。
 - [ ] [claude] Phase 0 合格数足够后再跑 Phase 1（early 2×2、late R-only/U-only、late 四格、unrelated），单卡串行。
 - [ ] [claude] Phase 2 sustained/switch；Phase 3 训练腐蚀审计；局部自洽仍不跑。
@@ -40,11 +42,12 @@
 
 ## 阻塞 / 等待
 
-- B 全量实验：等待 R1/R2/R3 修复、指标/评估讨论和用户批准。
+- B 全量实验：实现缺陷已修；等待 R4–R6/R9 指标讨论和用户批准。
 - 局部自洽控制：构造可能不自洽，DEFERRED / NOT RUN。
 
 ## 最近完成
 
+- [2026-11-14 14:41][claude] B review 修复：R1/R3/R2/R7/R8 代码完成，提交 `66440b8`，4 图 pipeline smoke 通过；未改训练、未启动全量实验。
 - [2026-11-14 14:25][claude] 合并 GPT 审阅分支 `review/b-mechanism-5137014`；审阅文档进入 `handoff/2026-11-14-1406-gpt-b-mechanism-review.md`。
 - [2026-11-14 13:40][claude] 项目备份 `tmp/archive/project-backup-20261114.tar.gz`，SHA256 `7037e0ce2c1cc09b4494031327ce68e959950bec2ba6b2ab1eaa39095a73517a`。
 - [2026-11-14 13:44][claude] 提交 `ab80594`：B 工具/文档迁出 `tmp/`、指标统计实现（未定稿）、`--save_top_k`、无效 C0 配置清理。
@@ -62,6 +65,7 @@
 
 ## 共享发现 / 证据
 
+- [2026-11-14 14:41][claude] Post-review fix smoke（4 图）：selection 9 chains / 16 sinks / 16 leaves；batch 4 与 8 的 `(T, n_loops)` 一致；early 36 条、late 66 条、controls 9+9 clean；summary 7 行，A′/B 来源分离、输入顺序不变、`duplicate_cleans=0`。**仅 pipeline smoke**。
 - 旧 C0 150ep 旧 N32（e143，Value / Graph / Strict，按当前 eval 实现口径，非最终验收）：s42 `0.9992 / 0.9873 / 0.9844`；s1234 `0.9990 / 0.9854 / 0.8770`；s2025 VALUE 约 0.48，后两项为 0。
 - 旧 C0 150ep 旧 N128（e143）：s42 `0.9912 / 0.8379 / 0.0156`；s1234 `0.9677 / 0.2910 / 0`。
 - 旧 C0 原始结果：`tmp/analysis/oldC0-resume-150ep/`；旧数据配方，不能直接与 B 的 heldout/matched-depth 样本混用。
@@ -87,3 +91,5 @@
 - [2026-11-14 14:12][gpt] 更正上述审阅措辞：用户明确**指标和评估尚未完全确定**。上条“用户最新指标要求”“未通过正式 B 实验验收”过度表述了协议的确定程度，以本条及修订后的交接文档为准。R1–R3 的资格键、运行身份配对、预算不一致仍是确定的实现缺陷；首轮/全窗口、曾恢复/持续恢复、节点/图聚合、两项节点核心指标属于待讨论选择，不能因尚未实现就认定为 bug。controls 汇总接口及 D1/D2/D3 真值参照另列为接口缺口或解释边界。未改 consensus。审阅分支目前仅在本地，尚未推送。
 
 - [2026-11-14 14:25][claude] 已接收并合并 GPT 审阅分支。对齐结论：四层探索框架（早期时点 / 整图完成 / 更新依据 / 训练腐蚀）与当前设计一致；但当前实现只部分覆盖“逐轮传播与恢复”的三情形，R4/R5 是观察窗口与恢复定义待定，R1/R3/R2 是确定实现缺陷。下一步先修 R1/R3，再修 R2；不启动 B 实验。局部自洽和 `switch_held_r` 的旧“稳定错误切换”解释继续暂缓。
+
+- [2026-11-14 14:41][claude] R1/R3/R2/R7/R8 已修复（`66440b8`）并通过 4 图 pipeline smoke；仍未启动 B 全量实验。R4–R6/R9 的指标/聚合/窗口定义继续待用户讨论。
