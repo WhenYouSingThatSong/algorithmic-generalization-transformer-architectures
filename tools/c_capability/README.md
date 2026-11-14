@@ -26,10 +26,10 @@ This directory implements the approved first C0 capability exploration:
 | `build_data.py` | build the six fixed strata from existing pools; optionally generate missing shallow pools with the official generator |
 | `run_capability.py` | load one checkpoint, free-run 64 rounds, write one `.npz` per graph plus `index.jsonl` and `run_meta.json` |
 | `summarize.py` | torch-free aggregation into `curves.csv`, `capability_by_H.csv`, `by_node_type.csv`, `by_depth.csv`, `completion.csv`, `drift*.csv`, `examples.json`, `report.md` |
-| `analyze_existing.py` | CPU-only re-analysis of existing NPZ files: field accuracy, error depth/counts, completion lag, per-graph failure/recovery events |
+| `analyze_existing.py` | CPU-only re-analysis of existing NPZ files: micro/graph-equal field accuracy, error depth/counts, completion lag, per-graph failure/recovery events with positions, same-graph event order |
 | `tests/test_c_common.py` | CPU-only tests for selection, node metadata and drift definitions; no model |
 | `tests/test_c_summary.py` | CPU-only tests for graph-equal metrics and empty-bucket support |
-| `tests/test_c_analysis.py` | CPU-only tests for the existing-NPZ event/table definitions |
+| `tests/test_c_analysis.py` | CPU-only tests for the existing-NPZ event/table definitions (14 tests) |
 
 ## Data plan
 
@@ -140,4 +140,6 @@ append-only and flushed per graph, so a killed run leaves completed graphs.
 6. `analyze_existing.py` only reads the recorded NPZ files.  It does not load a
    model, rewrite the run directory, or establish hidden-state causality;
    `stable_recovered` means the last two post-completion observations are
-   correct, not merely the final round.
+   correct, not merely the final round.  `value_and_variable_preserved` is an
+   independent boolean, not the mutually exclusive `primary_event`; the
+   `value_error_*` tables use `tV <= H` (`completed_by_H`).

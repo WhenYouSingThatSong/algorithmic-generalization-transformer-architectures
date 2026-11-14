@@ -4,7 +4,10 @@
 状态：**首批六档正式运行完成；探索结果，不是最终评测协议，也未训练 C+**。  
 设计：`docs/records/2026-11-14/c0-capability-exploration-plan.md`  
 代码：`9df92a8` + 本地未提交的 C 入口路径/测试修复；GPT review 修复见 `5669677`。  
-产物：`tmp/analysis/c0-capability-20261114/`（`data/`、`runs/`、`runs/summary/`、`logs/`、`analysis/`）。
+产物：`tmp/analysis/c0-capability-20261114/`（`data/`、`runs/`、`runs/summary/`、`logs/`、`analysis/`）。  
+审阅修复：2026-11-14 22:57 按 `82d9412` 的 C-1—C-5 修正独立 preserve、
+graph-equal 字段表、`completed_by_H` 队列、事件 positions 和测试夹具；
+未重跑模型。
 
 > 说明：以下数字是特定 checkpoint、固定数据档和 64 轮自由续算协议下的
 > 描述性统计，不是机制结论、最终能力结论或 C+ 设计决定。原始逐图 NPZ
@@ -163,11 +166,13 @@ C0 的训练分布是 N32、depth ≤6、129 词表；N64/N128 与 deep 档都�
   两类失败；N128_deep 的 0.0156（s42）与 0（s1234）主要是后者，因为
   H16 已有 0.906/0.4375。
 - **internal VALUE 在 H64 仍高，sink 更低**。以 s42 N128_deep 为例，
-  internal 0.8105、sink 0.7320；s1234 为 0.6249/0.5053。结果端比平均更早
-  失稳，但深层内部节点同样有错。
+  internal 0.8105、sink 0.7320；s1234 为 0.6249/0.5053。这只是说明
+  **H=64 时**sink 正确率更低，不能据此说结果端更早失稳；深层内部节点
+  同样有错。
 - **first-4 completed 的缺口主要来自 s1234 大图**：s1234 N128_deep 只有
-  19/64 曾有 t4，因为 13 张图在 tV 时 VARIABLE 已经不全对；其余档
-  first-4 完成数与 VALUE 接近。
+  19/64 曾有 t4；本批有 13 张图在 tV 时 VARIABLE 已不全对，因此未观察到
+  t4。这里保留“本批未观察到”的事实，不外推为以后不可能恢复并达到 t4；
+  其余档 first-4 完成数与 VALUE 接近。
 
 ### 3.2 逐字段分解：first-4 的下降是 VARIABLE
 
@@ -189,6 +194,11 @@ C0 的训练分布是 N32、depth ≤6、129 词表；N64/N128 与 deep 档都�
 | s1234_e143 | N64_deep | 0.9736 | 0.1061 | 1.0000 | 1.0000 |
 | s1234_e143 | N128_shallow | 0.9761 | 0.1119 | 1.0000 | 1.0000 |
 | s1234_e143 | N128_deep | 0.9776 | 0.1105 | 1.0000 | 1.0000 |
+
+`analysis/field_acc_by_H.csv` 同时输出节点加权（micro）和 graph-equal
+（macro）两列；all/internal 在固定 N、固定 6 叶时相同，sink/深度桶的
+节点数随图变化，可能不同。下表用 internal 的 micro，sink 的 graph-equal
+见辅助表。
 
 补充事实：
 
@@ -234,9 +244,11 @@ C0 的训练分布是 N32、depth ≤6、129 词表；N64/N128 与 deep 档都�
 
 读法：
 
-- **VARIABLE 比 VALUE 早得多开始退化**：s42 的 VARIABLE 首次退化平均相对
-  轮次为 5.6–12.3，VALUE 为 20.6–42.7；s1234 为 2.2–8.6 与 11.2–34.5。
-  也就是说，first-4 在 VALUE 还很稳定的阶段就已经开始掉。
+- **VARIABLE 的首次新错平均早于 VALUE 的首次退化**：s42 的 VARIABLE
+  平均相对轮次为 5.6–12.3，VALUE 为 20.6–42.7；s1234 为 2.2–8.6 与
+  11.2–34.5。注意这两个均值来自不同事件集合，不是逐图先后；同图两类
+  事件都发生的比较见 3.8（493 张中 VARIABLE 先 479、同轮 1、VALUE 先 13），
+  未发生者单列。first-4 在 VALUE 仍较稳定的阶段开始下降。
 - **VALUE 漂移随规模/深度增强**：s42 的 N32_shallow 末轮正确/完成图比例
   为 73%，N128_deep 为 1.7%；s1234 N128 两档为 0。s1234 N32_deep 的
   54% 略高于 N32_shallow 的 47%，但 N32_deep 本身完成得更晚、完成图更少，
@@ -253,7 +265,9 @@ C0 的训练分布是 N32、depth ≤6、129 词表；N64/N128 与 deep 档都�
 
 ### 3.4 H=64 的 VALUE 错误随深度增加；N32 是稀疏错误
 
-H=64、只统计完成图的整图 VALUE 错误节点数：
+H=64、只统计完成图的整图 VALUE 错误节点数。`value_error_counts.csv` /
+`value_error_by_depth.csv` 的队列是 `completed_by_H`（`tV <= H`）；当前
+H=64 与正式完成集相同，未来 H=16 不会悄悄沿用 64 轮完成队列。
 
 | weight | stratum | completed | 0 wrong | 1–2 wrong | 3–5 wrong | >5 wrong | max wrong |
 |---|---|---:|---:|---:|---:|---:|---:|
@@ -320,7 +334,7 @@ s1234 的 320 张完成图中只有 250 张 lag 0，43 张 lag 1，18 张 lag 2�
 9 张 lag >4。s1234 在 N128_shallow 的 42 张完成图里只有 13 张按深度时钟
 完成，其余 29 张延后；N128_deep 的 32 张里也只有 13 张 lag 0。
 
-长尾例子：s1234 N32_shallow `0023`（depth 6）tV=32、t4 不存在；
+长尾例子：s1234 N32_shallow `0023`（depth 6）tV=32、本批未观察到 t4；
 s1234 N64_shallow `0054`（depth 6）tV=61。它们在早期有过 1–2 个 VALUE
 错，后来短暂整图全对，再漂移。**“第 depth+1 轮没完成”不等于最终失败**；
 但本批也没有把这些晚完成图排除出能力表。
@@ -335,7 +349,7 @@ s1234 N64_shallow `0054`（depth 6）tV=61。它们在早期有过 1–2 个 VAL
 | s42 N32_shallow `0000` | 6 | 7/7 | VALUE 64 轮全对；VARIABLE 在 H=32 已错 16/32、H=64 错 29/32。只有 first-4 崩，VALUE 未崩。 |
 | s42 N32_shallow `0003` | 4 | 5/5 | H=48 前 VALUE 全对；绝对第 55 轮（tV 后第 50 个相对轮）首次出现 11 个 VALUE 错（depth 2–4），H=64 仍错；VARIABLE 错 31/32。说明 VALUE 可以在很长时间后突然退化。 |
 | s1234 N32_shallow `0006` | 6 | 10/10 | 比 `depth+1` 晚 3 轮完成；之后 VALUE 一直正确；VARIABLE 在 tV 后第 6 个相对轮首次新错。延迟完成与字段漂移可以同时出现。 |
-| s1234 N32_shallow `0023` | 6 | 32/– | H=8/16 有 2 个 VALUE 错，H=32 才整图全对；tV 时 VARIABLE 已错 18/32，所以 t4 不存在；绝对第 36 轮（tV 后第 4 个相对轮）起再次漂移，H=64 有 7 个 VALUE 错。非单调、长尾完成。 |
+| s1234 N32_shallow `0023` | 6 | 32/– | H=8/16 有 2 个 VALUE 错，H=32 才整图全对；tV 时 VARIABLE 已错 18/32，本批未观察到 t4（之后恢复并达到 t4 并非不可能）；绝对第 36 轮（tV 后第 4 个相对轮）起再次漂移，H=64 有 7 个 VALUE 错。非单调、长尾完成。 |
 | s1234 N32_deep `0047` | 11 | 12/12 | 绝对第 49 轮（tV 后第 37 个相对轮）出现 VALUE 错，绝对第 54 轮回正；H=64 VALUE 仍全对（本批少见的稳定恢复），但 VARIABLE 已错 28/32，first-4 仍为 0。 |
 | s1234 N64_shallow `0004` | 6 | –/– | 64 轮内从未整图 VALUE 全对；H=8/16 只错 1–2 个节点，H=64 错 6 个（depth 5–6），VARIABLE 错 60/64。不是“完全不会”，而是几个深层节点持续错。 |
 | s42 N128_deep `0002` | 12 | –/– | 64 轮从未完成；与 s1234 N128_deep 的 32 张未完成图同类。 |
@@ -351,7 +365,10 @@ depth-1 节点为例，H=1–28 的 VARIABLE 读数为真值 `111`，H=32–64 �
 
 事件表由 `tools/c_capability/analyze_existing.py` 从现有 NPZ 生成；每个
 图一行，输出在 `analysis/events_by_graph.csv`，汇总在
-`analysis/event_summary.csv`。定义：
+`analysis/event_summary.csv`。事件行同时保存首次 VALUE/VARIABLE 受损节点的
+`positions`（`value_affected_positions_first` /
+`variable_affected_positions_first`，reduced-sequence 位置；配合
+`source_index` 可回原图追踪）。定义：
 
 - `never`：64 轮内没有整图 VALUE 全对；
 - `delayed`：tV > `实际最大深度 + 1`；
@@ -359,38 +376,77 @@ depth-1 节点为例，H=1–28 的 VARIABLE 读数为真值 `111`，H=32–64 �
 - `VALUE final wrong`：VALUE 曾退化且末轮仍错；
 - `VALUE stable recovered`：退化后末尾连续两轮都正确；
 - `VARIABLE new-error`：tV 后出现至少一个节点的 VARIABLE 正确→错误转移；
-- `VARIABLE degraded, VALUE preserved`：VALUE 未退化且 VARIABLE 有新错误；
-- `VARIABLE already wrong at tV`：tV 时 VARIABLE 不是全对（因此 t4 不存在）。
+- `VALUE+VARIABLE preserved`：**独立布尔统计**，不是 `primary_event`；
+  要求有后续观察、VALUE 从未退化、tV 时 VARIABLE 全对且之后没有
+  正确→错误转移；
+- `VARIABLE degraded, VALUE preserved`：VALUE 从未退化，且 VARIABLE 有
+  新错误；`VARIABLE already wrong at tV` 单列，不计入新错误。
 
-| weight | stratum | completed | never | delayed | VALUE never degraded | VALUE final wrong | VALUE stable recovered | VARIABLE new-error | VARIABLE degraded, VALUE preserved | VARIABLE already wrong at tV |
-|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| s42_e143 | N32_shallow | 64 | 0 | 0 | 47 | 17 | 0 | 64 | 47 | 0 |
-| s42_e143 | N32_deep | 61 | 3 | 1 | 37 | 24 | 0 | 61 | 37 | 0 |
-| s42_e143 | N64_shallow | 64 | 0 | 0 | 17 | 47 | 0 | 64 | 17 | 0 |
-| s42_e143 | N64_deep | 62 | 2 | 1 | 20 | 42 | 0 | 62 | 20 | 0 |
-| s42_e143 | N128_shallow | 60 | 4 | 2 | 3 | 57 | 0 | 60 | 3 | 0 |
-| s42_e143 | N128_deep | 59 | 5 | 1 | 1 | 58 | 0 | 59 | 1 | 0 |
-| s1234_e143 | N32_shallow | 64 | 0 | 2 | 30 | 34 | 0 | 64 | 30 | 1 |
-| s1234_e143 | N32_deep | 63 | 1 | 1 | 33 | 29 | 1 | 63 | 33 | 0 |
-| s1234_e143 | N64_shallow | 60 | 4 | 11 | 4 | 56 | 0 | 59 | 3 | 2 |
-| s1234_e143 | N64_deep | 59 | 5 | 8 | 5 | 52 | 2 | 59 | 5 | 3 |
-| s1234_e143 | N128_shallow | 42 | 22 | 29 | 0 | 42 | 0 | 42 | 0 | 2 |
-| s1234_e143 | N128_deep | 32 | 32 | 19 | 0 | 32 | 0 | 32 | 0 | 13 |
+`primary_event` 仍是互斥分类，只用于案例归类；上表的 preserved 列由逐图
+独立布尔量汇总，因此延迟完成但之后 VALUE/VARIABLE 都保持的图不会被漏掉。
+本批恰好没有这样的图，但接口已按独立定义实现，并有合成测试。
+
+| weight | stratum | completed | never | delayed | VALUE never degraded | VALUE final wrong | VALUE stable recovered | VARIABLE new-error | VARIABLE degraded, VALUE preserved | VARIABLE already wrong at tV | VALUE+VARIABLE preserved |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| s42_e143 | N32_shallow | 64 | 0 | 0 | 47 | 17 | 0 | 64 | 47 | 0 | 0 |
+| s42_e143 | N32_deep | 61 | 3 | 1 | 37 | 24 | 0 | 61 | 37 | 0 | 0 |
+| s42_e143 | N64_shallow | 64 | 0 | 0 | 17 | 47 | 0 | 64 | 17 | 0 | 0 |
+| s42_e143 | N64_deep | 62 | 2 | 1 | 20 | 42 | 0 | 62 | 20 | 0 | 0 |
+| s42_e143 | N128_shallow | 60 | 4 | 2 | 3 | 57 | 0 | 60 | 3 | 0 | 0 |
+| s42_e143 | N128_deep | 59 | 5 | 1 | 1 | 58 | 0 | 59 | 1 | 0 | 0 |
+| s1234_e143 | N32_shallow | 64 | 0 | 2 | 30 | 34 | 0 | 64 | 30 | 0 | 0 |
+| s1234_e143 | N32_deep | 63 | 1 | 1 | 33 | 29 | 1 | 63 | 33 | 0 | 0 |
+| s1234_e143 | N64_shallow | 60 | 4 | 11 | 4 | 56 | 0 | 59 | 3 | 1 | 0 |
+| s1234_e143 | N64_deep | 59 | 5 | 8 | 5 | 52 | 2 | 59 | 5 | 0 | 0 |
+| s1234_e143 | N128_shallow | 42 | 22 | 29 | 0 | 42 | 0 | 42 | 0 | 0 | 0 |
+| s1234_e143 | N128_deep | 32 | 32 | 19 | 0 | 32 | 0 | 32 | 0 | 0 | 0 |
 
 支持数读法：
 
-- 本批 690 张完成图中，**没有一张**同时保持 VALUE 和 VARIABLE
-  （`value_and_variable_preserved=0`）；这由 `event_summary.csv` 逐档可查。
-- 本批恰好满足 `VALUE never degraded + VALUE final wrong + VALUE stable
-  recovered = completed`：没有“末轮正确但末尾两轮不全对”的图；少数恢复
-  都是末尾连续两轮正确。
+- 按独立定义，本批 690 张完成图中 `VALUE preserved` 为 197，
+  `VARIABLE preserved` 为 0，`VALUE+VARIABLE preserved` 为 0；
+  `event_summary.csv` 逐档可查。延迟完成但两者都保持的图本批没有，
+  但合成测试 `test_delayed_stable_is_independently_preserved` 已覆盖
+  该接口，不会因 `primary_event` 优先级漏计。
+- `VALUE never degraded + VALUE final wrong + VALUE stable recovered =
+  completed`：没有“末轮正确但末尾两轮不全对”的图；少数恢复都是末尾
+  连续两轮正确。
 - `VALUE final wrong` 只统计曾退化图，`VALUE never degraded` 只统计有
   后续观察且从未退化图，两者不是互补但本批由上一行补齐。
-- s1234 N64_shallow 的 completed=60、VARIABLE new-error=59、already wrong=2：
-  有一张图 tV 时 VARIABLE 已错且之后没有新的正确→错误转移；分类有重叠时
-  以逐图 flags 为准，不用汇总列互相推导。
+- s1234 N64_shallow 的 completed=60、VARIABLE new-error=59、
+  already wrong=1：有一张图 tV 时 VARIABLE 已错且之后没有新的
+  正确→错误转移；分类有重叠时以逐图 flags 为准，不用汇总列互相推导。
 - `no_post_observation=0`（tV 最大 61）；若未来出现 tV=64，该图不进入
   “never/final correct”的支持数，而应单列。
+
+### 3.8 同图事件先后（仅两事件均发生的图）
+
+为了避免把两个不同事件集合的均值比较当成逐图先后，下面只统计
+**VALUE 首次退化与 VARIABLE 首次新错都发生**的图。时间差定义为
+`VALUE 相对轮次 - VARIABLE 相对轮次`：正数表示 VARIABLE 先，0 表示同轮，
+负数表示 VALUE 先。未发生某一事件的图单列在 `variable_only` /
+`value_only` / `neither`，不进入时间差。
+
+| weight | stratum | both events | VARIABLE first | same round | VALUE first | VARIABLE only | VALUE only | neither |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| s42_e143 | N32_shallow | 17 | 17 | 0 | 0 | 47 | 0 | 0 |
+| s42_e143 | N32_deep | 24 | 23 | 0 | 1 | 37 | 0 | 0 |
+| s42_e143 | N64_shallow | 47 | 46 | 0 | 1 | 17 | 0 | 0 |
+| s42_e143 | N64_deep | 42 | 42 | 0 | 0 | 20 | 0 | 0 |
+| s42_e143 | N128_shallow | 57 | 56 | 0 | 1 | 3 | 0 | 0 |
+| s42_e143 | N128_deep | 58 | 57 | 0 | 1 | 1 | 0 | 0 |
+| s1234_e143 | N32_shallow | 34 | 34 | 0 | 0 | 30 | 0 | 0 |
+| s1234_e143 | N32_deep | 30 | 30 | 0 | 0 | 33 | 0 | 0 |
+| s1234_e143 | N64_shallow | 56 | 56 | 0 | 0 | 3 | 0 | 1 |
+| s1234_e143 | N64_deep | 54 | 48 | 0 | 6 | 5 | 0 | 0 |
+| s1234_e143 | N128_shallow | 42 | 39 | 1 | 2 | 0 | 0 | 0 |
+| s1234_e143 | N128_deep | 32 | 31 | 0 | 1 | 0 | 0 | 0 |
+
+合计：493 张图有两类事件；其中 VARIABLE 先 479、同轮 1、VALUE 先 13；
+另有 VARIABLE-only 196、VALUE-only 0、两者都未发生 1。两事件均发生的图
+时间差（VALUE−VARIABLE）均值 19.8 轮、中位 18 轮（范围 −12 到 50）。
+这只描述本批轨迹中的时间顺序，不说明 VARIABLE 错误导致 VALUE 错误；
+机制仍需 hidden probe/干预。
 
 ## 4. 讨论材料与尚不能判断之处
 
@@ -407,11 +463,12 @@ C+ 训练未启动。
    本批不替这个定义作决定。
 
 2. **VALUE 与 VARIABLE 是两条不同的稳定性轴。**
-   在本批轨迹中，VARIABLE 的首次新错平均早于 VALUE，且 H=64 时所有
-   节点（包括叶节点）的 VARIABLE 读出都大幅下降；VALUE 则相对更晚、
-   且在 H=64 切片中随深度更差。如果 C+ 的目标包含“可读出的完整赋值”，
-   需要显式区分并在指标上分开；如果把 first-4 作为单一目标，优化信号
-   会被 VARIABLE 头主导。
+   本批 493 张同时发生两类事件的图中，VARIABLE 先 479、同轮 1、VALUE
+   先 13；另有 196 张只有 VARIABLE 事件、0 张只有 VALUE 事件、1 张两者
+   都未发生。H=64 时所有节点（包括叶节点）的 VARIABLE 读出都大幅下降；
+   VALUE 则在 H=64 切片中随深度更差。这些只是事件形态/时间顺序描述，
+   不能推出 VARIABLE 错误导致 VALUE 错误；若 C+ 的目标包含“可读出的
+   完整赋值”，需要显式区分并在指标上分开。
 
 3. **整图指标比节点指标更早报警。**
    N32 上很多图只错 1–2 个节点，节点 VALUE 仍 >0.9，但整图全对率已从

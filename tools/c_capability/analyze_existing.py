@@ -144,13 +144,25 @@ def _depth_list(values: np.ndarray) -> str:
     return " ".join(str(int(x)) for x in sorted(set(values.tolist())))
 
 
+def _position_list(values: np.ndarray) -> str:
+    return " ".join(str(int(x)) for x in values.tolist())
+
+
 # ---------------------------------------------------------------------------
 # Tables
 # ---------------------------------------------------------------------------
 
 
 def field_accuracy_rows(graphs: list[dict[str, Any]], horizons: Iterable[int]) -> list[dict[str, Any]]:
-    """Aggregate field correctness by weight/stratum/H/field/scope."""
+    """Aggregate field correctness by weight/stratum/H/field/scope.
+
+    Both denominators are kept:
+    - ``acc`` is node-weighted (micro): total correct / total nodes.
+    - ``acc_graph_equal`` is the mean of per-graph accuracy over graphs with
+      at least one node in the scope (macro).  For all/internal with fixed N
+      and six leaves these coincide; sink/depth buckets can differ because
+      the number of nodes per graph varies.
+    """
     agg: dict[tuple[str, str, int, str, str], dict[str, Any]] = {}
     for g in graphs:
         for H in horizons:
@@ -163,19 +175,25 @@ def field_accuracy_rows(graphs: list[dict[str, Any]], horizons: Iterable[int]) -
                         weight=g["weight"], stratum=g["stratum"], H=H,
                         field=field, scope=scope, correct=0, total=0,
                         n_graphs_with_nodes=0, n_graphs_without_nodes=0,
+                        graph_acc_sum=0.0, graph_acc_n=0,
                     ))
                     mask = _mask(g, scope)
                     n = int(mask.sum())
                     if n:
-                        row["correct"] += int(ok[mask].sum())
+                        correct_g = int(ok[mask].sum())
+                        row["correct"] += correct_g
                         row["total"] += n
                         row["n_graphs_with_nodes"] += 1
+                        row["graph_acc_sum"] += correct_g / n
+                        row["graph_acc_n"] += 1
                     else:
                         row["n_graphs_without_nodes"] += 1
     rows = []
     for key in sorted(agg):
         row = agg[key]
         row["acc"] = (row["correct"] / row["total"]) if row["total"] else None
+        row["acc_graph_equal"] = (row["graph_acc_sum"] / row["graph_acc_n"]) if row["graph_acc_n"] else None
+        del row["graph_acc_sum"], row["graph_acc_n"]
         rows.append(row)
     return rows
 
@@ -193,9 +211,12 @@ def field_accuracy_wide(graphs: list[dict[str, Any]], horizons: Iterable[int]) -
         key = (r["weight"], r["stratum"], r["H"])
         row = bucket.setdefault(key, {"weight": r["weight"], "stratum": r["stratum"], "H": r["H"]})
         row[f'{r["field"]}_{r["scope"]}'] = r["acc"]
+        row[f'{r["field"]}_{r["scope"]}_graph_equal'] = r["acc_graph_equal"]
     fields = ["weight", "stratum", "H"]
     for scope in SCOPES:
-        fields.extend(f"{field}_{scope}" for field in FACTORS)
+        for field in FACTORS:
+            fields.append(f"{field}_{scope}")
+            fields.append(f"{field}_{scope}_graph_equal")
     return [{k: bucket[key].get(k) for k in fields}
             for key in sorted(bucket)]
 
@@ -235,6 +256,12 @@ def completion_lag_distribution_rows(graphs: list[dict[str, Any]]) -> list[dict[
 
 
 def value_error_rows(graphs: list[dict[str, Any]], H: int) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
+    """Errors among graphs that had completed by H (``tV <= H``).
+
+    This is the ``completed_by_H`` queue.  For H=64 it is the same set used in
+    the formal report; for a future H=16 it excludes graphs that completed
+    later, rather than silently using the final 64-round completion set.
+    """
     counts_rows: list[dict[str, Any]] = []
     depth_rows: list[dict[str, Any]] = []
     pred_rows: list[dict[str, Any]] = []
@@ -244,7 +271,8 @@ def value_error_rows(graphs: list[dict[str, Any]], H: int) -> tuple[list[dict[st
     diff_dist: dict[tuple[str, str], Counter] = defaultdict(Counter)
     non_residue: Counter = Counter()
     for g in graphs:
-        if int(g["tV"]) <= 0:
+        tV = int(g["tV"])
+        if tV <= 0 or tV > H:
             continue
         i = H - 1
         bad = ~g["value_correct"][i]
@@ -267,7 +295,7 @@ def value_error_rows(graphs: list[dict[str, Any]], H: int) -> tuple[list[dict[st
     for (w, s), vals in sorted(by_counts.items()):
         c = Counter(vals)
         counts_rows.append(dict(
-            weight=w, stratum=s, H=H, completed=len(vals),
+            weight=w, stratum=s, H=H, queue="completed_by_H", completed=len(vals),
             zero=c.get(0, 0),
             one_two=sum(v for k, v in c.items() if 1 <= k <= 2),
             three_five=sum(v for k, v in c.items() if 3 <= k <= 5),
@@ -275,16 +303,19 @@ def value_error_rows(graphs: list[dict[str, Any]], H: int) -> tuple[list[dict[st
             max_wrong=max(vals) if vals else None,
         ))
     for (w, s, d), (err, total) in sorted(by_depth.items()):
-        depth_rows.append(dict(weight=w, stratum=s, H=H, depth=d, errors=err,
-                               total=total, rate=(err / total) if total else None))
+        depth_rows.append(dict(weight=w, stratum=s, H=H, queue="completed_by_H",
+                               depth=d, errors=err, total=total,
+                               rate=(err / total) if total else None))
     for (w, s), c in sorted(pred_dist.items()):
         for value, n in sorted(c.items()):
-            pred_rows.append(dict(weight=w, stratum=s, H=H, kind="pred_value",
-                                  value=value, count=n, n_non_residue=non_residue[(w, s)]))
+            pred_rows.append(dict(weight=w, stratum=s, H=H, queue="completed_by_H",
+                                  kind="pred_value", value=value, count=n,
+                                  n_non_residue=non_residue[(w, s)]))
     for (w, s), c in sorted(diff_dist.items()):
         for value, n in sorted(c.items()):
-            pred_rows.append(dict(weight=w, stratum=s, H=H, kind="mod_diff",
-                                  value=value, count=n, n_non_residue=non_residue[(w, s)]))
+            pred_rows.append(dict(weight=w, stratum=s, H=H, queue="completed_by_H",
+                                  kind="mod_diff", value=value, count=n,
+                                  n_non_residue=non_residue[(w, s)]))
     return counts_rows, depth_rows, pred_rows
 
 
@@ -321,18 +352,24 @@ def graph_events(g: dict[str, Any]) -> dict[str, Any]:
         value_first_recovery_rel_round=None,
         value_affected_nodes_first=None,
         value_affected_depths_first=None,
+        value_affected_positions_first=None,
         value_degradation_episodes=None,
         value_final_correct=None,
         value_last_correct_run_rel_round=None,
         value_stable_recovered=None,
         value_recovery_then_error=None,
+        value_preserved=None,
         variable_all_at_tV=bool(var_ok[tV - 1].all()) if tV > 0 else None,
         variable_first_new_error_rel_round=None,
         variable_affected_nodes_first=None,
         variable_affected_depths_first=None,
+        variable_affected_positions_first=None,
         variable_affected_recovered_rel_round=None,
         variable_all_recovered_after_error=False,
         variable_final_all=bool(var_ok[-1].all()),
+        variable_preserved=None,
+        value_and_variable_preserved=None,
+        value_minus_variable_first_rel=None,
         primary_event=None,
     )
     if tV <= 0:
@@ -351,6 +388,7 @@ def graph_events(g: dict[str, Any]) -> dict[str, Any]:
         value_last_correct_run_rel_round=drift["last_correct_run_rel_round"],
         value_stable_recovered=drift["stable_recovered"],
         value_recovery_then_error=drift["recovery_then_error"],
+        value_preserved=(bool(drift["post_observed"]) and not bool(drift["ever_degraded"])),
     )
     first_value_rel = drift["first_degradation_rel_round"]
     if first_value_rel is not None:
@@ -358,6 +396,7 @@ def graph_events(g: dict[str, Any]) -> dict[str, Any]:
         bad = ~g["value_correct"][i]
         row["value_affected_nodes_first"] = int(bad.sum())
         row["value_affected_depths_first"] = _depth_list(g["depth"][bad])
+        row["value_affected_positions_first"] = _position_list(g["positions"][bad])
 
     # VARIABLE: correct-to-wrong transition after tV, not merely "not all
     # correct at tV" (that case is recorded separately in variable_all_at_tV).
@@ -374,6 +413,7 @@ def graph_events(g: dict[str, Any]) -> dict[str, Any]:
                 row["variable_first_new_error_rel_round"] = rel
                 row["variable_affected_nodes_first"] = int(transition.sum())
                 row["variable_affected_depths_first"] = _depth_list(g["depth"][transition])
+                row["variable_affected_positions_first"] = _position_list(g["positions"][transition])
                 break
         if first_var_rel is not None and affected is not None:
             for rel in range(first_var_rel + 1, R - tV + 1):
@@ -383,6 +423,22 @@ def graph_events(g: dict[str, Any]) -> dict[str, Any]:
             row["variable_all_recovered_after_error"] = any(
                 var_ok[tV + rel - 1].all()
                 for rel in range(first_var_rel + 1, R - tV + 1)
+            )
+
+    if row["value_post_observed"]:
+        # Independent preserve definitions; these are intentionally NOT the
+        # mutually exclusive primary_event category.
+        row["variable_preserved"] = bool(
+            row["variable_all_at_tV"] and row["variable_first_new_error_rel_round"] is None
+        )
+        row["value_and_variable_preserved"] = bool(
+            row["value_preserved"] and row["variable_preserved"]
+        )
+        if (row["value_first_degradation_rel_round"] is not None
+                and row["variable_first_new_error_rel_round"] is not None):
+            row["value_minus_variable_first_rel"] = (
+                int(row["value_first_degradation_rel_round"])
+                - int(row["variable_first_new_error_rel_round"])
             )
 
     # Primary event is mutually exclusive and prioritises a VALUE failure,
@@ -427,26 +483,77 @@ def event_summary_rows(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
         val_mean, val_median = _mean_median(val_first)
         var_mean, var_median = _mean_median(var_first)
         primary = Counter(e["primary_event"] for e in es)
+
+        # Independent preserve definitions; these overlap with primary_event
+        # only by construction and are not derived from it.
+        value_preserved = [e for e in post if e["value_preserved"] is True]
+        variable_preserved = [e for e in post if e["variable_preserved"] is True]
+        both_preserved = [e for e in post if e["value_and_variable_preserved"] is True]
+
+        both_events = [
+            e for e in post
+            if e["value_first_degradation_rel_round"] is not None
+            and e["variable_first_new_error_rel_round"] is not None
+        ]
+        deltas = [e["value_minus_variable_first_rel"] for e in both_events]
+        delta_mean, delta_median = _mean_median(deltas)
         rows.append(dict(
             weight=w, stratum=s, n_graphs=len(es), n_completed=len(completed),
             n_never_complete=primary.get("never_value_complete", 0),
             n_delayed=sum(1 for e in completed if e["delayed"]),
             n_value_no_post_observation=sum(1 for e in completed if not e["value_post_observed"]),
-            n_value_never_degraded=sum(1 for e in post if not e["value_ever_degraded"]),
+            n_value_never_degraded=len(value_preserved),
             n_value_ever_degraded=len(val_deg),
             n_value_degraded_final_wrong=primary.get("value_degraded_final_wrong", 0),
             n_value_degraded_final_correct_unstable=primary.get("value_degraded_final_correct_unstable", 0),
             n_value_degraded_recovered_stable=primary.get("value_degraded_recovered_stable", 0),
             n_variable_all_at_tV_false=sum(1 for e in completed if e["variable_all_at_tV"] is False),
             n_variable_degraded_after_tV=len(var_deg),
-            n_variable_degraded_value_preserved=primary.get("variable_degraded_after_tV_value_preserved", 0),
-            n_variable_already_wrong_value_preserved=primary.get("variable_already_wrong_at_tV_value_preserved", 0),
-            n_value_and_variable_preserved=primary.get("value_and_variable_preserved", 0),
+            n_value_preserved=len(value_preserved),
+            n_variable_preserved=len(variable_preserved),
+            n_value_and_variable_preserved=len(both_preserved),
+            n_primary_value_and_variable_preserved=primary.get("value_and_variable_preserved", 0),
+            n_variable_degraded_value_preserved=sum(
+                1 for e in post
+                if e["variable_first_new_error_rel_round"] is not None
+                and e["value_preserved"] is True
+            ),
+            n_primary_variable_degraded_value_preserved=primary.get(
+                "variable_degraded_after_tV_value_preserved", 0
+            ),
+            n_variable_already_wrong_value_preserved=sum(
+                1 for e in post
+                if e["variable_all_at_tV"] is False and e["value_preserved"] is True
+            ),
+            n_primary_variable_already_wrong_value_preserved=primary.get(
+                "variable_already_wrong_at_tV_value_preserved", 0
+            ),
             n_delayed_completion_only=primary.get("delayed_completion_only", 0),
+            n_both_events=len(both_events),
+            n_variable_first=sum(1 for d in deltas if d > 0),
+            n_same_round=sum(1 for d in deltas if d == 0),
+            n_value_first=sum(1 for d in deltas if d < 0),
+            n_variable_only=sum(
+                1 for e in post
+                if e["variable_first_new_error_rel_round"] is not None
+                and e["value_first_degradation_rel_round"] is None
+            ),
+            n_value_only=sum(
+                1 for e in post
+                if e["variable_first_new_error_rel_round"] is None
+                and e["value_first_degradation_rel_round"] is not None
+            ),
+            n_neither_event=sum(
+                1 for e in post
+                if e["variable_first_new_error_rel_round"] is None
+                and e["value_first_degradation_rel_round"] is None
+            ),
             value_first_deg_mean_rel=val_mean,
             value_first_deg_median_rel=val_median,
             variable_first_deg_mean_rel=var_mean,
             variable_first_deg_median_rel=var_median,
+            value_minus_variable_mean_rel=delta_mean,
+            value_minus_variable_median_rel=delta_median,
         ))
     return rows
 
@@ -562,13 +669,19 @@ def build_meta(run_dir: Path, out_dir: Path, graphs: list[dict[str, Any]],
             ),
             value_correct="pred_value == true_value at a numeric node",
             variable_correct="pred_variable == true_variable at a numeric node",
+            field_accuracy_micro="correct / total nodes (node-weighted)",
+            field_accuracy_graph_equal="mean of per-graph accuracy over graphs with nodes in the scope; all/internal coincide with micro when N and leaf count are fixed, sink/depth buckets need not",
             value_event="first post-tV round where graph_value_all is false",
             variable_event="first post-tV round with a correct-to-wrong VARIABLE transition at any node; nodes already wrong at tV are not counted as a new variable event",
             stable_recovered="last two post-completion observations are both correct (c_common.completion_drift semantics), not just the final round",
             final_correct="the last observed round is correct, only defined for completed graphs with post-completion observations",
             delayed_completion="tV > actual_max_depth + 1",
             completion_lag="tV - (actual_max_depth + 1)",
-            primary_event="mutually exclusive priority: VALUE failure first, then VARIABLE, then delayed, then preserved",
+            value_error_queue="completed_by_H: graphs with tV <= H; for H=64 this equals the formal completion set",
+            preserved_independent="value_preserved and variable_preserved are independent booleans, not primary_event categories; variable_preserved requires VARIABLE all-correct at tV and no later correct-to-wrong transition",
+            event_order="value_minus_variable_first_rel = VALUE first-event rel round minus VARIABLE first-event rel round; positive means VARIABLE first, zero same round, negative VALUE first; only graphs with both events enter the delta",
+            positions="first affected token positions are stored as space-separated reduced-sequence positions; use source_index/positions to trace the original graph",
+            primary_event="mutually exclusive priority: VALUE failure first, then VARIABLE, then delayed, then preserved; only for case classification, not for independent preserve totals",
         ),
     )
 

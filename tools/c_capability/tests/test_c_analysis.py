@@ -27,12 +27,17 @@ def make_graph(value_all, *, tV=2, t4=2, ref=2, var_wrong=(), value_wrong=(),
     true_value = np.array([0, 1, 2], dtype=np.int16)
     pred_variable = np.tile(true_variable, (R, 1))
     pred_value = np.tile(true_value, (R, 1))
-    value_correct = np.repeat(value_all[:, None], N, axis=1)
+    # Construct predictions first, then derive every correctness flag from
+    # those predictions.  This keeps field accuracy and event flags coupled
+    # to the same synthetic data.
+    for r in range(R):
+        if not value_all[r]:
+            pred_value[r, :] = (true_value + 1) % 4
     for r, node in var_wrong:
         pred_variable[r, node] = (pred_variable[r, node] + 1) % 4
     for r, node in value_wrong:
-        value_correct[r, node] = False
         pred_value[r, node] = (pred_value[r, node] + 1) % 4
+    value_correct = pred_value == true_value[None, :]
     first4_correct = value_correct & (pred_variable == true_variable[None, :])
     return dict(
         weight=weight, stratum=stratum, graph_id=graph_id, source_index=0,
@@ -111,7 +116,57 @@ class EventTests(unittest.TestCase):
         self.assertEqual(row["n_completed"], 2)
         self.assertEqual(row["n_never_complete"], 1)
         self.assertEqual(row["n_value_degraded_recovered_stable"], 1)
-        self.assertEqual(row["n_variable_degraded_value_preserved"], 1)
+        self.assertEqual(row["n_primary_variable_degraded_value_preserved"], 1)
+
+    def test_delayed_stable_is_independently_preserved(self):
+        # Delayed completion does not enter the mutually exclusive
+        # value_and_variable_preserved primary category, but the independent
+        # preserve flag must still count it.
+        g = make_graph([False, False, True, True, True, True], tV=3, t4=3, ref=2)
+        e = ae.graph_events(g)
+        self.assertTrue(e["delayed"])
+        self.assertEqual(e["primary_event"], "delayed_completion_only")
+        self.assertTrue(e["value_preserved"])
+        self.assertTrue(e["variable_preserved"])
+        self.assertTrue(e["value_and_variable_preserved"])
+        summary = ae.event_summary_rows([e])[0]
+        self.assertEqual(summary["n_delayed_completion_only"], 1)
+        self.assertEqual(summary["n_primary_value_and_variable_preserved"], 0)
+        self.assertEqual(summary["n_value_and_variable_preserved"], 1)
+
+    def test_event_order_counts_and_delta(self):
+        graphs = [
+            # variable first: value rel 2, variable rel 1
+            make_graph([False, True, True, False, True], var_wrong=[(2, 1)]),
+            # same round: both rel 1
+            make_graph([False, True, False, True, True], var_wrong=[(2, 1)]),
+            # value first: value rel 1, variable rel 2
+            make_graph([False, True, False, True, True], var_wrong=[(3, 1)]),
+            # variable only
+            make_graph([False, True, True, True, True], var_wrong=[(2, 1)]),
+            # value only
+            make_graph([False, True, False, True, True]),
+            # neither
+            make_graph([False, True, True, True, True]),
+        ]
+        row = ae.event_summary_rows(ae.event_rows(graphs))[0]
+        self.assertEqual(row["n_both_events"], 3)
+        self.assertEqual(row["n_variable_first"], 1)
+        self.assertEqual(row["n_same_round"], 1)
+        self.assertEqual(row["n_value_first"], 1)
+        self.assertEqual(row["n_variable_only"], 1)
+        self.assertEqual(row["n_value_only"], 1)
+        self.assertEqual(row["n_neither_event"], 1)
+        self.assertEqual(row["value_minus_variable_median_rel"], 0.0)
+
+    def test_first_affected_positions(self):
+        g = make_graph([False, True, True, True, True], var_wrong=[(2, 1)],
+                       value_wrong=[(2, 2)])
+        e = ae.graph_events(g)
+        self.assertEqual(e["variable_affected_positions_first"], "1")
+        self.assertEqual(e["variable_affected_depths_first"], "1")
+        self.assertEqual(e["value_affected_positions_first"], "2")
+        self.assertEqual(e["value_affected_depths_first"], "1")
 
 
 class TableTests(unittest.TestCase):
@@ -134,6 +189,32 @@ class TableTests(unittest.TestCase):
         self.assertEqual(rows[0]["completed"], 1)
         self.assertEqual(rows[0]["lag2_4"], 1)
         self.assertEqual(rows[0]["max_lag"], 2)
+
+    def test_sink_graph_equal_can_differ_from_micro(self):
+        # g1 has one sink node (correct); g2 has two sink nodes, one wrong.
+        g1 = make_graph([False, True, True, True])
+        g2 = make_graph([False, True, True, True], value_wrong=[(1, 2)])
+        g2["is_sink"] = np.array([False, True, True])
+        rows = ae.field_accuracy_rows([g1, g2], horizons=[2])
+        sink = next(r for r in rows if r["field"] == "value" and r["scope"] == "sink")
+        self.assertAlmostEqual(sink["acc"], 2 / 3)
+        self.assertAlmostEqual(sink["acc_graph_equal"], 3 / 4)
+        self.assertEqual(sink["n_graphs_with_nodes"], 2)
+
+    def test_value_error_queue_is_completed_by_H(self):
+        g = make_graph([False, False, False, True], tV=4, ref=2)
+        early, _, _ = ae.value_error_rows([g], H=2)
+        at_completion, _, _ = ae.value_error_rows([g], H=4)
+        self.assertEqual(early, [])
+        self.assertEqual(at_completion[0]["completed"], 1)
+        self.assertEqual(at_completion[0]["queue"], "completed_by_H")
+
+    def test_fixture_predictions_and_flags_are_consistent(self):
+        g = make_graph([False, True, True])
+        self.assertTrue(np.array_equal(g["value_correct"],
+                                       g["pred_value"] == g["true_value"][None, :]))
+        self.assertTrue(np.array_equal(g["graph_value_all"],
+                                       g["value_correct"].all(axis=1)))
 
 
 if __name__ == "__main__":

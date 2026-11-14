@@ -86,7 +86,8 @@ C1–C4 问题已不再作为未决项。仍建议后续报告时明确：
 - 正式六档数据已由 `build_data.py --allow-generate` 生成；s42_e143 与
   s1234_e143 各完成 384 图 × 64 轮，无 Traceback/OOM；汇总已生成。
   结果、边界与典型轨迹见 `docs/records/2026-11-14/c0-capability-report.md`。
-- 现有 NPZ 的 CPU 复分析已加入 `analyze_existing.py`（8 项测试通过），
-  输出逐字段/错误深度/完成延迟/逐图事件/事件汇总；不重跑模型。
+- 现有 NPZ 的 CPU 复分析已加入 `analyze_existing.py`（14 项测试通过），
+  输出逐字段 micro/graph-equal、错误深度/数量/完成队列、完成延迟、
+  逐图事件（含首次受影响 positions）/事件汇总/同图事件顺序；不重跑模型。
 - **未训练 C+、未扩展人工注错矩阵；seed2026 训练未受影响。**
 
