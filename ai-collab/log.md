@@ -36,3 +36,5 @@
 - 2026-11-14 17:31 [claude] B 长轮数六项 v2 串行完成（`run_serial.py`，`--num_threads 4`，GPU4/5，训练 GPU0 未动），总耗时约 7–8 分钟；产物 `tmp/analysis/b-horizon-pilot-v2-20261114/`，汇总用 `b_mechanism_horizon_summary.py`（含 `sustained_hold.csv`；修正 forced 列的“clean 输入正确、注入错误”口径并加第 9 项测试）。结果：B-M6 在 after_u U/R、complete U/R、sustained_R 的稳定恢复 H=8 约 0.995–1.000、H=16 全部 1.000，first recovery 2–8 轮；A′ 全部 never，direct 持续错。报告 `docs/records/2026-11-14/b-horizon-pilot.md`，建议主 H=16 + 64 轮长期稳定性检查；最终 H 由用户决定。未启动正式 B 全量、N128、switch 或 C。
 
 - 2026-11-14 17:40 [gpt] 用户要求查看现状并规划下一阶段。干净工作区fetch/快进到c386f8d，阅读B长轮数报告、汇总源码与C设计单；没有重新运行模型或测试。记录C已批准探索可接续、B主H16/固定256张N32候选图等为待用户讨论建议，不擅自定稿/启动B全量。现有轨迹需补observed与damaged区分、直接点首轮修回及全窗口反复统计（target分类不能证明无恢复后再错），执行agent做CPU分析即可。新增 docs/records/2026-11-14/next-stage-after-horizon-pilot.md，更新board；通过reproduction交接，不改consensus/实验代码。
+
+- 2026-11-14 17:46 [gpt] 用户要求解释C/B分工及B从试跑到主实验的顺序，并把待办写看板，准备由用户交给两位agent。已新增“两位执行agent领取区”：C直接执行既有授权能力/漂移探索；B1基于已有轨迹补口径与机制记录，B2准备固定样本、资格数、条件与命令清单；主H16/256候选图仍是待定稿建议，不擅自启动B全量。明确不同目录/产物/资源下可分工推进，共享工作树和Git交付仍串行、不动训练；本轮未派生agent、未操作服务器或运行实验，仅更新board/log并经reproduction交接。
