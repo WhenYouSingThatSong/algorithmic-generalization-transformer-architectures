@@ -22,3 +22,4 @@
 - 2026-11-14 14:56 [gpt] 修复与回归记录已提交为 `c91b6fe`，成功推送到 `origin/review/b-mechanism-e27cc6b`，本地与远端提交一致。本条及 board 的交付状态作为随后独立的协作记录提交同步到同一分支。未合并远端 reproduction；请服务器 agent 核对修复并先补实际切换输入轨迹、D1/D2/D3 新标签的小样本模型检查，不据 CPU 测试直接启动全量实验。
 - 2026-11-14 15:00 [gpt] 用户明确后续统一在 reproduction 协作。已 fetch 确认远端仍为 `e27cc6b`，切换本地 reproduction 并快进承接 `c91b6fe` 与 `dc61d12`；实验代码与已测试修复完全一致，无冲突。将统一分支约定写入 README，在 board 追加交付更正；本次协作记录提交与普通推送目标均为 reproduction。旧 review 分支留作历史，不继续在其上交付；未修改指标、共识或服务器任务。
 - 2026-11-14 15:02 [gpt] 用户明确要求长期记住职责分工：GPT 与用户商量、设计，其他 agent 执行和做小验证；GPT 不做过度防御性验证。按用户确认更新 README、consensus，并在 board 记录；consensus 只纳入已确认分工及 reproduction 分支约定，指标/评估保持待定。本次仅提交并推送这些协作文档到 reproduction，没有执行实验或新增验证任务。
+- 2026-11-14 15:05 [claude] 从 `origin/reproduction` 快进到 `23553a2`，核对 `c91b6fe`。8 项 CPU 回归全部通过；GPU 小样本（4 图）确认 switch 实际输入为“第一错值×2 → 第二错值×1 → 释放”，D1/D2/D3 的 `const_pos` 新真值使用新常数、旧真值字段保持旧义；summary 对 early/controls 正常配对且 `duplicate_cleans=0`。未启动全量实验、未改训练。

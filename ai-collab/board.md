@@ -1,6 +1,6 @@
 # 工作看板
 
-> 最近更新：2026-11-14 15:00 CST · [gpt]
+> 最近更新：2026-11-14 15:05 CST · [claude]
 > 活看板：任务可以移动；状态变化在 `log.md` 记一行。条目格式 `[YYYY-MM-DD HH:MM][author]`。
 
 ## 当前决策
@@ -14,7 +14,7 @@
 ## 需要 review（GPT）
 
 - [x] **B 机制代码 v2 + 指标实现**（GPT 已完成；发现 P1 缺陷，见“Review 结论”）
-  - 审查对象：`origin/reproduction` 的 B 包提交 `ab80594`；review 修复提交 `66440b8`（分支最新提交另含本协作目录）
+  - 审查对象：`origin/reproduction` 的 B 包提交 `ab80594`；review 修复提交 `66440b8` + `c91b6fe`（分支最新提交另含本协作目录）
   - **先读日志**：`log.md` 的 2026-11-14 11:35 / 13:44 条目，了解为什么改、改了哪些
   - 代码：`tools/b_mechanism/`
   - 设计与边界：`docs/records/2026-11-14/b-mechanism-design.md`
@@ -26,7 +26,7 @@
 ## 进行中
 
 - [2026-11-14 10:12][claude] 旧 C0 seed2026 150 epoch，GPU0；输出 `tmp/runs/oldC0-newseed-150ep/`；14:42 检查 epoch 61/150，约 5.9 it/s，val 1.540。不要停止/重启。
-- [2026-11-14 13:44][claude] B review 包：commit `ab80594`；GPT review 完成，R1/R2/R3/R7/R8 已修，当前不启动实验。
+- [2026-11-14 13:44][claude] B review 包：commit `ab80594`；GPT review 完成，R1/R2/R3/R7/R8 及后续 F1/F2 已修，当前不启动实验。
 
 ## 待办 / 下一步
 
@@ -49,6 +49,7 @@
 
 ## 最近完成
 
+- [2026-11-14 15:05][claude] 从 `origin/reproduction` 更新到 `23553a2`，核对 `c91b6fe`：8 项 CPU 回归通过；GPU 小样本确认 switch 实际注入第二错值一次、D1/D2/D3 常数新真值生效；未启动全量实验。
 - [2026-11-14 14:41][claude] B review 修复：R1/R3/R2/R7/R8 代码完成，提交 `66440b8`，4 图 pipeline smoke 通过；未改训练、未启动全量实验。
 - [2026-11-14 14:25][claude] 合并 GPT 审阅分支 `review/b-mechanism-5137014`；审阅文档进入 `handoff/2026-11-14-1406-gpt-b-mechanism-review.md`。
 - [2026-11-14 13:40][claude] 项目备份 `tmp/archive/project-backup-20261114.tar.gz`，SHA256 `7037e0ce2c1cc09b4494031327ce68e959950bec2ba6b2ab1eaa39095a73517a`。
@@ -99,3 +100,4 @@
 - [2026-11-14 14:53][gpt] 复核 `e27cc6b`：R1/R2/R3 修复通过源码与 CPU 回归检查，controls 汇总接口已接通。发现两处残留：合法 switch 被 hold 分支遮蔽，第二错值从未写入；D1/D2/D3 的新真值漏改题面常数。用户授权必要修复后，已在 `review/b-mechanism-e27cc6b` 修正为 N 轮固定、第 N+1 轮一次切换并释放，同时补齐常数新标签。8 项 CPU unittest、8 文件语法编译和 diff 检查通过；没有运行 GPU 或改变服务器任务。指标/评估仍未定稿，switch 不据此升级为正式必跑实验。详细证据与受影响结果见 [后续复核与修复](handoff/2026-11-14-1453-gpt-b-mechanism-followup.md)。本条补充并修正上条“全部已修”的范围，历史记录保留。
 - [2026-11-14 14:56][gpt] 交付状态：修复提交 `c91b6fe` 已推送至 `origin/review/b-mechanism-e27cc6b`，未合并 reproduction。服务器 agent 可从该分支核对两处修复及 CPU 回归，再补模型小样本检查；没有授权或启动全量实验，指标方案仍待用户讨论。
 - [2026-11-14 15:00][gpt] 分支更正：按用户最新确认，以上修复和记录统一并入 reproduction，服务器 agent 后续从 reproduction 更新即可。旧分支及日志作为历史保留；后续提交不再另建审阅分支。
+- [2026-11-14 15:05][claude] 服务器核对 `c91b6fe`：`python -I tools/b_mechanism/tests/test_review_regressions.py` 8/8 通过。GPU 小样本（4 图）确认 switch 的 r 输入序列为“第一错值×2 → 第二错值×1 → 释放”；D1/D2/D3 的 `const_pos` 新真值为新常数、旧真值字段保持旧值；summary 对 early/controls 正常配对、`duplicate_cleans=0`。仍只做小样本检查，未启动全量实验。
