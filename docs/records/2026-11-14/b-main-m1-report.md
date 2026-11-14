@@ -105,20 +105,28 @@ graph-equal 稳定率为 0.9784–0.9979、H=16 为 100%。但 teacher64 只有
 
 ### 4.1 teacher64 与 own 的同链配对
 
-> 2026-11-14 23:22 GPT复核范围更正：本节所引12行CSV来自跳过clean的旧比较入口，直接支持每个模型/时点的276条干预记录一致；包含clean的368条一致尚待统一入口复核，不能把12行CSV当成完整证明。入口现已纳入clean，执行agent将用同一批原轨迹补比较，历史数字暂保留。
+> 2026-11-14 23:35 执行复核：GPT 23:22 指出旧入口跳过 clean。已用纳入
+> clean 的 `b_compare_teacher_own.py` 对同一批原轨迹重跑；下表的 16 行
+> 结果包含 clean/r/u/ur，替换此前 12 行干预-only 记录。历史 12 行 CSV
+> 不再作为完整证明。
 
 按同图、同链（`event_id`）、同 timing、同 condition 筛取 own 对应记录
 （`b_subset_records.py`），每个 timing 得到 92 链 × 4 条件 = 368 条，
-与 teacher64 对齐。可复跑入口 `b_compare_teacher_own.py` 输出
-`summary/teacher_pair_own/teacher_vs_own_compare.csv`：12 行
-（2 模型 × 2 timing × 3 条件），每行 teacher 92、own 365、
-intersection 92、`missing_in_own=0`、`rounds_identical=92`、
-`rounds_different=0`、duplicate/conflict 均为 0。A′/B ×
-before_u/after_u 四个组合的 368 条记录 `rounds` 与 teacher 逐值相同；
-H=8/H=16 的 damage/stable 也相同（`teacher_vs_own_subset.csv`）。
+与 teacher64 对齐。`b_compare_teacher_own.py` 输出
+`summary/teacher_pair_own/teacher_vs_own_compare_with_clean.csv`（仓库内
+小表 `b-main-m1-teacher-vs-own.csv`）：16 行（2 模型 × 2 timing × 4
+条件，含 clean）。每行均为：
 
-这里只记录该事实，是否把 teacher 视为独立起点对照由 GPT/用户判断；
-原 teacher 与 own 全集结果保留作可复现记录。
+- teacher 92、own 365、intersection 92；
+- `missing_in_own=0`、`missing_in_teacher=273`；
+- `duplicate_teacher=0`、`duplicate_own=0`、
+  `conflict_teacher=0`、`conflict_own=0`；
+- `rounds_identical=92`、`rounds_different=0`。
+
+clean/r/u/ur 分别列出，未合并；A′/B × before_u/after_u 的 368 条
+teacher/own 交集记录 `rounds` 均逐值相同。这里只记录该事实，是否把
+teacher 视为独立起点对照由 GPT/用户判断；原 teacher 与 own 全集结果
+保留作可复现记录。
 
 ## 5. long32 H=64
 
@@ -198,7 +206,7 @@ B 在该 64 轮窗口内没有“第 16 轮已正确、17–64 又错”的节�
 - `tmp/analysis/b-main-20261114/summary/teacher64/`
 - `tmp/analysis/b-main-20261114/summary/long32_early/`
 - `tmp/analysis/b-main-20261114/summary/teacher_pair_own/teacher_vs_own_subset.csv`
-- `tmp/analysis/b-main-20261114/summary/teacher_pair_own/teacher_vs_own_compare.csv`
+- `tmp/analysis/b-main-20261114/summary/teacher_pair_own/teacher_vs_own_compare_with_clean.csv`
 - `tmp/analysis/b-main-20261114/summary/long32_early/long_window.csv`
 - `tmp/analysis/b-main-20261114/summary/long32_early/long_window_nodes.csv`
 - `tmp/analysis/b-main-20261114/summary/m1_field_errors.csv`

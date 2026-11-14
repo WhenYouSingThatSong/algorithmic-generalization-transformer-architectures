@@ -158,6 +158,9 @@ A′ 的 stable 仍为 0；A′ 的 n_cp 分别为 364/306/838/0/79，
 - 事件导出：`summary/complete_main256/graph142_pos128_rounds.csv`、
   `summary/complete_main256/unrelated_exclusive_events.csv`
   （`b_export_events.py`）
+- 5-case 完整证据：`docs/records/2026-11-14/b-main-review-evidence.json`
+  （含 clean/intervention 16 轮 pair、原数据图结构、provenance；
+  原始 tensor bundle 留 `tmp/analysis/b-main-20261114/review-evidence-2322/`）
 - 关键计数：`docs/records/2026-11-14/b-main-m2-key-metrics.csv`；
   报告仓库内小表：`b-main-m2-long-window.csv`、
   `b-main-m2-graph142-pos128.csv`、`b-main-m2-unrelated-exclusive.csv`。

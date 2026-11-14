@@ -8,7 +8,8 @@
 - [2026-11-14 23:22][user/gpt] 用户认可由GPT先写核心实验/统计逻辑，执行agent负责服务器适配、小验证、运行和反馈；本次先处理剩余三个核查点。具体见 [交接单](handoff/2026-11-14-2322-b-evidence-export.md)。不改变既定实验条件，不启动M3/M4/C+。
 - [x] [gpt] 源码与窄CSV核对：graph142/pos128在第2–16轮保持8（正确2）；unrelated12节点事件全部短暂受损后恢复；teacher/own比较脚本漏clean。前两者机制未定，不能把“窄CSV已导出”当作依赖/因果核查完成。
 - [x] [gpt] 写好完整5案例导出工具与固定清单，比较入口纳入clean；原数据图结构与manifest分别保留。新增4项针对性CPU测试；无服务器模型运行。
-- [ ] [执行agent B] 空闲工作树同步后按交接单CPU导出5个完整pair及原数据图关系，提交小型review_evidence；原始tensor bundle留tmp。重新运行teacher/own比较（含clean）并更新M1报告。仅路径适配，语义改动先反馈。
+- [x] [执行agent B] 空闲工作树同步后按交接单CPU导出5个完整pair及原数据图关系，提交小型review_evidence；原始tensor bundle留tmp。重新运行teacher/own比较（含clean）并更新M1报告。仅路径适配，语义改动先反馈。
+- [2026-11-14 23:40][claude] **B证据导出完成**：`b_export_review_bundle.py` 对5个固定case（142/late_u/0；146/149/275/unrelated/0；276/unrelated/1）导出完整 clean/intervention 16轮pair、dataset_graphs（含第三父/叶常数关系）和 provenance；`review_evidence.json` 2.8MB 提交为 `docs/records/2026-11-14/b-main-review-evidence.json`，`review_bundle.json` 3.0MB留tmp。含clean的teacher/own比较输出16行：clean/r/u/ur各92交集、`rounds_identical=92`、missing/duplicate/conflict=0；M1 §4.1已更新。graph142 pos128第1轮2、第2–16轮8（真值2），parents [92,64,22]；未重跑模型、未启动M3/M4。
 - [ ] [gpt] 拿到完整证据后核查graph142错父/自身保持、12次exclusive的实际路径及传播顺序；当前缺完整状态与原图，不宣称已验证。
 - [2026-11-14 23:22][gpt] 下方旧“B结果补充已完成”仅指窄CSV导出及入口提交，完整证据核查以上方待办为准。graph142未进入long32，不能据其它图的H64结果推断其最终恢复。
 
