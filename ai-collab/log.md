@@ -64,3 +64,5 @@
 - 2026-11-14 23:51 [gpt] fetch/快进至9207d56，核查完整5案例证据及含clean比较。新增b_audit_review_evidence.py，从dataset_graphs独立建边并与manifest比较，160节点无父/子关系差异；12个exclusive受损节点确实不在注入点下游，异常起点存在正确父输入却错误输出，后续部分按错父传播。graph142/128第2轮父64为EMPTY时变8，第3–16轮父值全正确仍输出8；不能以持续错父解释，也不等于证明内部复制或永久失稳。teacher/own1472条交集rounds全同，missing_in_teacher每行273为own额外样本，修正日志泛称missing=0。实际运行纯stdlib审阅脚本产出audit/损伤轮CSV，核对关键行与ADD mod23手算；无模型重跑、无新实验。C无新提交。报告和board更新，经reproduction提交推送。
 
 - 2026-11-15 00:27 [gpt] 按用户要求新增精简C说明 docs/records/2026-11-15/c0-capability-brief.md，不改原报告。记录旧C0 s42/s1234 e143权重、六档同题64轮自由hidden续算、节点VALUE/四属性H16/H64结果、690完成/197保持/493退化/3末尾恢复及4个真实案例。依据用户压缩包逐图预测，此前已复算48组指标并核对案例；说明raw为原始记录、无hidden快照，时间先后不作因果、深度未严格匹配。无新增模型运行或实验任务；通过reproduction交付文档。
+
+- 2026-11-15 [gpt] 用户要求精简MD汇总B/C权重、实验、结果与现象。核对远端无新提交和原M1/M2/C报告，新增docs/records/2026-11-15/bc-experiments-brief.md，保留原文档；B区分early/整图完成/长窗口/pilot及恢复分母，纳入graph142和12次exclusive核查；C列两种子六档节点指标、完成后保持/恢复及4例，注明无hidden快照和未训C+。更新看板入口，经reproduction提交推送；纯文档整理，无实验或测试重跑。
