@@ -343,7 +343,7 @@ def main():
                         for _pos, cb, jb, ib, cin in entries:
                             if cin[i]:
                                 obs_in += 1
-                                if ib[i]:
+                                if not ib[i]:
                                     forced += 1
                             if cb[i]:
                                 obs += 1

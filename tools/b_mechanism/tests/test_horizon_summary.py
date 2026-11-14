@@ -117,6 +117,19 @@ class RoleAndOffsetTests(unittest.TestCase):
         self.assertEqual(roles['target_u'], {1})
         self.assertEqual(roles['downstream_d1'], {3})
 
+    def test_hold_entries_marks_forced_input_as_wrong(self):
+        chain = {'pos': 1, 'r_pos': 2}
+        clean = dict(rounds=[dict(input_nodes={'2': node(True)}) for _ in range(2)])
+        rec = dict(condition='sustained_r', mode='sustained_r',
+                   hold_rounds=2, chain=chain, injection={'pos': 2},
+                   node_truth=self.NODE_TRUTH,
+                   rounds=[dict(input_nodes={'2': node(False)}) for _ in range(2)])
+        roles = H.role_sets(rec)
+        entries = H.hold_entries(rec, clean, roles, 2)
+        _pos, _cb, _jb, ib, cin = entries[('direct', 'value')][0]
+        self.assertEqual(ib, [False, False])   # injected input is wrong
+        self.assertEqual(cin, [True, True])    # clean input is correct
+
     def test_sustained_horizon_starts_after_release(self):
         chain = {'pos': 1, 'r_pos': 2}
         pat_clean = [True] * 8
