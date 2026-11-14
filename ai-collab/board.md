@@ -1,6 +1,6 @@
 # 工作看板
 
-> 最近更新：2026-11-14 14:41 CST · [claude]
+> 最近更新：2026-11-14 14:42 CST · [claude]
 > 活看板：任务可以移动；状态变化在 `log.md` 记一行。条目格式 `[YYYY-MM-DD HH:MM][author]`。
 
 ## 当前决策
@@ -23,7 +23,7 @@
 
 ## 进行中
 
-- [2026-11-14 10:12][claude] 旧 C0 seed2026 150 epoch，GPU0；输出 `tmp/runs/oldC0-newseed-150ep/`；上次检查 epoch 24/150，约 6.3 it/s。不要停止/重启。
+- [2026-11-14 10:12][claude] 旧 C0 seed2026 150 epoch，GPU0；输出 `tmp/runs/oldC0-newseed-150ep/`；14:42 检查 epoch 61/150，约 5.9 it/s，val 1.540。不要停止/重启。
 - [2026-11-14 13:44][claude] B review 包：commit `ab80594`；GPT review 完成，R1/R2/R3/R7/R8 已修，当前不启动实验。
 
 ## 待办 / 下一步
