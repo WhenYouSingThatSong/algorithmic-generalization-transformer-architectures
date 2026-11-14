@@ -1,15 +1,16 @@
 # 工作看板
 
-> 最近更新：2026-11-14 14:01 CST · [claude]
+> 最近更新：2026-11-14 14:25 CST · [claude]
 > 活看板：任务可以移动；状态变化在 `log.md` 记一行。条目格式 `[YYYY-MM-DD HH:MM][author]`。
 
 ## 当前决策
 
 - [2026-11-14 14:01][claude] `consensus.md` 先留空；具体口径、结果和当前状态放在本看板，待用户确认后再上升为共识。
+- [2026-11-14 14:25][claude] GPT review 已完成：R1/R2/R3 是确定的实现缺陷，暂不进入正式 B 实验；先修实现，再讨论指标和跑 Phase 0。
 
 ## 需要 review（GPT）
 
-- [ ] **B 机制代码 v2 + 正式指标修复**
+- [x] **B 机制代码 v2 + 指标实现**（GPT 已完成；发现 P1 缺陷，见“Review 结论”）
   - 审查对象：`origin/reproduction` 的 B 包提交 `ab80594`（分支最新提交另含本协作目录）
   - **先读日志**：`log.md` 的 2026-11-14 11:35 / 13:44 条目，了解为什么改、改了哪些
   - 代码：`tools/b_mechanism/`
@@ -22,26 +23,31 @@
 ## 进行中
 
 - [2026-11-14 10:12][claude] 旧 C0 seed2026 150 epoch，GPU0；输出 `tmp/runs/oldC0-newseed-150ep/`；上次检查 epoch 24/150，约 6.3 it/s。不要停止/重启。
-- [2026-11-14 13:44][claude] B review 包：commit `ab80594`，等待外部 review。
+- [2026-11-14 13:44][claude] B review 包：commit `ab80594`；GPT 已完成 review，发现 P1 缺陷，待修，当前不启动实验。
 
 ## 待办 / 下一步
 
-- [ ] [gpt] 按上节 review B 代码和文档，给出可执行结论。
-- [ ] [claude] review 通过后先跑 B Phase 0（A′ s42 + B-M6 s42 的 common-complete manifest），报告合格 n。
+- [x] [gpt] 按上节 review B 代码和文档，给出可执行结论。
+- [ ] [claude] 先修 R1（early 资格键统一）和 R3（selection 搜索/保存预算一致），再生成 manifest；验收含“一边合格一边不合格”和换 batch_size 的用例。
+- [ ] [claude] 修 R2（summary 保留运行身份、完整配对键和分组键），覆盖 A/B 同图、own/teacher、before/after 和输入文件顺序交换。
+- [ ] [claude] 处理 R7（controls condition/clean/汇总）和 R8（D1/D2/D3 新真值参照与汇总）接口缺口。
+- [ ] [user/claude] 讨论 R4–R6/R9：全窗口统计、曾恢复 vs 持续恢复、节点/图聚合、节点级指标；指标未定稿前不称为正式验收。
+- [ ] [claude] 实现缺陷修复且用户批准后先跑 B Phase 0（A′ s42 + B-M6 s42 的 common-complete manifest），报告合格 n；保留完整原始轨迹。
 - [ ] [claude] Phase 0 合格数足够后再跑 Phase 1（early 2×2、late R-only/U-only、late 四格、unrelated），单卡串行。
 - [ ] [claude] Phase 2 sustained/switch；Phase 3 训练腐蚀审计；局部自洽仍不跑。
-- [ ] [claude] seed2026 完成后用正式三指标评旧 N32/N128，并与 s42/s1234/s2025 对照。
+- [ ] [claude] seed2026 完成后用当前 eval 实现评旧 N32/N128，并与 s42/s1234/s2025 对照；指标未定稿，先保留原始结果。
 - [ ] [user/claude] 决定是否/何时重新设计局部自洽错误控制。
 
 ## 阻塞 / 等待
 
-- B 全量实验：等待外部 review 和用户批准。
+- B 全量实验：等待 R1/R2/R3 修复、指标/评估讨论和用户批准。
 - 局部自洽控制：构造可能不自洽，DEFERRED / NOT RUN。
 
 ## 最近完成
 
+- [2026-11-14 14:25][claude] 合并 GPT 审阅分支 `review/b-mechanism-5137014`；审阅文档进入 `handoff/2026-11-14-1406-gpt-b-mechanism-review.md`。
 - [2026-11-14 13:40][claude] 项目备份 `tmp/archive/project-backup-20261114.tar.gz`，SHA256 `7037e0ce2c1cc09b4494031327ce68e959950bec2ba6b2ab1eaa39095a73517a`。
-- [2026-11-14 13:44][claude] 提交 `ab80594`：B 工具/文档迁出 `tmp/`、正式指标修复、`--save_top_k`、无效 C0 配置清理。
+- [2026-11-14 13:44][claude] 提交 `ab80594`：B 工具/文档迁出 `tmp/`、指标统计实现（未定稿）、`--save_top_k`、无效 C0 配置清理。
 - [2026-11-14 13:45][claude] 推送 `origin/review/b-mechanism`（后重命名为 `reproduction`）。
 - [2026-11-14 11:35][claude] B 代码 v2 smoke 全路径跑通；仅 pipeline smoke。
 - [2026-11-14][claude] 旧 C0 150ep 的 N32/N128 结果已整理；数字见下方“共享发现”。
@@ -51,12 +57,12 @@
 
 - 当前主线：旧 C0 150ep + B 机制；离散线 A / A′ / B，连续线 no-interm C0。
 - 命名：**C0** = 旧 C0（旧窄分布，50k，32 节点、depth ≤ 6，129 词表，seed 42/1234/2025，150ep）；**C0′** = 新 MixedN（8/16/24/32 节点、depth 1–12，100k，129 词表，100ep，已冷存）；**vocab33** = 独立错误配置，已废弃，不得引用。详见 `docs/records/2026-11-14/c0-naming-vocab.md`。
-- 指标：**Value Node Acc** = 非 PAD 数值节点的 VALUE token 准确率；**Graph Value All** = 每图所有数值节点 VALUE 正确；**Strict First-4** = 每图所有非 PAD 位置的 syntax / variable / operation / value 正确。后两个是整图 conjunction，非平滑，必须同时报分母。旧 `VALUE acc` / `last_var_fully` 不能与正式三指标混用。
+- 指标现状（未定稿）：现有 **Value Node Acc**、**Graph Value All**、**Strict First-4** 三个统计；但指标与评估尚未最终确定，旧三指标只作辅助/历史口径，不能称为正式验收标准。B common 的 numeric mask 与正式 `metric_utils` 的 numeric 范围不同，不能直接混称。
 - 当前活跃：C0 旧线 + B 主对照 A′ s42 / B-M6 s42；C0′ 和 vocab33 不活跃；cyhB 三 seed 放第二批。
 
 ## 共享发现 / 证据
 
-- 旧 C0 150ep 旧 N32（e143，Value / Graph / Strict）：s42 `0.9992 / 0.9873 / 0.9844`；s1234 `0.9990 / 0.9854 / 0.8770`；s2025 VALUE 约 0.48，后两项为 0。
+- 旧 C0 150ep 旧 N32（e143，Value / Graph / Strict，按当前 eval 实现口径，非最终验收）：s42 `0.9992 / 0.9873 / 0.9844`；s1234 `0.9990 / 0.9854 / 0.8770`；s2025 VALUE 约 0.48，后两项为 0。
 - 旧 C0 150ep 旧 N128（e143）：s42 `0.9912 / 0.8379 / 0.0156`；s1234 `0.9677 / 0.2910 / 0`。
 - 旧 C0 原始结果：`tmp/analysis/oldC0-resume-150ep/`；旧数据配方，不能直接与 B 的 heldout/matched-depth 样本混用。
 - B smoke：4 张 heldout 图 selection 4/4 common-complete；early 28 条、late 53 条、leaf 16 条、controls 7+7；audit 128 candidates + 692 次替换的 pre-corruption 全 EMPTY。**不是结果**。
@@ -71,8 +77,6 @@
 
 ## Review 结论
 
-- 暂无。
-
 - [2026-11-14 14:06][gpt] 已复核 `reproduction@5137014`，**未通过正式 B 实验验收**。本条取代上方“暂无”，保留此前记录。7 个 B Python 脚本在换行归一化后与 v2 压缩包完全一致，上一轮问题尚未修复。
   - P1 实现缺陷：early 标记 `early_own_after` 与读取的 `early_own_after_u` 不一致；summary 的 clean 配对键/汇总分组缺运行身份，可能串模型和时点；selection 搜索按 batch 预算、manifest 却保存单图预算。
   - P2 未完成/口径问题：只统计首轮受损、any-later 被叫恢复、未按图等权；controls 无 clean 且 mode 不被 summary 识别；D1/D2/D3 正确标记仍按旧 label。
@@ -81,3 +85,5 @@
   - 证据、修复建议、验收样例见 [Git 复核交接](handoff/2026-11-14-1406-gpt-b-mechanism-review.md)。源码审查与包对照已完成；未独立运行模型 smoke，未修改实验代码或 consensus。
 
 - [2026-11-14 14:12][gpt] 更正上述审阅措辞：用户明确**指标和评估尚未完全确定**。上条“用户最新指标要求”“未通过正式 B 实验验收”过度表述了协议的确定程度，以本条及修订后的交接文档为准。R1–R3 的资格键、运行身份配对、预算不一致仍是确定的实现缺陷；首轮/全窗口、曾恢复/持续恢复、节点/图聚合、两项节点核心指标属于待讨论选择，不能因尚未实现就认定为 bug。controls 汇总接口及 D1/D2/D3 真值参照另列为接口缺口或解释边界。未改 consensus。审阅分支目前仅在本地，尚未推送。
+
+- [2026-11-14 14:25][claude] 已接收并合并 GPT 审阅分支。对齐结论：四层探索框架（早期时点 / 整图完成 / 更新依据 / 训练腐蚀）与当前设计一致；但当前实现只部分覆盖“逐轮传播与恢复”的三情形，R4/R5 是观察窗口与恢复定义待定，R1/R3/R2 是确定实现缺陷。下一步先修 R1/R3，再修 R2；不启动 B 实验。局部自洽和 `switch_held_r` 的旧“稳定错误切换”解释继续暂缓。
