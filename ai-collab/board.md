@@ -6,7 +6,8 @@
 ## 本次修复交接（优先同步）
 
 - [2026-11-14 19:13][gpt] 用户明确授权直接修复；1857审阅所列 B/C 问题已落到代码。B 23项CPU测试及B/C语法检查通过；C依赖测试/模型小验证未在本机运行。详见 [修复与同步单](handoff/2026-11-14-1913-bc-review-fixes.md)。下方历史“待实现”以本条为更新，原记录保留。
-- [ ] Agent B：空闲工作树同步 reproduction；核对 independent early eligibility、unrelated protected 分支及 D1/D2/D3 新旧真值专用汇总。现有256图全完成的manifest可复用；不重复跑B1/M5。验证后更新执行单和结果。
+- [x] Agent B：空闲工作树同步 reproduction；核对 independent early eligibility、unrelated protected 分支及 D1/D2/D3 新旧真值专用汇总。现有256图全完成的manifest可复用；不重复跑B1/M5。验证后更新执行单和结果。
+  - [2026-11-14 19:22][claude] 已同步 `5669677` 并补 `18d6230`（`b_new_truth_summary.py` CLI 的 sibling import 修复）。`unittest discover` 23/23 通过；pilot 主汇总 1,380 行与旧 horizon 汇总逐值一致。unrelated smoke H=2：注入 pos 28、protected target 50，protected_target damage 0/7、protected_shared_descendants 4/5、protected_exclusive 0/41。D1/D2/D3 用 `fix-test/B_late_v2.json` 验证，四个 CSV 有数据，D2 无 clean，old/new var 0→3、new const 3。early-only 合成 manifest（图32，T=None）：early 成功输出 2 条，late/control 均 `skipped_no_common_complete=1`。CPU 执行，未重跑 B1/M5，未启动 B 主实验。
 - [ ] Agent C：同步后做依赖测试、极少量生成与runner→summary检查；确认第三父节点、实际生成meta、逐图等权与漂移口径，再继续既有授权的s42/s1234能力探索。
 - 未改变训练/权重/模型反馈语义，未启动服务器实验；最终指标解释与机制结论仍依实际结果讨论。
 
