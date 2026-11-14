@@ -1,6 +1,6 @@
 # C0 能力与自由运行漂移：六档首批探索报告
 
-日期：2026-11-14 19:58 CST。  
+日期：2026-11-14 19:58 CST；21:00 补充现有 NPZ 的可复跑事件分析。  
 状态：**首批六档正式运行完成；探索结果，不是最终评测协议，也未训练 C+**。  
 设计：`docs/records/2026-11-14/c0-capability-exploration-plan.md`  
 代码：`9df92a8` + 本地未提交的 C 入口路径/测试修复；GPT review 修复见 `5669677`。  
@@ -13,11 +13,12 @@
    32–64/64，主要缺口在 N128。大多数完成的图在 `实际最大深度 + 1` 轮首次
    整图 VALUE 全对；N128_deep 的中位 tV 为 12（s42）/13（s1234）。
 
-2. **自由续算没有稳定不动点：VALUE 在完成后会漂移，规模越大越严重。**
+2. **本批 64 轮窗口内出现完成后退化：VALUE 会漂移，规模越大越严重。**
    H=64 时整图 VALUE 全对率从 s42 N32_shallow 的 47/64 降到 N128_deep 的
    1/64；s1234 的 N64/N128 档只剩 0–7/64。节点级 VALUE 仍较高
    （internal 0.62–0.96），说明不少图只是少数节点错，但整图 conjunction
-   已经把“仍算对”变成 0。
+   已经把“仍算对”变成 0。这里只陈述 64 轮窗口内的观察，不外推“没有
+   稳定不动点”或 64 轮之后的行为。
 
 3. **first-4 的崩溃几乎全部来自 VARIABLE，而不是四个字段一起坏。**
    在 ADD/单一语法任务中 SYNTAX、OPERATION 真值恒定，模型在 H=64 仍为
@@ -31,10 +32,11 @@
    有 tV=61，N32_shallow 有 tV=32），N128_deep 32 张从未完成。完成后的
    VALUE 漂移则两个权重都存在，且在 N64/N128、深图上更强。
 
-5. **VALUE 漂移是“深层优先”的，且错误值是合法余数而非 EMPTY/NA。**
-   s42 N128_deep 完成图中，H=64 的 VALUE 错误率从 depth 1 的 0.2% 单调
-   升到 depth 10–12 的约 50%；s1234 同档从 2.6% 升到 93%。N32 上不少图
-   只有 1–2 个 VALUE 错，N64/N128 多数完成图有 >5 个错。
+5. **H=64 切片中 VALUE 错误随真实深度增加，且错误值是合法余数而非
+   EMPTY/NA。** s42 N128_deep 完成图中，H=64 的 VALUE 错误率从 depth 1
+   的 0.2% 升到 depth 10–12 的约 50%；s1234 同档从 2.6% 升到 93%。
+   N32 上不少图只有 1–2 个 VALUE 错，N64/N128 多数完成图有 >5 个错。
+   这只是 H=64 时刻的切片，不能单凭它说深层节点“最先”退化。
 
 6. **s42 与 s1234 的差异主要在 N128，不能把 e143 当作“最佳 checkpoint”。**
    s42 在 N128_deep 的 VALUE 完成 59/64、H=64 仍全对 1/64；s1234 为
@@ -44,7 +46,8 @@
 7. **C+ 的直接启示：先决定“保持什么”，再设计干预。**
    当前证据支持把 VALUE 稳定性与 VARIABLE 身份保持分开作为两个目标；
    如果 C+ 只优化 first-4 合计，会被 VARIABLE 读出头主导；如果只优化
-   VALUE，可能掩盖表示已经离开训练流形、只是 VALUE 读数暂时正确。
+   VALUE，可能掩盖读出头或表示稳定性问题。后者目前只是待检验假设，
+   本批没有 hidden probe，不能据此断言表示已经离开训练流形。
 
 ## 1. 数据与权重
 
@@ -111,10 +114,16 @@ C0 的训练分布是 N32、depth ≤6、129 词表；N64/N128 与 deep 档都�
   轮次；没有则为空。t4 存在时必然 ≥ tV；本批所有 t4 存在的情形都恰好
   `t4=tV`，没有观察到“VALUE 先完成、VARIABLE 后补对”的图。
 - **完成后漂移**：从 tV 的下一轮开始，按相对轮次记录第一次整图 VALUE
-  失败、是否恢复、最终是否正确。`stable_recovered` 指末轮仍正确；本报告
-  的“恢复”不自动等于永久恢复。
-- 每档 64 图节点数相同，因此逐图等权与节点加权在本批数值上相同；summary
-  仍同时输出两列，后续不同规模混合分析时需保留区分。
+  失败、是否恢复、末轮是否正确。`stable_recovered` 指退化后**末尾连续
+  两轮都正确**（`c_common.completion_drift` 语义），不是仅末轮；
+  `recovered` 只是“退化后末轮正确”的兼容别名。本报告的“恢复”不自动
+  等于永久恢复。
+- 相对轮次曲线每轮以 `n_observable` 为分母；本批所有完成图的 tV≤61，
+  因此都有至少 1 个后续观察。若未来出现 tV=64，`post_observed` 与末轮
+  标志不可用，必须把无观察图单列，不能算作“保持”。
+- 每档 64 图节点数相同，因此**全数值节点**的逐图等权与节点加权在本批
+  数值上相同；叶数固定时 internal 也相同。sink/深度桶的节点数随图变化，
+  不能笼统宣称所有指标宏微一致；summary 仍同时保留两套值。
 - 运行：GPU6，两个权重串行，各 384 图 × 64 轮。s42 耗时 95.4 s，s1234
   99.7 s；日志无 Traceback/OOM。seed2026 训练在 GPU0，未受影响。
 
@@ -185,50 +194,58 @@ C0 的训练分布是 N32、depth ≤6、129 词表；N64/N128 与 deep 档都�
   N128_shallow 2/42、N64_deep 3/59、N64_shallow 2/60、N32_shallow 1/64。
 - VARIABLE 预测不是塌缩到某一个固定类：在 N32_shallow 上检查，H=64 的预测
   仍覆盖 117–128 个变量名，但逐节点轨迹在若干轮后跳到另一个名字并保持
-  一段时间（示例见 3.5）。
+  一段时间（示例见 3.6）。
   这更像隐藏状态/读出头进入另一个稳定读出，而不是简单输出常数。
-- **不能据此说隐藏状态已经“忘了变量”**。本批只观察模型自己的 VARIABLE
-  头；隐藏状态是否仍线性可读、是否仍保留变量信息，需要 probe 或干预实验
-  （例如每轮刷新叶节点 token embedding、或训练线性 probe），本批未做。
+- **不能据此说隐藏状态已经不再编码变量身份**。本批只观察模型自己的
+  VARIABLE 头；隐藏状态是否仍线性可读、是否仍保留变量信息，需要 probe
+  或干预实验（例如每轮刷新叶节点 token embedding、或训练线性 probe），
+  本批未做。
 
 ### 3.3 完成后漂移
 
-下表只统计 64 轮内完成过 VALUE 的图；“ever degraded”是完成后至少一次
-整图 VALUE 失败；“final correct”是第 64 轮仍整图全对；“retention”=
-final/completed。相对轮次从 tV 的下一轮算起。
+下表只统计 64 轮内完成过 VALUE 的图。`ever degraded` 是完成后至少一次
+整图 VALUE 失败；`never degraded` 是完成后整图 VALUE 一直正确（且有后续
+观察）；`last-round correct` 是末轮整图全对。最后一列是
+“末轮正确 / completed”，**不是**从完成后从未退化的保持率。相对轮次
+从 tV 的下一轮算起。两个首次退化列都是**平均**相对轮次；VALUE 列的分母
+是 ever degraded 图，VARIABLE 列的分母是 3.7 表中 `variable new-error`
+支持数（两者分母不同，不能直接相减）。
 
-| weight | stratum | VALUE completed | ever degraded | final correct | retention | first deg mean rel | variable first deg mean rel |
-|---|---|---:|---:|---:|---:|---:|---:|
-| s42_e143 | N32_shallow | 64 | 17 | 47 | 73.4% | 42.7 | 12.3 |
-| s42_e143 | N32_deep | 61 | 24 | 37 | 60.7% | 39.2 | 10.4 |
-| s42_e143 | N64_shallow | 64 | 47 | 17 | 26.6% | 35.8 | 10.6 |
-| s42_e143 | N64_deep | 62 | 42 | 20 | 32.3% | 32.3 | 8.2 |
-| s42_e143 | N128_shallow | 60 | 57 | 3 | 5.0% | 27.6 | 10.4 |
-| s42_e143 | N128_deep | 59 | 58 | 1 | 1.7% | 20.6 | 5.5 |
-| s1234_e143 | N32_shallow | 64 | 34 | 30 | 46.9% | 34.5 | 8.7 |
-| s1234_e143 | N32_deep | 63 | 30 | 34 | 54.0% | 32.7 | 6.2 |
-| s1234_e143 | N64_shallow | 60 | 56 | 4 | 6.7% | 26.9 | 7.1 |
-| s1234_e143 | N64_deep | 59 | 54 | 7 | 11.9% | 23.0 | 4.7 |
-| s1234_e143 | N128_shallow | 42 | 42 | 0 | 0.0% | 15.8 | 5.7 |
-| s1234_e143 | N128_deep | 32 | 32 | 0 | 0.0% | 11.2 | 2.5 |
+| weight | stratum | VALUE completed | ever degraded | never degraded | last-round correct | last-round correct / completed | VALUE first deg mean rel | VARIABLE new-error mean rel |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| s42_e143 | N32_shallow | 64 | 17 | 47 | 47 | 73.4% | 42.7 | 12.3 |
+| s42_e143 | N32_deep | 61 | 24 | 37 | 37 | 60.7% | 39.2 | 10.6 |
+| s42_e143 | N64_shallow | 64 | 47 | 17 | 17 | 26.6% | 35.8 | 10.8 |
+| s42_e143 | N64_deep | 62 | 42 | 20 | 20 | 32.3% | 32.3 | 8.2 |
+| s42_e143 | N128_shallow | 60 | 57 | 3 | 3 | 5.0% | 27.6 | 10.5 |
+| s42_e143 | N128_deep | 59 | 58 | 1 | 1 | 1.7% | 20.6 | 5.6 |
+| s1234_e143 | N32_shallow | 64 | 34 | 30 | 30 | 46.9% | 34.5 | 8.6 |
+| s1234_e143 | N32_deep | 63 | 30 | 33 | 34 | 54.0% | 32.7 | 6.2 |
+| s1234_e143 | N64_shallow | 60 | 56 | 4 | 4 | 6.7% | 26.9 | 6.9 |
+| s1234_e143 | N64_deep | 59 | 54 | 5 | 7 | 11.9% | 23.0 | 4.9 |
+| s1234_e143 | N128_shallow | 42 | 42 | 0 | 0 | 0.0% | 15.8 | 5.7 |
+| s1234_e143 | N128_deep | 32 | 32 | 0 | 0 | 0.0% | 11.2 | 2.2 |
 
 读法：
 
-- **VARIABLE 比 VALUE 早得多开始退化**：s42 的 VARIABLE 首次退化中位相对
-  轮次为 5–12，VALUE 为 20–43；s1234 为 2.5–8.7 与 11–35。也就是说，
-  first-4 在 VALUE 还很稳定的阶段就已经开始掉。
-- **VALUE 漂移随规模/深度增强**：s42 的 N32_shallow retention 73%，
-  N128_deep 1.7%；s1234 N128 两档 retention 为 0。N32_deep 的 s1234
-  retention（54%）略高于 N32_shallow（47%），但 N32_deep 本身完成得更晚、
-  完成图更少，不能简单解释为“更深更稳”。
-- **恢复很少**：s42 六个档没有一张图在末轮前稳定恢复；s1234 只有
-  N32_deep 1 张、N64_deep 2 张 `stable_recovered`。其余退化图到 H=64 仍错。
-  64 轮之外是否还会回正，本批没有观察。
+- **VARIABLE 比 VALUE 早得多开始退化**：s42 的 VARIABLE 首次退化平均相对
+  轮次为 5.6–12.3，VALUE 为 20.6–42.7；s1234 为 2.2–8.6 与 11.2–34.5。
+  也就是说，first-4 在 VALUE 还很稳定的阶段就已经开始掉。
+- **VALUE 漂移随规模/深度增强**：s42 的 N32_shallow 末轮正确/完成图比例
+  为 73%，N128_deep 为 1.7%；s1234 N128 两档为 0。s1234 N32_deep 的
+  54% 略高于 N32_shallow 的 47%，但 N32_deep 本身完成得更晚、完成图更少，
+  不能简单解释为“更深更稳”。
+- **恢复很少**：s42 六个档没有一张图达到 `stable_recovered`（末尾连续
+  两轮正确）；s1234 只有 N32_deep 1 张、N64_deep 2 张。其余退化图到
+  H=64 仍错。64 轮之外是否还会回正，本批没有观察。
+- **本批所有完成图都有后续观察**：tV 最大 61，故 `no_post_observation=0`；
+  因此上表的 never/last-round 两列不会把“没观察到”误算成“保持”。若未来
+  tV=64，该图必须单列。
 - **退化不是一次全局崩溃**：N32 上有相当比例的图只有 1–2 个 VALUE 错；
   这些图在节点指标上仍接近全对，但整图全对率已经掉。N64/N128 则是
   >5 个错的图占多数（见 3.4）。
 
-### 3.4 错误集中在深层节点；N32 是稀疏错误
+### 3.4 H=64 的 VALUE 错误随深度增加；N32 是稀疏错误
 
 H=64、只统计完成图的整图 VALUE 错误节点数：
 
@@ -265,11 +282,13 @@ H=64、只统计完成图的整图 VALUE 错误节点数：
 | 11 | – | 52/104 (50.0%) | 39/50 (78.0%) |
 | 12 | – | 12/24 (50.0%) | 13/14 (92.9%) |
 
-叶节点（depth 0）始终全对；错误从 depth 1–2 开始出现，随深度近似单调
-增加。s42 N32_shallow 的绝对错误率低（最高 8.6%），而 s1234 N128_deep
-在 depth 8 以上已超过 60%。错误 VALUE 都是 0–22 的合法余数，没有
-EMPTY/NA；s42 的模差最集中在 ±7，s1234 在 ±4，提示不是均匀随机噪声，
-但本批不足以把模差模式归因到具体的错误父节点/变量混淆。
+叶节点（depth 0）始终全对；错误从 depth 1–2 开始出现，在 H=64 这一时刻
+随深度近似单调增加。s42 N32_shallow 的绝对错误率低（最高 8.6%），而
+s1234 N128_deep 在 depth 8 以上已超过 60%。**这是时刻切片，不是首次
+退化时刻的排序**；深层节点完成得晚，可能只是到 H=64 时更接近窗口末尾。
+错误 VALUE 都是 0–22 的合法余数，没有 EMPTY/NA；s42 的模差最集中在
+±7，s1234 在 ±4，提示不是均匀随机噪声，但本批不足以把模差模式归因到
+具体的错误父节点/变量混淆。
 
 ### 3.5 完成时刻的长尾
 
@@ -302,22 +321,70 @@ s1234 N64_shallow `0054`（depth 6）tV=61。它们在早期有过 1–2 个 VAL
 
 ### 3.6 典型轨迹
 
-以下均为逐图 npz 的直接观察，不改变 3.1–3.5 的汇总。
+以下均为逐图 npz 的直接观察，不改变 3.1–3.7 的汇总。完整例子和分类
+见 `tmp/analysis/c0-capability-20261114/analysis/examples.json`。
 
 | 图 | 深度 | tV/t4 | 现象 |
 |---|---:|---|---|
 | s42 N32_shallow `0000` | 6 | 7/7 | VALUE 64 轮全对；VARIABLE 在 H=32 已错 16/32、H=64 错 29/32。只有 first-4 崩，VALUE 未崩。 |
-| s42 N32_shallow `0003` | 4 | 5/5 | H=48 前 VALUE 全对；第 55 轮首次出现 11 个 VALUE 错（depth 2–4），H=64 仍错；VARIABLE 错 31/32。说明 VALUE 可以在很长时间后突然退化。 |
-| s1234 N32_shallow `0023` | 6 | 32/– | H=8/16 有 2 个 VALUE 错，H=32 才整图全对；tV 时 VARIABLE 已错 18/32，所以 t4 不存在；第 36 轮起再次漂移，H=64 有 7 个 VALUE 错。非单调、长尾完成。 |
-| s1234 N32_deep `0047` | 11 | 12/12 | tV 后第 49 轮出现 VALUE 错，第 54 轮回正；H=64 VALUE 仍全对（本批少见的稳定恢复），但 VARIABLE 已错 28/32，first-4 仍为 0。 |
+| s42 N32_shallow `0003` | 4 | 5/5 | H=48 前 VALUE 全对；绝对第 55 轮（tV 后第 50 个相对轮）首次出现 11 个 VALUE 错（depth 2–4），H=64 仍错；VARIABLE 错 31/32。说明 VALUE 可以在很长时间后突然退化。 |
+| s1234 N32_shallow `0006` | 6 | 10/10 | 比 `depth+1` 晚 3 轮完成；之后 VALUE 一直正确；VARIABLE 在 tV 后第 6 个相对轮首次新错。延迟完成与字段漂移可以同时出现。 |
+| s1234 N32_shallow `0023` | 6 | 32/– | H=8/16 有 2 个 VALUE 错，H=32 才整图全对；tV 时 VARIABLE 已错 18/32，所以 t4 不存在；绝对第 36 轮（tV 后第 4 个相对轮）起再次漂移，H=64 有 7 个 VALUE 错。非单调、长尾完成。 |
+| s1234 N32_deep `0047` | 11 | 12/12 | 绝对第 49 轮（tV 后第 37 个相对轮）出现 VALUE 错，绝对第 54 轮回正；H=64 VALUE 仍全对（本批少见的稳定恢复），但 VARIABLE 已错 28/32，first-4 仍为 0。 |
 | s1234 N64_shallow `0004` | 6 | –/– | 64 轮内从未整图 VALUE 全对；H=8/16 只错 1–2 个节点，H=64 错 6 个（depth 5–6），VARIABLE 错 60/64。不是“完全不会”，而是几个深层节点持续错。 |
 | s42 N128_deep `0002` | 12 | –/– | 64 轮从未完成；与 s1234 N128_deep 的 32 张未完成图同类。 |
 
 VARIABLE 轨迹的形态：不少节点在前 20–30 轮保持正确名字，然后跳到另一个
 名字并稳定一段时间；不是每轮随机抖动。以 s42 N32_shallow `0000` 的一个
 depth-1 节点为例，H=1–28 的 VARIABLE 读数为真值 `111`，H=32–64 变为
-`77`，期间 VALUE 始终为 `11`。这提示“读出头换了固定点”，但本批没有
-hidden probe，不能断言隐藏状态已经删除了变量身份。
+`77`，期间 VALUE 始终为 `11`。这与“读出头改变读出/隐藏状态变化”的
+假设一致，但本批没有 hidden probe，不能区分二者，也不能断言隐藏状态
+已经删除了变量身份。
+
+### 3.7 失败/恢复事件支持数
+
+事件表由 `tools/c_capability/analyze_existing.py` 从现有 NPZ 生成；每个
+图一行，输出在 `analysis/events_by_graph.csv`，汇总在
+`analysis/event_summary.csv`。定义：
+
+- `never`：64 轮内没有整图 VALUE 全对；
+- `delayed`：tV > `实际最大深度 + 1`；
+- `VALUE never degraded`：有后续观察且完成后整图 VALUE 一直正确；
+- `VALUE final wrong`：VALUE 曾退化且末轮仍错；
+- `VALUE stable recovered`：退化后末尾连续两轮都正确；
+- `VARIABLE new-error`：tV 后出现至少一个节点的 VARIABLE 正确→错误转移；
+- `VARIABLE degraded, VALUE preserved`：VALUE 未退化且 VARIABLE 有新错误；
+- `VARIABLE already wrong at tV`：tV 时 VARIABLE 不是全对（因此 t4 不存在）。
+
+| weight | stratum | completed | never | delayed | VALUE never degraded | VALUE final wrong | VALUE stable recovered | VARIABLE new-error | VARIABLE degraded, VALUE preserved | VARIABLE already wrong at tV |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| s42_e143 | N32_shallow | 64 | 0 | 0 | 47 | 17 | 0 | 64 | 47 | 0 |
+| s42_e143 | N32_deep | 61 | 3 | 1 | 37 | 24 | 0 | 61 | 37 | 0 |
+| s42_e143 | N64_shallow | 64 | 0 | 0 | 17 | 47 | 0 | 64 | 17 | 0 |
+| s42_e143 | N64_deep | 62 | 2 | 1 | 20 | 42 | 0 | 62 | 20 | 0 |
+| s42_e143 | N128_shallow | 60 | 4 | 2 | 3 | 57 | 0 | 60 | 3 | 0 |
+| s42_e143 | N128_deep | 59 | 5 | 1 | 1 | 58 | 0 | 59 | 1 | 0 |
+| s1234_e143 | N32_shallow | 64 | 0 | 2 | 30 | 34 | 0 | 64 | 30 | 1 |
+| s1234_e143 | N32_deep | 63 | 1 | 1 | 33 | 29 | 1 | 63 | 33 | 0 |
+| s1234_e143 | N64_shallow | 60 | 4 | 11 | 4 | 56 | 0 | 59 | 3 | 2 |
+| s1234_e143 | N64_deep | 59 | 5 | 8 | 5 | 52 | 2 | 59 | 5 | 3 |
+| s1234_e143 | N128_shallow | 42 | 22 | 29 | 0 | 42 | 0 | 42 | 0 | 2 |
+| s1234_e143 | N128_deep | 32 | 32 | 19 | 0 | 32 | 0 | 32 | 0 | 13 |
+
+支持数读法：
+
+- 本批 690 张完成图中，**没有一张**同时保持 VALUE 和 VARIABLE
+  （`value_and_variable_preserved=0`）；这由 `event_summary.csv` 逐档可查。
+- 本批恰好满足 `VALUE never degraded + VALUE final wrong + VALUE stable
+  recovered = completed`：没有“末轮正确但末尾两轮不全对”的图；少数恢复
+  都是末尾连续两轮正确。
+- `VALUE final wrong` 只统计曾退化图，`VALUE never degraded` 只统计有
+  后续观察且从未退化图，两者不是互补但本批由上一行补齐。
+- s1234 N64_shallow 的 completed=60、VARIABLE new-error=59、already wrong=2：
+  有一张图 tV 时 VARIABLE 已错且之后没有新的正确→错误转移；分类有重叠时
+  以逐图 flags 为准，不用汇总列互相推导。
+- `no_post_observation=0`（tV 最大 61）；若未来出现 tV=64，该图不进入
+  “never/final correct”的支持数，而应单列。
 
 ## 4. 对 C+ 的启示与尚不能判断之处
 
@@ -325,15 +392,18 @@ hidden probe，不能断言隐藏状态已经删除了变量身份。
 
 ### 4.1 可直接支持的判断
 
-1. **C0 的 VALUE 计算能力不是主要瓶颈，稳定性才是。**
-   N32/N64/N128 的多数图在 tV 时整图 VALUE 全对，s42 在 N128_deep 也有
-   59/64 完成；但到 H=64 只剩 1/64 整图全对。C+ 若只追求“首次算对”，
-   会错过主要失败模式。
+1. **在本批 s42 六档与 s1234 的 N32/N64 档，首次 VALUE 完成不是
+   主要瓶颈；保持能力才是。** 这些档多数图在 tV 时整图 VALUE 全对，
+   s42 在 N128_deep 也有 59/64 完成；但到 H=64 只剩 1/64 整图全对。
+   s1234 的 N128_shallow/N128_deep 只有 42/64、32/64 完成，**完成缺口
+   仍是能力问题**，不能把“计算不是瓶颈”推广到所有权重/档位。
 
 2. **VALUE 与 VARIABLE 是两条不同的稳定性轴。**
-   VARIABLE 在所有节点（包括叶节点）上先崩，VALUE 在深层节点上后崩。
-   如果 C+ 的目标包含“可读出的完整赋值”，需要显式区分并在指标上分开；
-   如果把 first-4 作为单一目标，优化信号会被 VARIABLE 头主导。
+   在本批轨迹中，VARIABLE 的首次新错平均早于 VALUE，且 H=64 时所有
+   节点（包括叶节点）的 VARIABLE 读出都大幅下降；VALUE 则相对更晚、
+   且在 H=64 切片中随深度更差。如果 C+ 的目标包含“可读出的完整赋值”，
+   需要显式区分并在指标上分开；如果把 first-4 作为单一目标，优化信号
+   会被 VARIABLE 头主导。
 
 3. **整图指标比节点指标更早报警。**
    N32 上很多图只错 1–2 个节点，节点 VALUE 仍 >0.9，但整图全对率已从
@@ -398,9 +468,12 @@ hidden probe，不能断言隐藏状态已经删除了变量身份。
   没有人工注错，没有 C+ 训练。
 - 生成档使用官方生成器但仍是新池；与 B 线共享部分 heldout 来源，不能
   称为完全独立于 B 的 heldout。
-- `field_acc_by_H.csv` 是为解释 first-4 从逐图 npz 直接重算的辅助表；
-  `summarize.py` 当前正式输出仍只有 first-4 合计。若后续要把逐字段曲线
-  纳入正式协议，建议给 `summarize.py` 增加 per-factor 输出并走 review。
+- `analysis/field_acc_by_H.csv` 由 `analyze_existing.py` 从逐图 npz 生成，
+  用于解释 first-4；`summarize.py` 的正式输出仍只有 first-4 合计。若后续
+  要把逐字段曲线纳入正式协议，建议给 `summarize.py` 增加 per-factor 输出
+  并走 review。
+- 本次事件分析只读现有 npz，不重跑模型、不生成新数据；事件表和例子
+  不能替代对隐藏状态的 probe/干预。
 
 ## 6. 复现与产物
 
@@ -426,6 +499,14 @@ python -I -B tools/c_capability/summarize.py \
   --out-dir tmp/analysis/c0-capability-20261114/runs/summary
 ```
 
+现有 NPZ 的 CPU 事件分析（不加载模型、不写运行目录）：
+
+```bash
+python -I -B tools/c_capability/analyze_existing.py \
+  --run-dir tmp/analysis/c0-capability-20261114/runs \
+  --out-dir tmp/analysis/c0-capability-20261114/analysis --overwrite-ok
+```
+
 产物：
 
 - `data/manifest.json`：六档来源、合格池、source indices、实际深度/长度、
@@ -434,6 +515,10 @@ python -I -B tools/c_capability/summarize.py \
   + `run_meta.json`；
 - `runs/summary/`：`curves.csv`、`capability_by_H.csv`、`by_node_type.csv`、
   `by_depth.csv`、`completion.csv`、`drift.csv`、`drift_by_graph.csv`、
-  `post_completion_curves.csv`、`examples.json`、`report.md`、
-  `field_acc_by_H.csv`（辅助逐字段表）；
+  `post_completion_curves.csv`、`examples.json`、`report.md`；
+- `analysis/`：`field_accuracy_long.csv`、`field_acc_by_H.csv`、
+  `completion_lag.csv`、`completion_lag_distribution.csv`、
+  `value_error_counts.csv`、`value_error_by_depth.csv`、
+  `value_wrong_predictions.csv`、`events_by_graph.csv`、`event_summary.csv`、
+  `examples.json`、`analysis_meta.json`（含权重/数据/index 哈希与定义）；
 - `logs/s42_e143.log`、`logs/s1234_e143.log`：无 Traceback/OOM。

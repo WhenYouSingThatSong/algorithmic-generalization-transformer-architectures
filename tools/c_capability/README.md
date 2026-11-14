@@ -26,7 +26,10 @@ This directory implements the approved first C0 capability exploration:
 | `build_data.py` | build the six fixed strata from existing pools; optionally generate missing shallow pools with the official generator |
 | `run_capability.py` | load one checkpoint, free-run 64 rounds, write one `.npz` per graph plus `index.jsonl` and `run_meta.json` |
 | `summarize.py` | torch-free aggregation into `curves.csv`, `capability_by_H.csv`, `by_node_type.csv`, `by_depth.csv`, `completion.csv`, `drift*.csv`, `examples.json`, `report.md` |
+| `analyze_existing.py` | CPU-only re-analysis of existing NPZ files: field accuracy, error depth/counts, completion lag, per-graph failure/recovery events |
 | `tests/test_c_common.py` | CPU-only tests for selection, node metadata and drift definitions; no model |
+| `tests/test_c_summary.py` | CPU-only tests for graph-equal metrics and empty-bucket support |
+| `tests/test_c_analysis.py` | CPU-only tests for the existing-NPZ event/table definitions |
 
 ## Data plan
 
@@ -72,6 +75,11 @@ python tools/c_capability/run_capability.py \
 # 3) Summarize both weights:
 python tools/c_capability/summarize.py \
   --run-dir tmp/analysis/c0-capability-20261114/runs
+
+# 4) CPU-only re-analysis of the existing NPZ traces (no model):
+python -I -B tools/c_capability/analyze_existing.py \
+  --run-dir tmp/analysis/c0-capability-20261114/runs \
+  --out-dir tmp/analysis/c0-capability-20261114/analysis --overwrite-ok
 ```
 
 `s2026` can be added after training finishes without changing the data or
@@ -129,3 +137,7 @@ append-only and flushed per graph, so a killed run leaves completed graphs.
    first pass is an exploration budget, not a final evaluation protocol.  It
    found that first-4 collapse in this ADD task is dominated by the VARIABLE
    readout, while VALUE remains high much longer; see the report.
+6. `analyze_existing.py` only reads the recorded NPZ files.  It does not load a
+   model, rewrite the run directory, or establish hidden-state causality;
+   `stable_recovered` means the last two post-completion observations are
+   correct, not merely the final round.

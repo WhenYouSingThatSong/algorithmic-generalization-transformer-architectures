@@ -14,7 +14,9 @@
 | `build_data.py` | 从现有数据池构建六档固定数据；缺档时用官方生成器补齐 |
 | `run_capability.py` | 加载一个 C0 checkpoint，连续 hidden 自由续算 64 轮，逐图保存 npz |
 | `summarize.py` | 汇总逐轮曲线、H 切片、节点类型/深度分解、完成与漂移、案例 |
+| `analyze_existing.py` | 只读现有 NPZ 的 CPU 复分析：逐字段、错误深度/数量、完成延迟、失败/恢复事件 |
 | `tests/test_c_common.py` | 纯 CPU 单元测试；不加载模型 |
+| `tests/test_c_analysis.py` | 纯 CPU 事件/表定义测试；不加载模型 |
 | `README.md` | 文件、数据来源、命令、记录格式与 review 点 |
 
 ## 2. 数据档与来源
@@ -84,5 +86,7 @@ C1–C4 问题已不再作为未决项。仍建议后续报告时明确：
 - 正式六档数据已由 `build_data.py --allow-generate` 生成；s42_e143 与
   s1234_e143 各完成 384 图 × 64 轮，无 Traceback/OOM；汇总已生成。
   结果、边界与典型轨迹见 `docs/records/2026-11-14/c0-capability-report.md`。
+- 现有 NPZ 的 CPU 复分析已加入 `analyze_existing.py`（8 项测试通过），
+  输出逐字段/错误深度/完成延迟/逐图事件/事件汇总；不重跑模型。
 - **未训练 C+、未扩展人工注错矩阵；seed2026 训练未受影响。**
 
