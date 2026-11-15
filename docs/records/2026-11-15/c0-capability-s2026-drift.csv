@@ -1,0 +1,7 @@
+weight,stratum,n_graphs,n_value_post_observed,n_value_no_post_observation,n_value_ever_recovered,n_value_recovery_then_error,n_value_stable_recovered,n_first4_post_observed,n_first4_no_post_observation,n_first4_ever_recovered,n_first4_recovery_then_error,n_first4_stable_recovered,n_other_error_at_value_completion,n_other_only_error_ever,n_value_completed,n_value_ever_degraded,n_value_recovered,n_value_final_correct,value_first_deg_mean,value_first_deg_median,n_first4_completed,n_first4_ever_degraded,n_first4_recovered,n_first4_final_correct,first4_first_deg_mean,first4_first_deg_median,n_other_only_ever,n_other_only_final_value_correct
+s2026_e143,N128_deep,64,64,0,0,0,0,64,0,0,0,0,0,63,64,64,0,0,20.984375,20.500000,64,64,0,0,4.984375,5.000000,63,0
+s2026_e143,N128_shallow,64,64,0,1,1,0,64,0,0,0,0,0,64,64,64,0,0,26.312500,26.000000,64,64,0,0,9.515625,10.000000,64,0
+s2026_e143,N32_deep,64,63,0,0,0,0,63,0,0,0,0,0,63,63,31,0,32,38.483871,40.000000,63,63,0,0,9.698413,10.000000,63,32
+s2026_e143,N32_shallow,64,64,0,0,0,0,64,0,0,0,0,0,64,64,23,0,41,38.608696,40.000000,64,64,0,0,11.156250,11.000000,64,41
+s2026_e143,N64_deep,64,64,0,0,0,0,64,0,0,0,0,0,64,64,61,0,3,32.754098,33.000000,64,64,0,0,7.484375,8.000000,64,3
+s2026_e143,N64_shallow,64,64,0,0,0,0,64,0,0,0,0,0,64,64,60,0,4,34.566667,34.000000,64,64,0,0,10.218750,10.500000,64,4

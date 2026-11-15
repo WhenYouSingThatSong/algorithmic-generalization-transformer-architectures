@@ -17,6 +17,9 @@ This directory implements the approved first C0 capability exploration:
 - per-round per-node first-four readouts, VALUE/first-four metrics, `tV`/`t4`,
   and post-completion drift;
 - `s2025` is intentionally excluded; `s2026` can be added later with `--ckpt`.
+  The s2026/e143 six-stratum follow-up is recorded in
+  `docs/records/2026-11-15/c0-capability-s2026.md`; s42/s1234 results are
+  unchanged.
 
 ## Files
 
