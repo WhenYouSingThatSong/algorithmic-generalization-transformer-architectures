@@ -185,7 +185,40 @@ H64（同一诊断集，节点/整图）：
   - `c-long-pilot-six-strata.csv`
   - `c-long-pilot-six-strata-completion.csv`
   - `c-long-pilot-trajectories.csv`
+  - `c-long-pilot-audit.json`
+  - `c-long-pilot-field-curves.csv`
+  - `c-long-pilot-field-drift.csv`
 - 原始 NPZ、权重、完整 records 留在 tmp；不提交新权重。训练和验证均由 agent C
   在 GPU2 串行执行，未与其他 agent 争用共享工作树。
 
+## 6. 审阅补交：审计摘要与逐字段曲线（CPU）
+
+- 来源/参数/预算审计摘要：`c-long-pilot-audit.json`。它只包含 source SHA、
+  data manifest/train/val SHA、三组 args/optimizer/steps、checkpoint SHA 和
+  validation model/hash，不包含权重、原始张量或训练数据。
+- validation 的逐图 NPZ 保存 `predictions[round,node,4]`（SYNTAX/VARIABLE/
+  OPERATION/VALUE）与 truth；因此可以补逐字段曲线和首次失错时间，不需要重跑。
+- `c-long-pilot-field-curves.csv`：按 endpoint×field×time 的节点准确率和
+  整图 all 率；`c-long-pilot-field-drift.csv`：只在 D 处该字段整图全对的图上，
+  统计 D 后首次失错（相对 D 的轮次）和末两轮是否仍全对。
+
+| endpoint | VALUE all@D | VALUE post-D fail | VALUE first-fail median | VARIABLE post-D fail | VARIABLE first-fail median | first4 all@D |
+|---|---:|---:|---:|---:|---:|---:|
+| initial | 127/128 | 71/127 | 45 | 128/128 | 11 | 127/128 |
+| base / same_exposure | 128/128 | 53/128 | 45 | 128/128 | 10 | 128/128 |
+| base / equal_compute | 128/128 | 85/128 | 42 | 128/128 | 8.5 | 128/128 |
+| plus_d / same_exposure | 128/128 | 14/128 | 51.5 | 128/128 | 21 | 128/128 |
+| plus_d / equal_compute | 128/128 | 4/128 | 55.5 | 128/128 | 29.5 | 128/128 |
+| plus_2d / same=equal | 128/128 | 3/128 | 47 | 128/128 | 31 | 128/128 |
+
+- SYNTAX 和 OPERATION 在所有 endpoint 的所有时点都是 1.0000；first4 的下降
+  全部落在 VARIABLE（first4 accuracy 与 VARIABLE accuracy 对齐）。这是本批
+  validation 的字段事实，不是对旧 C0 的机制归因。
+- VALUE 的改善是“首次失错更晚/更少”：plus_2d 只有 3/128 在 D 后发生整图
+  VALUE 失错；但 first4/VARIABLE 仍在 D+32 后持续下降，最终 all 为 0。
+- `initial` 的 VALUE all@D 是 127/128（1 图在 D 处未全对），所以 VALUE 的
+  post-D 分母是 127；表中明确使用该条件分母，不把它当作 128 图稳定率。
+
 > 2026-11-15 18:05 GPT 审阅更正：区分末轮 76/128 与末两轮 75/128；明确独立优化器、+2D 优势的切片范围和字段归因边界。未修改代码或重跑模型。详见 [审阅记录](../../../ai-collab/handoff/2026-11-15-1805-c-long-results-review.md)。
+
+> 2026-11-15 18:49 执行 agent C 补：审计 JSON、逐字段曲线/首次失错表（仅读现有 NPZ）。未重跑模型。
