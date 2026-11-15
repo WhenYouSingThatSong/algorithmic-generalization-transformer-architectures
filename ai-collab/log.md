@@ -116,3 +116,5 @@
 - 2026-11-15 20:56 [claude] C 持续错父与噪声校准完成：同步 `3320449`，7 项测试、sustained/noise smoke 与汇总通过，无 NaN/OOM。sustained 128 图×2 时点×L2/4：common VALUE 256/256、strict 167；强制写错 u 时 q 输出 0–5/128，而 u 输出可 92–108/128 正确；释放后 q 中位首次恢复约 2 轮，r4 110–124、r16 127–128（initial late 110–111）。L4 的 release r1 稍低但 r4 接近；semantic 初期恢复更慢，无更快恢复证据。noise 64 图×2 时点：1×（同 L2）new VALUE error 1/128，而语义 wrong 64/64；2×/3×/4×/6× new error 约13–20%/39–50%/56–65%/75–79%。semantic 高强度的 children harmed 低于 hold（6× 46 vs88，late56 vs92），但单 seed、不同 donor/norm，不能当训练收益。报告 `docs/records/2026-11-15/c-stress.md` + 10 小表/审计，提交 `a97debe`；GPU2 已释放，未训练新模型。
 
 - 2026-11-15 21:32 [gpt] 审阅3320449到8d70b3f：源码未变，运行源码hash及10个导出hash匹配，10560行配对计数正确；96条持续wrong剂量均128/128实际预期错值。未重放权重/records。更正报告2048记录数、强制末轮范围、initial late clean漂移、噪声试次分母/方向及错误归因；补高噪声后期残留和graph0完整时序。semantic首轮保护在连续强制后消失，释放恢复不更快；强噪声有输入及输出VALUE始终正确却下游受损案例，机制仍未定位。新增2132审阅并更新看板；不重跑GPU、不启动新训练，后续中等噪声训练及CPU归因建议待用户讨论。
+
+- 2026-11-15 22:03 [gpt] 用户要求按昨日简报标准整理今天实验。新增docs/records/2026-11-15/bc-daily-summary.md，覆盖B/C全天已核对内容，逐项写权重/操作/结果/现象，补真实与示意例子，分开两批后训练、验证与六档诊断、观察和机制边界。旧bc-experiments-brief.md不改；本地文档链接均有效，更新看板，无代码/数据改动或新实验授权。
