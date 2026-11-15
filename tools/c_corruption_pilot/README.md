@@ -2,6 +2,11 @@
 
 入口方案：[协作交接](../../ai-collab/handoff/2026-11-15-c-corruption-pilot.md)。
 
+状态：首批 hold/noise/semantic 三组、128 图两时点评估和汇总已完成
+（2026-11-15）；结果与边界见
+[docs/records/2026-11-15/c-corruption-pilot.md](../../docs/records/2026-11-15/c-corruption-pilot.md)。
+原始 NPZ/权重/records 留在 `tmp/analysis/c-corruption-pilot-20261115/`，不提交。
+
 三组从固定 s2026/e143 出发，均 +D、3 epoch、lr1e-4、batch8：
 `hold`（不注错）、`noise`（L2匹配随机方向）、`semantic`（当前模型的反事实VALUE向量）。
 正式源码不改原 model.py；执行 agent 先小验证、再按固定版本串行执行。
@@ -13,4 +18,4 @@
 
 运行命令和小验证门槛见交接。支持 `--smoke-batches` / `--smoke-ckpt --limit-graphs`；smoke和正式目录分离，所有输出目录必须不存在。高强度噪声暂只评估，不混入训练。
 
-本地：6项stdlib通过，3项torch留服务器；尚未执行训练/模型评估。
+本地/服务器：9项测试通过；首批训练与评估已完成，结果见上方报告。

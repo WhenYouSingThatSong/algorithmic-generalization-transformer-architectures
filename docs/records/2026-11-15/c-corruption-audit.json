@@ -1,0 +1,226 @@
+{
+  "status": "audit_summary",
+  "report": "docs/records/2026-11-15/c-corruption-pilot.md",
+  "source_sha256": "40babb206b1393d0892b047202b9d6469cd140c82f3ba82c96a466fa3c76e780",
+  "data": {
+    "path": "tmp/analysis/c-long-pilot-20261115/data",
+    "manifest_sha256": "551163f5947bf25197696a1a8c993a4e5e7c7fc1b96c5f25363d59b9b22b5649",
+    "train_sha256": "1f23380e07628b4d152b416c17591e78b81e23517e9c632f5fc7bd8e585aa4ae",
+    "val_sha256": "676aabd2173d007b9c70c1e044ed69b7afe26d1f88e6bfcfd842778af3bcf66f",
+    "train_count": 1024,
+    "val_count": 128
+  },
+  "plan": {
+    "path": "tmp/analysis/c-corruption-pilot-20261115/plan/manifest.json",
+    "sha256": "10758a9326bb9419405a777802bacdce3b8a928af1064e42dbc421ae4292a49c",
+    "status": "complete",
+    "protocol": "C_corruption_pilot_v1",
+    "seed": 20261117,
+    "rate": 0.5,
+    "dependency_hashes": {
+      "tools/c_corruption_pilot/pilot_core.py": "a86cc1713b806c924edf8aae51abfdb2bc9f28c8447ce48d625a1c1f92e3cdd8",
+      "tools/counterfactual_control/design.py": "9af2555e0cf110b8df8166611cf67f76f6a3dc8c9e9c91c3eb40d466fbc4a489",
+      "tools/c_long_pilot/protocol.py": "49040c1d11a7fac0ab8308a85e50860779246f9f3801c5e8059dcdd78276224b",
+      "experiments/model.py": "dccaeaf24619c2e685e7e3146a700b42fc565abbffcbdc9d1f0f6eda53fb07dc",
+      "tools/c_capability/run_capability.py": "7b17a44c2d0e0df97fd88edbf7622f444ad46fcfa5457e16f5fe78ac0ff3d692"
+    },
+    "case_sha256": {
+      "train": "8d0f2201ac931a92febe1a15a1d2f136e415f7b735235a4ec1ab469a945afc3f",
+      "val": "1971a635f0c572abbcb88de440fc844c593ab9f8199e82fe331299f938e8c24f"
+    },
+    "counts": {
+      "train": {
+        "graphs": 1024,
+        "selected": 1024,
+        "scheduled_by_epoch": [
+          514,
+          488,
+          487
+        ]
+      },
+      "val": {
+        "graphs": 128,
+        "selected": 128,
+        "scheduled_by_epoch": [
+          55,
+          59,
+          62
+        ]
+      }
+    }
+  },
+  "training": {
+    "hold": {
+      "status": "complete",
+      "cohort": "main",
+      "epochs": 3,
+      "seed": 20261117,
+      "rate": 0.5,
+      "budget": {
+        "steps": 393,
+        "graph_presentations": 3072,
+        "recipient_sample_forwards": 40284,
+        "recipient_token_forwards": 10312704,
+        "recipient_attention_units": 2640052224,
+        "donor_sample_forwards": 12298,
+        "donor_token_forwards": 3148288,
+        "donor_attention_units": 805961728,
+        "scheduled_events": 1489,
+        "injected_events": 0
+      },
+      "wall_seconds": 60.83962447755039,
+      "checkpoint": {
+        "path": "tmp/analysis/c-corruption-pilot-20261115/hold/final.ckpt",
+        "sha256": "24f6b0715cb5d76775a9c93fd4a466b75b69d5c7e949f8d681d9062d79dc3aee"
+      },
+      "optimizer": {
+        "betas": [
+          0.9,
+          0.999
+        ],
+        "eps": 1e-08,
+        "lr": 0.0001,
+        "weight_decay": 0.01
+      },
+      "batch_count": 131,
+      "code_sha256": {
+        "train.py": "54308f524304fa424168bfa5616caee4ac6f79725ac4f273322eb4bdd87c7690",
+        "pilot_core.py": "a86cc1713b806c924edf8aae51abfdb2bc9f28c8447ce48d625a1c1f92e3cdd8",
+        "prepare.py": "f9fa2e77ebb02211df237cd73f25027821d4fcebd162a3bfa04d2770b4982306"
+      },
+      "config_sha256": {
+        "model_config.yaml": "1787c0435b1f2ba73aad0bc2989ebea01e7e834b13b88e9cfd51a5e2c729c6b1",
+        "train_config.yaml": "87f6352d9b00aae6291d635fc154e918915eaea7323c1ccc5eaf7a39c9ba52ad",
+        "data_config.yaml": "7c098fa1975e8e7638171b5fd54e5c77b78305be88b105256a91cf42614d1ae3"
+      }
+    },
+    "noise": {
+      "status": "complete",
+      "cohort": "main",
+      "epochs": 3,
+      "seed": 20261117,
+      "rate": 0.5,
+      "budget": {
+        "steps": 393,
+        "graph_presentations": 3072,
+        "recipient_sample_forwards": 40284,
+        "recipient_token_forwards": 10312704,
+        "recipient_attention_units": 2640052224,
+        "donor_sample_forwards": 12298,
+        "donor_token_forwards": 3148288,
+        "donor_attention_units": 805961728,
+        "scheduled_events": 1489,
+        "injected_events": 1489
+      },
+      "wall_seconds": 60.69977249763906,
+      "checkpoint": {
+        "path": "tmp/analysis/c-corruption-pilot-20261115/noise/final.ckpt",
+        "sha256": "cdf398a7ff407a60fc9a7548cc651df1b420daf3a3626871cc9c14616da4cf9a"
+      },
+      "optimizer": {
+        "betas": [
+          0.9,
+          0.999
+        ],
+        "eps": 1e-08,
+        "lr": 0.0001,
+        "weight_decay": 0.01
+      },
+      "batch_count": 131,
+      "code_sha256": {
+        "train.py": "54308f524304fa424168bfa5616caee4ac6f79725ac4f273322eb4bdd87c7690",
+        "pilot_core.py": "a86cc1713b806c924edf8aae51abfdb2bc9f28c8447ce48d625a1c1f92e3cdd8",
+        "prepare.py": "f9fa2e77ebb02211df237cd73f25027821d4fcebd162a3bfa04d2770b4982306"
+      },
+      "config_sha256": {
+        "model_config.yaml": "1787c0435b1f2ba73aad0bc2989ebea01e7e834b13b88e9cfd51a5e2c729c6b1",
+        "train_config.yaml": "87f6352d9b00aae6291d635fc154e918915eaea7323c1ccc5eaf7a39c9ba52ad",
+        "data_config.yaml": "7c098fa1975e8e7638171b5fd54e5c77b78305be88b105256a91cf42614d1ae3"
+      }
+    },
+    "semantic": {
+      "status": "complete",
+      "cohort": "main",
+      "epochs": 3,
+      "seed": 20261117,
+      "rate": 0.5,
+      "budget": {
+        "steps": 393,
+        "graph_presentations": 3072,
+        "recipient_sample_forwards": 40284,
+        "recipient_token_forwards": 10312704,
+        "recipient_attention_units": 2640052224,
+        "donor_sample_forwards": 12298,
+        "donor_token_forwards": 3148288,
+        "donor_attention_units": 805961728,
+        "scheduled_events": 1489,
+        "injected_events": 1489
+      },
+      "wall_seconds": 59.798469776287675,
+      "checkpoint": {
+        "path": "tmp/analysis/c-corruption-pilot-20261115/semantic/final.ckpt",
+        "sha256": "559fed2b0665164671e0176ee5b7ec1fde5682b328741d73fe78d8aa758fd9be"
+      },
+      "optimizer": {
+        "betas": [
+          0.9,
+          0.999
+        ],
+        "eps": 1e-08,
+        "lr": 0.0001,
+        "weight_decay": 0.01
+      },
+      "batch_count": 131,
+      "code_sha256": {
+        "train.py": "54308f524304fa424168bfa5616caee4ac6f79725ac4f273322eb4bdd87c7690",
+        "pilot_core.py": "a86cc1713b806c924edf8aae51abfdb2bc9f28c8447ce48d625a1c1f92e3cdd8",
+        "prepare.py": "f9fa2e77ebb02211df237cd73f25027821d4fcebd162a3bfa04d2770b4982306"
+      },
+      "config_sha256": {
+        "model_config.yaml": "1787c0435b1f2ba73aad0bc2989ebea01e7e834b13b88e9cfd51a5e2c729c6b1",
+        "train_config.yaml": "87f6352d9b00aae6291d635fc154e918915eaea7323c1ccc5eaf7a39c9ba52ad",
+        "data_config.yaml": "7c098fa1975e8e7638171b5fd54e5c77b78305be88b105256a91cf42614d1ae3"
+      }
+    }
+  },
+  "evaluation": {
+    "status": "complete",
+    "protocol": "C_corruption_eval_v1",
+    "cohort": "main",
+    "horizon": 16,
+    "meta_sha256": "e695fb75c135290b2405f33d006db1a6cf487b0500d9b5a6bf66c8d699181927",
+    "code_sha256": {
+      "evaluate.py": "b001e816480c7c960a8479643a38ff05dda789225ee6f3b1c9917efa986ef0af",
+      "pilot_core.py": "a86cc1713b806c924edf8aae51abfdb2bc9f28c8447ce48d625a1c1f92e3cdd8"
+    },
+    "models": [
+      {
+        "arm": "initial",
+        "sha256": "40babb206b1393d0892b047202b9d6469cd140c82f3ba82c96a466fa3c76e780"
+      },
+      {
+        "arm": "hold",
+        "sha256": "24f6b0715cb5d76775a9c93fd4a466b75b69d5c7e949f8d681d9062d79dc3aee"
+      },
+      {
+        "arm": "noise",
+        "sha256": "cdf398a7ff407a60fc9a7548cc651df1b420daf3a3626871cc9c14616da4cf9a"
+      },
+      {
+        "arm": "semantic",
+        "sha256": "559fed2b0665164671e0176ee5b7ec1fde5682b328741d73fe78d8aa758fd9be"
+      }
+    ]
+  },
+  "submitted_checks": {
+    "clean_summary_sha256": "7b9547ea0eb5c6d9b47342b667ae0dd3c40a0222b4afbffbc67f55ad937a9cca",
+    "intervention_summary_sha256": "014a175c2f2f884d6c1fcee15bc893bb28523a3a8ce8cecf14d3eba4c8eef2ee",
+    "event_summary_sha256": "2a2688a428c16fd576a510b0f95ac60a93204afb0cb5551a5cd4ecc4e56c4a6e",
+    "training_dose_sha256": "eeb37afa6bd6c343cdd1fa05cf05df70a7a4c1c6de40fa72c68f20d8f85367bc"
+  },
+  "notes": [
+    "No weights/raw tensors are copied.",
+    "Full raw records/NPZ/checkpoints remain in tmp.",
+    "The validation split is the already-viewed long-pilot split; not an independent final test."
+  ]
+}
