@@ -51,15 +51,21 @@ def main():
             raise ValueError('B primary comparison requires both model_a and model_b files')
     common = bsets['model_a'] & bsets['model_b']
     if a.require_timings:
-        availability = defaultdict(set)
-        for r in records:
-            if r['cohort']=='fixed_candidates' and (r['case_id'],r['data_sha256']) in common:
-                availability[(r['graph_id'],r['target_pos'],r['data_sha256'])].add(r['timing'])
-        allowed = {k for k,v in availability.items() if set(a.require_timings)<=v}
-        common = {(r['case_id'],r['data_sha256']) for r in records
-                  if r['cohort']=='fixed_candidates' and r['timing'] in a.require_timings
-                  and (r['case_id'],r['data_sha256']) in common
-                  and (r['graph_id'],r['target_pos'],r['data_sha256']) in allowed}
+        required = set(a.require_timings)
+        matched_by_weight = {}
+        for weight in ('model_a', 'model_b'):
+            availability = defaultdict(set)
+            for r in records:
+                if (r['weight']==weight and r['cohort']=='fixed_candidates'
+                        and r['status']=='eligible'):
+                    availability[(r['graph_id'],r['target_pos'],r['data_sha256'])].add(r['timing'])
+            allowed = {k for k,v in availability.items() if required<=v}
+            matched_by_weight[weight] = {
+                (r['case_id'],r['data_sha256']) for r in records
+                if r['weight']==weight and r['cohort']=='fixed_candidates'
+                and r['status']=='eligible' and r['timing'] in required
+                and (r['graph_id'],r['target_pos'],r['data_sha256']) in allowed}
+        common = matched_by_weight['model_a'] & matched_by_weight['model_b']
     metrics, target_rows, coverage, endpoints = [], [], [], []
     for r in records:
         included = r['status']=='eligible' and (r['cohort']!='fixed_candidates' or
