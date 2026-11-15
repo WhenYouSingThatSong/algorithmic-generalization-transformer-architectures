@@ -4,6 +4,11 @@
 
 本批评估现有initial s2026/e143及hold/noise/semantic，不新训练。
 
+新增已授权任务：[持续错父与噪声剂量校准交接](../../ai-collab/handoff/2026-11-15-c-sustained-noise-execution.md)。
+`run_stress.py --mode sustained|noise` 和 `summarize_stress.py` 分别执行/汇总，
+沿用现有四权重；持续2/4轮后释放16轮，或固定六档噪声强度×两方向。
+本地新增5项stdlib通过，2项torch检查及GPU小验证由执行agent完成；不改旧结果或训练代码。
+
 状态：首批 clean/pair/CPU 联合分析于 2026-11-15 完成；结果与边界见
 [docs/records/2026-11-15/c-basic-evaluation.md](../../docs/records/2026-11-15/c-basic-evaluation.md)。
 原始 records/NPZ/权重留在 `tmp/analysis/c-evaluation-suite-20261115/`，不提交。
