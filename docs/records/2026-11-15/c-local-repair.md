@@ -151,7 +151,31 @@ value_parent_correct 3 helped / 9 harmed、value_parent_wrong 9 helped /
 - 没有做 B 结果解释；B 使用 GPU1，C 在 smoke/main 后已释放 GPU6/7。
 - 原始 NPZ/PT、完整 records 和 hidden 快照留在 tmp，不进入 git。
 
-## 5. 产物
+## 5. 审阅补交（仅现有结果 CPU 导出）
+
+- `parent_correct` / `parent_wrong` 是**出错 forward 之前（t−1）**的父读出类别；
+  替换发生在错误已经出现的 t 轮输出。类别名不表示替换时父节点仍对/错。
+- `target` 的自然结局窗口是**原轨迹最后两轮**；干预后的 `final_two_correct`
+  是事件后第 15/16 轮。两者不是同一时间窗，不能混称。
+- 完整分层表已提交：
+  `c-local-repair-target-cases.csv`（逐 case/branch/metric）、
+  `c-local-repair-target-summary.csv`（保留 weight/stratum/selection_group）。
+  `c-local-repair-key-metrics.csv` 只是折叠概览，不替代分层表。
+- 末两轮改善/恶化案例（natural target VALUE；完整小轨迹见
+  `c-local-repair-review-node-curves.csv`）：
+
+| 案例 | 类别 | unchanged final2 | restore_parents final2 | 备注 |
+|---|---|---:|---:|---|
+| s1234 N32_shallow:14 / pos170 / state53 | value_parent_wrong | False | True | 本批唯一 restore_parents 改善 |
+| s42 N64_deep:0 / pos306 / state52 | value_parent_wrong | True | False | restore_parents 恶化 |
+
+- 例1（`s42 N32_shallow:19 / pos678 / state23`）的文字已限定为：替换后
+  **第一个 forward** 仍为 4，第二个 forward 起回到 11；不写成“持续修复”。
+- 实际调度：C smoke/main 使用 GPU6/7，B 当时使用 GPU1；C 使用同一共享
+  worktree 但固定在 `95611a1`，运行期间没有 pull/改代码；B/C 输出目录独立。
+  没有证据表明该并行调度污染数据。
+
+## 6. 产物
 
 - 选样：`tmp/analysis/c-local-repair-20261115/selection/`
 - smoke：`.../smoke_s42/`、`.../smoke_s1234/`
@@ -159,5 +183,7 @@ value_parent_correct 3 helped / 9 harmed、value_parent_wrong 9 helped /
 - summary：`.../summary/`（`coverage.csv`、`target_cases.csv`、
   `target_summary.csv`、`node_curves.csv`）
 - 小型汇总表：`docs/records/2026-11-15/c-local-repair-key-metrics.csv`、
-  `c-local-repair-selection-events.csv`、`c-local-repair-selection-groups.csv`
+  `c-local-repair-selection-events.csv`、`c-local-repair-selection-groups.csv`、
+  `c-local-repair-target-cases.csv`、`c-local-repair-target-summary.csv`、
+  `c-local-repair-review-node-curves.csv`
 - 本轮没有修改原训练、原 B/C runner 或原输出目录。
