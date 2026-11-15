@@ -124,7 +124,7 @@ value_parent_correct 3 helped / 9 harmed、value_parent_wrong 9 helped /
    - unchanged：initial 11，16 轮输出全为 11；
    - restore_target：initial 4、第一轮 forward 4，从第二轮起回到 11；
    - restore_parents：initial 11，16 轮全为 11。
-   这是“写回后当下正确、下一轮即丢失”的典型轨迹。
+   这是“写回后及第一个forward仍正确、第二个forward起丢失”的轨迹。
 
 2. `s1234_e143 / N32_shallow:0014 / pos 170 / state 53 / parent_wrong`
    （真值 0）：
@@ -169,7 +169,7 @@ value_parent_correct 3 helped / 9 harmed、value_parent_wrong 9 helped /
 | s1234 N32_shallow:14 / pos170 / state53 | value_parent_wrong | False | True | 本批唯一 restore_parents 改善 |
 | s42 N64_deep:0 / pos306 / state52 | value_parent_wrong | True | False | restore_parents 恶化 |
 
-- 例1（`s42 N32_shallow:19 / pos678 / state23`）的文字已限定为：替换后
+- 例1（`s42 N128_shallow:19 / pos678 / state23`，数据档按逐case表更正）的文字已限定为：替换后
   **第一个 forward** 仍为 4，第二个 forward 起回到 11；不写成“持续修复”。
 - 实际调度：C smoke/main 使用 GPU6/7，B 当时使用 GPU1；C 使用同一共享
   worktree 但固定在 `95611a1`，运行期间没有 pull/改代码；B/C 输出目录独立。
