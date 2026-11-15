@@ -2,6 +2,7 @@
 
 日期：2026-11-15 20:05 CST。
 状态：**四个现有权重的六档 clean 评估和 128 图父子两点评估已完成；评估 only，没有新训练**。
+审阅更正（2026-11-15 20:16）：下述语义组首轮比较、事件分母、末端残留及案例恢复时间按提交 CSV 修正；未改原始数据或重跑模型。详见 `ai-collab/handoff/2026-11-15-2016-c-basic-review.md`。
 代码：`reproduction@7f25a42`（运行期间固定，未 pull/改配置）。
 数据：六档沿用旧诊断集；128 图沿用 long-pilot 的新验证集（已查看过，不是独立最终测试）。
 权重：initial=s2026/e143；hold/noise/semantic=腐蚀 pilot 的三个 epoch3 final checkpoint。
@@ -31,7 +32,7 @@
 - D 处四模型都接近饱和：initial VALUE 0.996–1.000、first4 0.996–1.000；hold/noise/semantic 的 VALUE 0.9999–1.000。因此这里的主差异在 D 之后。
 - 三组后训练都把 D+64 VALUE 从 initial 的 0.599–0.925 提高到约 0.94–0.995；first4 从约 0.01–0.03 提高到 0.25–0.37。first4 的整图 all 在所有模型的 D+64 都是 0。
 - 在本次六档上，hold 总体最强（D+64 first4 0.309–0.369）；noise 较低（0.252–0.301），semantic 与 hold 接近但并非所有档更高。单 seed，不作总体排序。
-- D+64 角色均值：leaf 四模型均为 1.000；initial 的 internal/sink 为 0.832/0.700，hold 为 0.982/0.965，noise 为 0.976/0.950，semantic 为 0.974/0.951。逐深度/父数见 `c-basic-clean-depth-fanin.csv`。
+- D+64 角色的 VALUE 均值：leaf 四模型均为 1.000；initial 的 internal/sink 为 0.832/0.700，hold 为 0.982/0.965，noise 为 0.976/0.950，semantic 为 0.974/0.951。逐深度/父数见 `c-basic-clean-depth-fanin.csv`。
 
 ### 完成与完成后稳定性（VALUE；每档 64 图）
 
@@ -43,7 +44,7 @@
 | semantic | 64/64 | 3–50 | 14–61 |
 
 - 所有模型 first4 的 completed 为 63–64/64（initial）或 64/64（三组后训练），但 first4 的 final-two 整图全对在所有组、所有档均为 **0/64**。VALUE 的完成和保持改善不等于四属性保持。
-- postD failure / completion 的分母按各档实际完成数；未完成图保留在曲线和分母中，没有用“没完成所以稳定”替代。
+- 完成率以全部候选图为分母；完成后失稳率以“曾完成且之后还有观察轮次”的图为分母；D 后失稳率仅以 D 时全对的图为分母（`all_at_D`）。三个分母不同。固定轮次准确率始终保留未完成图。
 - 这些是条件于完成/全图的固定观察，不是永久稳定性；完整事件表见 `c-basic-clean-stability.csv`。
 
 ## 3. 父子两点：保留已有答案 vs 重新获得
@@ -66,8 +67,8 @@
 - `sham` 与 unchanged 完全一致；`u_same`、`q_same`、`both_same` 在目标/子节点上都无第一轮错误。覆盖和剂量分别见 `c-basic-pair-coverage.csv`、`c-basic-pair-dose.csv`。
 - `q_wrong` 虽然在输入中把 q 置错，第一轮/第二轮已经大量恢复（q_wrong q r1 97–116，r2 128）；这不是因为 q 解码值被正确回灌，而是下一轮状态/recurrence 的行为结果。`both_wrong` 的 q 第一轮 0–3，r2 61–74；hold/训练组到 r4 约 123–126、r16 128，initial 的 late 到 r4 111、r16 112。正确上游 u 对早期 q 恢复有作用（q_wrong 比 both_wrong 早），但到 r4 多数已接近；不能把它写成“必须由 u 重建”或“q 是独立计算头”。
 - `u_wrong` 时 q 第一轮只有 8–40/128，r2 71–84，r4 111–126，r16 112–128；u 本身 r1 91–109，r2 126–128，r4 128。u 错误的传播/恢复和 q 的错误并不同步。
-- semantic 组在 u_wrong 的 q 第一轮 34/128（hold 12/128）并不更好；q_wrong 的 q 第一轮 97/128（hold 112/128）也更低。它的下游损伤总量（见事件表）在 u_wrong 下较少，但目标 u 本身更易被注入打错；这两点不能合成“恢复更好”。
-- 目标 u 在 u_wrong 和 both_wrong 的 r1 相同（例如 hold 105，semantic 91），说明 q 注入没有反向改变 u；符合结构方向。
+- 保持时点，semantic 在 u_wrong 下 q 第一轮正确 34/128，高于 hold 的 12/128，说明原本正确的 q 首轮保持得更好；q_wrong 下却是 97/128，低于 hold 的 112/128，说明直接改错 q 后首轮恢复较慢。两个分支测的是不同能力，不能合成“恢复更好/更差”。
+- 目标 u 在 u_wrong 和 both_wrong 的 r1 正确总数相同（例如 hold 105，semantic 91）；总数相同不保证逐题输出相同，也不能据此证明 q 对 u 没有反向影响。
 
 ### 事件与末两轮
 
@@ -77,9 +78,12 @@
 - both_wrong：q damaged=128/128；hold 两个时点和 semantic late 的 final-two among
   damaged 为 128，noise late 为 127/128，initial late 为 112/128。不能把 r1 的
   0–3/128 当成持续失败，也不能说四个模型最终都一样。
-- u_wrong：q damaged 约为 100–123/128（semantic 100–106、initial 116–123、
-  hold 122、noise 118–120），final-two among damaged 也落在这个范围；没有全部恢复。
-  但 u_wrong 的 descendants 仍有部分残留，且 semantic 的 damaged 数较少、excess
+- u_wrong：q damaged 为 100–123/128。hold 两时点均 122/122 末两轮正确；semantic
+  为 106/106、100/100；noise 为 120/120、117/118；initial 为 123/123、101/116。
+  因此不能概括成“没有全部恢复”。初始模型 late 的 q_wrong 末轮 125/128，与 clean
+  完全一致，额外受损为 0；u_wrong/both_wrong 末轮 112/128，其中相对 clean 额外受损
+  为 13，而不是把全部 16 个错误都归因于注错。
+  u_wrong 的 descendants 仍有部分残留，且 semantic 的 damaged 数较少、excess
   wrong rounds 略低（见 events CSV）。这是传播范围的差异，不是“错误检测机制”证明。
 - 完整按 cohort（all_fixed/common_value/common_strict）、u/q/other_children/descendants/unrelated/all、value/first4、post1/2/4/8/16 的表在 `c-basic-pair-accuracy.csv` 与 `c-basic-pair-events.csv`。正文仅列 common VALUE 主视图。
 
@@ -102,7 +106,7 @@
 | graph68 | both_wrong | 0→6 | 11→11→11→17 |
 
 - graph89 中 q_wrong 和 both_wrong 都能在 r2 回到 13；u_wrong 时 q 保持 13（不同题/不同注入，不能把这一例当成普遍“q 免疫”）。
-- graph68 中 q_wrong 在 r2 回到 17，both_wrong 在 r2/r4 仍为 11、r16 才回到 17；这是逐题可核对的恢复延迟例子，不是总体率。
+- graph68 中 q_wrong 在 r2 回到 17；u_wrong 的 q 在 r1 仍正确、r2–r4 变成 11、r5 恢复；both_wrong 的 q 在 r1–r6 为 11、r7 恢复并保持到 r16。不能把稀疏表里的 r16 正确写成“r16 才恢复”。这是逐题可核对的延迟传播与恢复例子，不是总体率。
 - 两个例子均保留 clean/unchanged 对照（表中输入/输出均为实际解码数值；没有把解码值回灌）。
 
 ## 4. 现有 corruption records 的 CPU 联合分析
@@ -119,6 +123,8 @@
 - 六档和 128 图都已被查看过，不能称最终独立测试；单 seed，不能做总体模型排名。
 - 解码头读出与下一轮 Transformer 使用的 hidden 不是同一事实。`q_matches_input_parent_readouts` 仅是行为一致性检查；q_wrong 后的恢复不等于内部一定读取了正确 q 或 u 的隐藏表示。
 - `both_wrong` 与 `q_wrong` 的差异只能说明正确 u 对早期 q 恢复有帮助；不能单独证明内部检测、选择性重算或独立 VALUE 通道。
+- `both_wrong` 的两行 hidden 来自两个分别构造的 donor 题面。数字满足局部错父值关系，不代表两个完整向量来自同一个全图自洽错误状态；也不是此前延期的祖先局部自洽实验。
+- 资格是局部 VALUE/first4，不是整图四属性全对。initial late 起点整图 VALUE 全对 127/128、first4 全对 0/128；三组后训练 late 分别为 128/128、127/128。不得把全部 late 案例称为“整图四属性完成后注错”。
 - 未完成图没有被稳定率掩盖；完成时间中位数和 post-completion 事件分别使用条件分母。
 - 继承的 `reduce_batch` factor-PAD 裁剪缺口未修；clean 评估 mask 排除 PAD。
 
