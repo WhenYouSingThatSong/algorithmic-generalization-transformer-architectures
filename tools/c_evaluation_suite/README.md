@@ -13,6 +13,10 @@
 [docs/records/2026-11-15/c-basic-evaluation.md](../../docs/records/2026-11-15/c-basic-evaluation.md)。
 原始 records/NPZ/权重留在 `tmp/analysis/c-evaluation-suite-20261115/`，不提交。
 
+持续错父与噪声剂量校准（2026-11-15）也已完成；结果见
+[docs/records/2026-11-15/c-stress.md](../../docs/records/2026-11-15/c-stress.md)，
+原始 records/trajectory 留在 `tmp/analysis/c-sustained-noise-20261115/`。
+
 1. `analyze_existing.py`：CPU读取上一批records，输出目标读出×子节点损伤联合表、hold与semantic逐题配对，避免拼接两组边际均值。
 2. `run_clean.py` / `summarize_clean.py`：统一四权重、六档各64图、batch4、到每图D+64；逐轮与固定切片VALUE/四属性、分字段、节点角色/深度/父数、求解速度和完成后漂移。未完成图保留。
 3. `run_pair.py` / `summarize_pair.py`：复用128验证图、结构选一对u→q，保持/晚期两时点，clean/原样写回/只改u/只改q/一起改，以及对应同值异源控制。单次替换后16轮自由续算；输出实际输入和输出的数值，不将解码写回。

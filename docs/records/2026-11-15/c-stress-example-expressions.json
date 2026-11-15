@@ -1,0 +1,49 @@
+{
+  "note": "u/q expressions for stress examples; x positions are variable ids, leaf immediates are constant values; all ADD mod23",
+  "graphs": [
+    {
+      "graph_id": 89,
+      "node_pos": 76,
+      "role": "u",
+      "variable_id": 1,
+      "truth_value": 14,
+      "immediate_expression": "x1 = x60(21)+x64(16) mod23 = 14",
+      "expanded_expression": "x1 = ((x50(15)+x75(12)+x15(17))+(x15(17)+x66(22))) mod23 = 14",
+      "local_expected_shifted": 22,
+      "delta": 8
+    },
+    {
+      "graph_id": 89,
+      "node_pos": 130,
+      "role": "q",
+      "variable_id": 99,
+      "truth_value": 13,
+      "immediate_expression": "x99 = x76(12)+x78(10)+x1(14) mod23 = 13",
+      "expanded_expression": "x99 = ((x75(12))+((x75(12)+(x75(12)+x109(17))+x50(15)))+((x50(15)+x75(12)+x15(17))+(x15(17)+x66(22)))) mod23 = 13",
+      "local_expected_shifted": 21,
+      "delta": 8
+    },
+    {
+      "graph_id": 0,
+      "node_pos": 156,
+      "role": "u",
+      "variable_id": 53,
+      "truth_value": 1,
+      "immediate_expression": "x53 = x79(1) mod23 = 1",
+      "expanded_expression": "x53 = ((((x68(6))+x56(16)+((x56(16))+x56(16)))+x56(16))) mod23 = 1",
+      "local_expected_shifted": 6,
+      "delta": 5
+    },
+    {
+      "graph_id": 0,
+      "node_pos": 178,
+      "role": "q",
+      "variable_id": 25,
+      "truth_value": 22,
+      "immediate_expression": "x25 = x125(21)+x53(1) mod23 = 22",
+      "expanded_expression": "x25 = ((((x24(20)+(x68(6)))+(x56(16)))+((x56(16)+x60(18)+(x56(16)))+(x60(18)+(x56(16)+x60(18)+(x56(16))))+(x24(20)+(x56(16))))+((x56(16))+x56(16)))+((((x68(6))+x56(16)+((x56(16))+x56(16)))+x56(16)))) mod23 = 22",
+      "local_expected_shifted": 4,
+      "delta": 5
+    }
+  ]
+}

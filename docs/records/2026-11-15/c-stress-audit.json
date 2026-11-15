@@ -1,0 +1,174 @@
+{
+  "status": "audit_summary",
+  "report": "docs/records/2026-11-15/c-stress.md",
+  "code_commit": "3320449",
+  "models": [
+    {
+      "arm": "initial",
+      "path": "/workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/runs/oldC0-newseed-150ep/checkpoints/Nodes32-ADD - L4H16D384_DeBERTa-seed-2026 - 2026-11-14-10:12:43/epoch=143-val_loss=0.0000.ckpt",
+      "sha256": "40babb206b1393d0892b047202b9d6469cd140c82f3ba82c96a466fa3c76e780"
+    },
+    {
+      "arm": "hold",
+      "path": "tmp/analysis/c-corruption-pilot-20261115/hold/final.ckpt",
+      "sha256": "24f6b0715cb5d76775a9c93fd4a466b75b69d5c7e949f8d681d9062d79dc3aee"
+    },
+    {
+      "arm": "noise",
+      "path": "tmp/analysis/c-corruption-pilot-20261115/noise/final.ckpt",
+      "sha256": "cdf398a7ff407a60fc9a7548cc651df1b420daf3a3626871cc9c14616da4cf9a"
+    },
+    {
+      "arm": "semantic",
+      "path": "tmp/analysis/c-corruption-pilot-20261115/semantic/final.ckpt",
+      "sha256": "559fed2b0665164671e0176ee5b7ec1fde5682b328741d73fe78d8aa758fd9be"
+    }
+  ],
+  "data": {
+    "val_sha256": "676aabd2173d007b9c70c1e044ed69b7afe26d1f88e6bfcfd842778af3bcf66f",
+    "plan_sha256": "1971a635f0c572abbcb88de440fc844c593ab9f8199e82fe331299f938e8c24f",
+    "pilot_manifest_sha256": "551163f5947bf25197696a1a8c993a4e5e7c7fc1b96c5f25363d59b9b22b5649"
+  },
+  "runs": {
+    "sustained": {
+      "meta_sha256": "d74fed0c03e81c4e7a96fee7200f1fc9e97fb3c08481f27eac29601e0f51d006",
+      "status": "complete",
+      "candidate_graphs": 128,
+      "durations": [
+        2,
+        4
+      ],
+      "horizon": 16,
+      "code_hashes": {
+        "run_stress.py": "a74f52bb0f0ed20b20d5f868da653b12a9030019c350485545e209049ae501f8",
+        "stress_core.py": "f79c137383cc334a04e1916ecc3753bab37daae38a0987bb0f639a39888f1fce",
+        "suite_core.py": "5bb3244666ebc4c042a1a57749724c815685bfa55f741cf644d5efa6b7e69b8b"
+      }
+    },
+    "noise": {
+      "meta_sha256": "38a996d0bebeab8c9543af831eb9919fc44f51210b511ca615cbe1e5c9c706f3",
+      "status": "complete",
+      "candidate_graphs": 64,
+      "durations": [
+        1
+      ],
+      "horizon": 16,
+      "code_hashes": {
+        "run_stress.py": "a74f52bb0f0ed20b20d5f868da653b12a9030019c350485545e209049ae501f8",
+        "stress_core.py": "f79c137383cc334a04e1916ecc3753bab37daae38a0987bb0f639a39888f1fce",
+        "suite_core.py": "5bb3244666ebc4c042a1a57749724c815685bfa55f741cf644d5efa6b7e69b8b"
+      }
+    }
+  },
+  "summary_metas": {
+    "sustained": "6b41d9e61dc23b5640ef5fbfe8e51ac9fbde33a0ce42c7437f46fa71a5c5d364",
+    "noise": "f703a86b4de906a7cb18e64bea9837358df44f69c4324c65c1c180de732b8522"
+  },
+  "exports": [
+    {
+      "name": "sustained_accuracy",
+      "source_path": "tmp/analysis/c-sustained-noise-20261115/sustained-summary/accuracy.csv",
+      "source_sha256": "0b08b2fa357fac2ba4b8712e1d50ed8f771c3803194b3ff51802c7c01a029b8d",
+      "export_path": "docs/records/2026-11-15/c-stress-sustained-accuracy.csv",
+      "export_sha256": "147a2a9cad355f316262ef0acd95f90e76c66cdfa53d1f38cfeea2a259a2927f",
+      "filter": "cohort=common_value; groups u/q/descendants/all; metrics value/first4; forced phase_round 1,2,4; released phase_round 1,2,4,8,16"
+    },
+    {
+      "name": "sustained_events",
+      "source_path": "tmp/analysis/c-sustained-noise-20261115/sustained-summary/events.csv",
+      "source_sha256": "8175149e6719c80f78bf289ba8c89e8071fe574ce5043f13d644ee9559267487",
+      "export_path": "docs/records/2026-11-15/c-stress-sustained-events.csv",
+      "export_sha256": "8c0fb3f11ec8bae94153087694ab96f1dcfd2e6cad5e97fd6736593953090bcc",
+      "filter": "cohort=common_value; groups u/q/descendants/all; metrics value/first4; all windows"
+    },
+    {
+      "name": "sustained_dose",
+      "source_path": "tmp/analysis/c-sustained-noise-20261115/sustained-summary/dose_summary.csv",
+      "source_sha256": "17240b210d4604ebecc0f6776cc0b2e5089cf6a5d51db893f3bd5ec25d52d591",
+      "export_path": "docs/records/2026-11-15/c-stress-sustained-dose.csv",
+      "export_sha256": "17240b210d4604ebecc0f6776cc0b2e5089cf6a5d51db893f3bd5ec25d52d591",
+      "filter": "none (full summary)"
+    },
+    {
+      "name": "sustained_coverage",
+      "source_path": "tmp/analysis/c-sustained-noise-20261115/sustained-summary/coverage.csv",
+      "source_sha256": "ab0659d7a59d2322f9df335307f45a1ef855a9266dd0b77d2faae56536bbeb58",
+      "export_path": "docs/records/2026-11-15/c-stress-sustained-coverage.csv",
+      "export_sha256": "ab0659d7a59d2322f9df335307f45a1ef855a9266dd0b77d2faae56536bbeb58",
+      "filter": "none (full summary)"
+    },
+    {
+      "name": "noise_accuracy",
+      "source_path": "tmp/analysis/c-sustained-noise-20261115/noise-summary/accuracy.csv",
+      "source_sha256": "ae871794ce6a54191f92bbbf8c025e153e53e6a88863a8d55d47f8fb988e3801",
+      "export_path": "docs/records/2026-11-15/c-stress-noise-accuracy.csv",
+      "export_sha256": "a2e4e144654d9ad386cc0ec4ec6e24c3f054a0393a47bbce29c4f9968879b826",
+      "filter": "cohort=common_value; groups u/q/descendants/all; metrics value/first4; phase_round 1,2,4,8,16"
+    },
+    {
+      "name": "noise_events",
+      "source_path": "tmp/analysis/c-sustained-noise-20261115/noise-summary/events.csv",
+      "source_sha256": "3c3ef8255625da803af73f968cf6ff38c702da0d14ebb8abea055f0cb819637c",
+      "export_path": "docs/records/2026-11-15/c-stress-noise-events.csv",
+      "export_sha256": "24436514486611c62f3abf5b510812b18a4b1a2995203462a494ec15bff58ca8",
+      "filter": "cohort=common_value; groups u/q/descendants/all; metrics value/first4"
+    },
+    {
+      "name": "noise_dose",
+      "source_path": "tmp/analysis/c-sustained-noise-20261115/noise-summary/dose_summary.csv",
+      "source_sha256": "0517d3b887610134f5f0864c098c35ac382707f7735ab0285cf5f73b2af9d04e",
+      "export_path": "docs/records/2026-11-15/c-stress-noise-dose.csv",
+      "export_sha256": "0517d3b887610134f5f0864c098c35ac382707f7735ab0285cf5f73b2af9d04e",
+      "filter": "none (full summary)"
+    },
+    {
+      "name": "noise_coverage",
+      "source_path": "tmp/analysis/c-sustained-noise-20261115/noise-summary/coverage.csv",
+      "source_sha256": "628fbf2726f58d804936ea0a40859edf1bf97ed9d01cb2e7e54059620cf6855d",
+      "export_path": "docs/records/2026-11-15/c-stress-noise-coverage.csv",
+      "export_sha256": "628fbf2726f58d804936ea0a40859edf1bf97ed9d01cb2e7e54059620cf6855d",
+      "filter": "none (full summary)"
+    },
+    {
+      "name": "example_values",
+      "source_path": "composite (see source_paths)",
+      "source_sha256": "composite",
+      "export_path": "docs/records/2026-11-15/c-stress-example-values.csv",
+      "export_sha256": "8236b6358e54ff6cd480c934645eae17079a0bbe12406fcf15b59ac19a3fe21a",
+      "filter": "graph89 sustained late semantic L2 conditions free/wrong; graph0 noise late semantic conditions wrong/s1/s3/s6 r0",
+      "source_paths": [
+        {
+          "path": "tmp/analysis/c-sustained-noise-20261115/sustained/records.jsonl",
+          "sha256": "9af2dd1746d22dbf46fb4781b2b997909f3224bb7a223c89e69e68fc225bbae6"
+        },
+        {
+          "path": "tmp/analysis/c-sustained-noise-20261115/noise/records.jsonl",
+          "sha256": "9ec6fc4e10e896a68c1f5c4507dde4599cb29cf803dd45de476ca44da1f5b146"
+        }
+      ]
+    },
+    {
+      "name": "example_expressions",
+      "source_path": "composite (see source_paths)",
+      "source_sha256": "composite",
+      "export_path": "docs/records/2026-11-15/c-stress-example-expressions.json",
+      "export_sha256": "941bf0a8074d6752fdea31d2acdb6059ed1f835eb153f88d9b05b2e8baf89a01",
+      "filter": "derived u/q expressions for graphs89/0",
+      "source_paths": [
+        {
+          "path": "tmp/analysis/c-long-pilot-20261115/data/val.pt",
+          "sha256": "676aabd2173d007b9c70c1e044ed69b7afe26d1f88e6bfcfd842778af3bcf66f"
+        },
+        {
+          "path": "tmp/analysis/c-corruption-pilot-20261115/plan/val.jsonl",
+          "sha256": "1971a635f0c572abbcb88de440fc844c593ab9f8199e82fe331299f938e8c24f"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "No weights/raw tensors copied.",
+    "Sustained tables are filtered from full summary; noise tables are filtered/aggregated from full summary.",
+    "Development graphs, not an independent final test."
+  ]
+}
