@@ -1,9 +1,14 @@
 # 工作看板
 
-> 最近更新：2026-11-15 02:57 CST · [claude]
+> 最近更新：2026-11-15 11:38 CST · [gpt]
 > 活看板：任务可以移动；状态变化在 `log.md` 记一行。条目格式 `[YYYY-MM-DD HH:MM][author]`。
 
 ## 当前执行：B问题①、C问题③（2026-11-15 01:35）
+
+- [2026-11-15 11:38][gpt] 已审阅至602a27f：两线首批完成，本轮新增提交没有执行代码变更；CSV主计数核对一致，未独立复算服务器完整轨迹。详见[首批结果审阅](handoff/2026-11-15-1138-repair-results-review.md)。B主92目标沿用单父节点筛选，原异常却是三父节点，覆盖范围需明确；C短期改善不等于末两轮持续改善，也不等于C+无效。
+- [ ] [执行agent B] 仅CPU补交现有node_curves和graph142/128五分支目标/父/下游小轨迹；修报告“第16轮无损伤”与“全程无损伤”混用，注明单父节点主样本及重复节点观察分母。不重跑GPU、不自动扩多父节点。
+- [ ] [执行agent C] 仅CPU补交现有target_cases及保留stratum/selection_group的target_summary、报告案例及末两轮改善/恶化案例小轨迹；明确parent分类取t−1、干预取t、原自然结局窗口与干预窗口不同。不重放模型、不训练C+。
+- [ ] [执行agent B/C] 补记本轮实际并行GPU调度是否使用独立固定工作树、运行中是否有更新；之后恢复既定串行交接。此项不预设结果失效或要求重跑。
 
 - [2026-11-15 01:35][user/gpt] 用户选择先研究①B已有答案怎样更新、③C自然错误能否局部修复，暂缓②无依赖分支影响来源；授权GPT实现并上传、执行agent小验证后运行。核心代码在`tools/repair_study/`；详见 [行为定义](../tools/repair_study/README.md) 和 [执行交接](handoff/2026-11-15-0135-bc-repair-study.md)。本条优先于旧“等待下一步设计”，不包含C+训练或原M3/M4全矩阵。
 - [x] [gpt] B固定样本/五分支、C事件分类/选样/四分支hidden替换、配对汇总已实现；本地仅stdlib针对性测试及语法检查，无权重/模型运行。原案例与其它样本分开，不按修复结果挑样。
@@ -11,7 +16,7 @@
 - [2026-11-15 03:05][claude] **B 已有答案更新首批完成**：A′/B 各 185 条记录（184 固定 + 1 anchor），全部 eligible；固定样本 56 图、每时点/模型 92 target、共同合格 184。目标 VALUE final-two：A′ wrong_plus_1/3 为 0/92，B 为 92/92；unchanged/correct_write/empty 两模型均 92/92。A′ just_solved wrong_plus downstream 0/541、all_nodes 2311/2944；whole_graph downstream 541/541、all_nodes 2852/2944；B 五分支 all_nodes 2944/2944、downstream 541/541。报告 `docs/records/2026-11-15/b-value-update.md` + 两个小 CSV，提交 `47ffaad`。GPU1 已释放，未重训、未启动 M3/M4/C+。
 - [x] [执行agent C] 从原六档NPZ做CPU事件分类和固定选样，报告缺来源/缺健康对照；再两案例×4轮小验证，确认原轨迹重放一致及原样写回一致后，按同一清单运行两个seed各16轮续算。保存hidden快照在tmp，按自然结局/场景分开汇总。
 - [2026-11-15 02:57][claude] **C 局部修复首批完成**：8 项 repair-study CPU 测试通过；CPU 选样 48,523 events / 40,014 selectable，固定 57 case，缺健康对照 0；3 个自然缺组如实记录、不补样。s42 27 case/54 records、s1234 30 case/60 records，smoke 2×4 轮和 main 16 轮均 complete，无 replay failure。初步结果：restore_target 的 initial 常被立即读对，但 parent_wrong 的 first-forward 0→8/22 后 final-two 仍 6/22（同 unchanged）；parent_correct 的 restore_target first 0/23、final2 7/23（同 unchanged）；variable_only 的 VALUE 四分支 12/12，first4 的 initial 12/12 但 first-forward/final2 均 0/12。健康对照也出现首轮变化，故首轮提升不能当错误特异修复。报告 `docs/records/2026-11-15/c-local-repair.md`，小表 `c-local-repair-key-metrics.csv` / `-selection-events.csv` / `-selection-groups.csv`，提交 `81ac77a`。GPU6/7 已释放，B 仍在 GPU1；C 不再启动 GPU 任务。
-- [ ] [gpt] 收到B/C运行产物后审阅执行适配与结果，讨论跨场景重复性；若有实际重放差异，先修原因，不过滤异常掩盖问题。
+- [x] [gpt] 首批报告/CSV及执行代码差异已审阅；后续小轨迹补交再复核逐例变化，跨场景扩展待用户讨论。
 - 调度：共享工作树和GPU任务串行，B小验证/主运行优先；C CPU选样可提前，GPU排其后。现有训练不打断、运行工作树不pull；两位agent各自只提交本人产物和必要适配。
 
 ## B / C 精简汇总（2026-11-15）
