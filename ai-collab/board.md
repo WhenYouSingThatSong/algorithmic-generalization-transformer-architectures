@@ -1,14 +1,15 @@
 # 工作看板
 
-> 最近更新：2026-11-15 19:45 CST · [gpt]
+> 最近更新：2026-11-15 20:05 CST · [claude]
 > 活看板：任务可以移动；状态变化在 `log.md` 记一行。条目格式 `[YYYY-MM-DD HH:MM][author]`。
 
 ## 当前执行：C基础评估首批（2026-11-15 19:45）
 
 - [2026-11-15 19:45][user/gpt] 用户要求先做基础实现并交agent执行。已实现[tools/c_evaluation_suite](../tools/c_evaluation_suite/README.md)，详见[首批执行交接](handoff/2026-11-15-c-basic-evaluation-execution.md)。此条授权下面三项评估，替代历史“尚不执行新矩阵”；不授权任何新训练。
 - [x] [gpt] CPU已有records联合分析；现有initial s2026/e143及hold/noise/semantic四权重六档统一基本能力/到每图D+64；128图u→q两点2×2及同值来源/原样写回对照。节点VALUE/四属性、角色/深度/父数、完整读出轨迹、完成/失稳分母、输入父值与输出比较。原训练/腐蚀代码不改。
-- [ ] [执行agent C] 先确认共享工作树和GPU队列空闲，固定本提交，运行6项stdlib+1项torch及4图smoke；成功后按交接串行执行六档各64图/模型和128图父子两时点评估。已获用户授权，无需再次问启动。若源构造/时序/资格全失败则反馈，不为得到好结果换样。
-- [ ] [执行agent C] 交能力/长程曲线、全固定与共同资格的u/q恢复和传播、健康节点损伤；两个完整方程+实际输入输出案例；审计区分源文件与提交子表哈希。复用新CPU分析补1904联合表，原strict/unrelated/all与导出哈希补交仍保留。
+- [x] [执行agent C] 先确认共享工作树和GPU队列空闲，固定本提交，运行6项stdlib+1项torch及4图smoke；成功后按交接串行执行六档各64图/模型和128图父子两时点评估。已获用户授权，无需再次问启动。若源构造/时序/资格全失败则反馈，不为得到好结果换样。
+- [x] [执行agent C] 交能力/长程曲线、全固定与共同资格的u/q恢复和传播、健康节点损伤；两个完整方程+实际输入输出案例；审计区分源文件与提交子表哈希。复用新CPU分析补1904联合表，原strict/unrelated/all与导出哈希补交仍保留。
+- [2026-11-15 20:05][claude] **C 基础评估首批完成**：同步 `7f25a42`，7 项测试、clean/pair smoke 和汇总通过，无 NaN/OOM。clean 4 权重×6 档×64 图（到每图 D+64）：D+64 VALUE/first4 均值约 initial 0.796/0.022、hold 0.977/0.344、noise 0.968/0.276、semantic 0.968/0.343；first4 整图 all 在 D+64 均为 0。pair 128 图×2 时点全部有 q，value 资格 256/256，common strict 185；q_wrong 的 q 首轮 97–116、r2 128，both_wrong 首轮 0–3、r2 61–74、r4 111–126、r16 112–128；u_wrong 的 q 首轮 8–40，r2 71–84。semantic 的 u/q 首轮错误更多，未显示更快恢复；其下游 damaged 数较少。报告 `docs/records/2026-11-15/c-basic-evaluation.md` + 13 小表/审计，提交 `bfa33dc`；GPU2 已释放，未训练新模型。
 - [执行agent B] 继续既有CPU工作，不新增GPU；共享树/GPU按既定串行交接，运行中不pull/改配置。
 - 范围：只评估当前四权重，不训练三种子，不运行真实改题、持续污染、层/头干预或原延期的祖先局部自洽控制。这些留后续讨论。
 - 本地6项stdlib通过、语法检查；1项torch由服务器验证。尚未在本地加载模型或运行GPU评估。
@@ -24,7 +25,8 @@
 
 - [x] [gpt] 审阅至267bf40，源码未变且审计源码hash匹配；预算与主CSV计数一致。semantic减少子节点首轮传播但目标恢复不更快、末端接近；noise仅32/1489注入后读出错误，不能称等错误剂量。3倍噪声下semantic较少下游错误是值得复核的迁移观察。详见[审阅](handoff/2026-11-15-1904-c-corruption-review.md)。
 - [x] [gpt] 更正报告字段归因（VARIABLE主导而非全部）、initial late末两轮127/128、链接、已做人工注错状态及噪声解释；未改代码/重跑。下方历史“未训练C+”应读为尚未证明纠错机制，不是没有做后训练。
-- [ ] [执行agent C] 仅CPU补完整strict/unrelated/all汇总及源/导出hash映射；现有两提交小表hash不匹配audit，先明确是否过滤子集。补目标×下游联合逐图配对与实际方程/值轨迹，训练noise的新增错误数；不跑GPU。具体见审阅单。
+- [x] [执行agent C] 仅CPU补完整strict/unrelated/all汇总及源/导出hash映射；现有两提交小表hash不匹配audit，先明确是否过滤子集。补目标×下游联合逐图配对与实际方程/值轨迹，训练noise的新增错误数；不跑GPU。具体见审阅单。
+- [2026-11-15 19:30][claude] **1904 CPU补交完成**：提交 `b9e934b`；干预/event 改为完整源汇总，新增 noise-dose、joint-pairs/highlights、example-values/expressions；audit 记录 source→export SHA 与过滤条件。noise before-correct→after-wrong 真实新增 24/1481（1.62%）；旧“32 after wrong”含 8 个 before wrong。未重跑模型。
 - 本轮没有新训练授权；第二seed/更强噪声训练方案与用户讨论后再执行。B既有任务不变。
 
 ## 当前授权：C腐蚀后训练三组小比较（2026-11-15 18:29）
