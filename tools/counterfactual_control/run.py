@@ -14,6 +14,7 @@ from types import SimpleNamespace
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import design
+import stages
 sys.path.insert(0, str(HERE.parent/'repair_study'))
 import core
 
@@ -29,12 +30,15 @@ def main():
     p.add_argument('--per_graph', type=int, default=2)
     p.add_argument('--deltas', type=int, nargs='+', default=[1,3])
     p.add_argument('--horizon', type=int, default=16)
+    p.add_argument('--stage_study', action='store_true', help='early / first graph VALUE completion / completion+late_gap')
+    p.add_argument('--completion_budget',type=int,default=64)
+    p.add_argument('--late_gap',type=int,default=16)
     p.add_argument('--seed', type=int, default=20261115)
     p.add_argument('--ckpt', type=Path)
     p.add_argument('--device', default='cuda')
     p.add_argument('--num_threads', type=int, default=4)
     a = p.parse_args()
-    if min(a.n_graphs,a.per_graph,a.horizon) < 1:
+    if min(a.n_graphs,a.per_graph,a.horizon,a.completion_budget,a.late_gap) < 1:
         p.error('positive sample/window arguments required')
     design.matched_changes({0:1,1:1}, a.deltas)  # validate deltas before runtime
     sys.path.insert(0, str(HERE.parent/'b_mechanism'))
@@ -53,14 +57,14 @@ def main():
     if core.sha(ckpt) != source['weight_sha256']:
         raise ValueError('checkpoint hash mismatch')
     a.out_dir.mkdir(parents=True, exist_ok=False)
-    meta = dict(protocol='matched_counterfactual_v1', status='running',
+    meta = dict(protocol='matched_counterfactual_stages_v1' if a.stage_study else 'matched_counterfactual_v1', status='running',
                 weight=a.weight, checkpoint_sha256=core.sha(ckpt), source_run=source,
                 source_index_sha256=core.sha(source_dir/'index.jsonl'),
-                code_sha256={f:core.sha(HERE/f) for f in ['run.py','design.py']},
+                code_sha256={f:core.sha(HERE/f) for f in ['run.py','design.py','stages.py']},
                 args={k:str(v) if isinstance(v,Path) else v for k,v in vars(a).items()},
                 note='New batch-size-1 graph extraction; donor batch and branch batch fixed across conditions. Not a replay of old C4.')
     core.write_json(a.out_dir/'meta.json', meta)
-    counts = dict(graphs=0, candidates=0, eligible=0, no_candidate_graphs=0)
+    counts = dict(graphs=0, candidates=0, eligible=0, no_candidate_graphs=0, stage_records=0)
     with (a.out_dir/'records.jsonl').open('x',encoding='utf-8') as out, \
          (a.out_dir/'selection.jsonl').open('x',encoding='utf-8') as sel, torch.no_grad():
         for stratum in a.strata:
@@ -124,59 +128,72 @@ def main():
                         for leaf,delta in edits.items():
                             x[0,leaf_constants[leaf],3] = (leaves[leaf]+delta)%23
                         inputs.append(x)
-                    hidden = lit.model.token_embedder(torch.cat(inputs,dim=0))
-                    for _ in range(candidate['state_round']):
-                        hidden, logits = lit.model(hidden,True)
-                    source_pred = torch.stack(lit.generate_factor_decodes(logits,temperature=0.0),-1)
-                    source_initial = {name:source_pred[i,pos,:4].cpu().tolist() for i,name in enumerate(names)}
-                    branches = ['unchanged','sham','same',*[f'shift_{d}' for d in a.deltas]]
-                    branch_states = []
-                    distance = {}
-                    for name in branches:
-                        h = hidden[0:1].clone()
-                        if name != 'unchanged':
-                            donor_i = 0 if name=='sham' else names.index(name)
-                            h[:,u,:] = hidden[donor_i:donor_i+1,u,:]
-                        branch_states.append(h)
-                        v,base = h[0,u].float(),hidden[0,u].float()
-                        distance[name] = dict(l2=float((v-base).norm()),
-                            cosine=float(torch.dot(v,base)/(v.norm()*base.norm()).clamp_min(1e-12)),
-                            exactly_equal=bool(torch.equal(h[0,u],hidden[0,u])))
-                    # Full donor states are reference runs with their OWN truth, not local interventions.
-                    refnames = ['full_'+n for n in names[1:]]
-                    states = torch.cat(branch_states+[hidden[i:i+1].clone() for i in range(1,len(names))],dim=0)
-                    allnames = branches+refnames
-                    def decode_heads(h):
-                        logits = [head(h) for head in lit.model.output_layers]
-                        return torch.stack(lit.generate_factor_decodes(logits,temperature=0.0),-1)
-                    initial = decode_heads(states)
-                    traces = {name:dict(initial=initial[i,pos,:4].cpu().tolist(),outputs=[])
-                              for i,name in enumerate(allnames)}
-                    for _ in range(a.horizon):
-                        states, logits = lit.model(states,True)
-                        pred = torch.stack(lit.generate_factor_decodes(logits,temperature=0.0),-1)
-                        for i,name in enumerate(allnames):
-                            traces[name]['outputs'].append(pred[i,pos,:4].cpu().tolist())
-                    if traces['sham'] != traces['unchanged']:
-                        raise ValueError('identical hidden sham diverged from unchanged')
-                    for name in names[1:]:
-                        if traces[name]['initial'][ui] != source_initial[name][ui]:
-                            raise ValueError('hidden row copy did not preserve donor immediate readout')
-                    flags, qs = design.qualify(truth4,pos,parents,candidate,source_initial,
-                                              traces['unchanged']['outputs'][0])
-                    eligible = bool(qs) and all(flags.values())
-                    counts['eligible'] += int(eligible)
-                    rec = dict(candidate, case_id=f'{graph_key}:u{u}', graph_id=graph_key,
-                        stratum=stratum, weight=a.weight, data_sha256=data_sha,
-                        modulus=23, deltas=a.deltas, node_positions=pos,truth4=truth4,
-                        parents=parents,depths=depths,leaf_constants=leaf_constants,
-                        source_initial=source_initial,source_qualification=flags,
-                        eligible_children=qs,status='eligible' if eligible else 'ineligible',
-                        same_vector_equal=distance['same']['exactly_equal'],vector_distance=distance,
-                        branches={n:traces[n] for n in branches},
-                        references={n:traces[n] for n in refnames})
-                    out.write(json.dumps(rec)+'\n'); out.flush()
-                    print(json.dumps(dict(case_id=rec['case_id'],status=rec['status'],q=len(qs))),flush=True)
+                    snapshots,complete_round = stages.collect(lit,torch,inputs,candidate,pos,truth4,
+                        enabled=a.stage_study,completion_budget=a.completion_budget,late_gap=a.late_gap)
+                    for stage,snapshot,state_round in snapshots:
+                        if snapshot is None:
+                            rec = dict(candidate,case_id=f'{graph_key}:u{u}:{stage}',graph_id=graph_key,
+                                weight=a.weight,stratum=stratum,data_sha256=data_sha,stage=stage,
+                                state_round=None,completion_round=complete_round,status='unavailable',
+                                reason='no_completion_or_late_outside_budget',eligible_children=[],
+                                source_qualification={},same_vector_equal=None,vector_distance={})
+                            out.write(json.dumps(rec)+'\n');out.flush();counts['stage_records']+=1
+                            continue
+                        hidden,source_pred,state_round = snapshot
+                        source_initial = {name:source_pred[i,pos,:4].cpu().tolist() for i,name in enumerate(names)}
+                        branches = ['unchanged','sham','same',*[f'shift_{d}' for d in a.deltas]]
+                        branch_states = []
+                        distance = {}
+                        for name in branches:
+                            h = hidden[0:1].clone()
+                            if name != 'unchanged':
+                                donor_i = 0 if name=='sham' else names.index(name)
+                                h[:,u,:] = hidden[donor_i:donor_i+1,u,:]
+                            branch_states.append(h)
+                            v,base = h[0,u].float(),hidden[0,u].float()
+                            distance[name] = dict(l2=float((v-base).norm()),
+                                cosine=float(torch.dot(v,base)/(v.norm()*base.norm()).clamp_min(1e-12)),
+                                exactly_equal=bool(torch.equal(h[0,u],hidden[0,u])))
+                        # Full donor states are reference runs with their OWN truth, not local interventions.
+                        refnames = ['full_'+n for n in names[1:]]
+                        states = torch.cat(branch_states+[hidden[i:i+1].clone() for i in range(1,len(names))],dim=0)
+                        allnames = branches+refnames
+                        def decode_heads(h):
+                            logits = [head(h) for head in lit.model.output_layers]
+                            return torch.stack(lit.generate_factor_decodes(logits,temperature=0.0),-1)
+                        initial = decode_heads(states)
+                        traces = {name:dict(initial=initial[i,pos,:4].cpu().tolist(),outputs=[])
+                                  for i,name in enumerate(allnames)}
+                        for _ in range(a.horizon):
+                            states, logits = lit.model(states,True)
+                            pred = torch.stack(lit.generate_factor_decodes(logits,temperature=0.0),-1)
+                            for i,name in enumerate(allnames):
+                                traces[name]['outputs'].append(pred[i,pos,:4].cpu().tolist())
+                        if traces['sham'] != traces['unchanged']:
+                            raise ValueError('identical hidden sham diverged from unchanged')
+                        for name in names[1:]:
+                            if traces[name]['initial'][ui] != source_initial[name][ui]:
+                                raise ValueError('hidden row copy did not preserve donor immediate readout')
+                        flags, qs = design.qualify(truth4,pos,parents,candidate,source_initial,
+                                                  traces['unchanged']['outputs'][0],value_only=a.stage_study)
+                        eligible = bool(qs)
+                        counts['eligible'] += int(eligible)
+                        counts['stage_records'] += 1
+                        rec = dict(candidate, case_id=f'{graph_key}:u{u}'+(':'+stage if a.stage_study else ''), graph_id=graph_key,
+                            stratum=stratum, weight=a.weight, data_sha256=data_sha,
+                            stage=stage,state_round=state_round,completion_round=complete_round,
+                            source_policy='value' if a.stage_study else 'first4',
+                            modulus=23, deltas=a.deltas, node_positions=pos,truth4=truth4,
+                            parents=parents,depths=depths,leaf_constants=leaf_constants,
+                            source_initial=source_initial,source_qualification=flags,
+                            original_value_correct_count=sum(row[3]==gold[3] for row,gold in zip(source_initial['original'],truth4)),
+                            original_first4_correct_count=sum(row==gold for row,gold in zip(source_initial['original'],truth4)),
+                            eligible_children=qs,status='eligible' if eligible else 'ineligible',
+                            same_vector_equal=distance['same']['exactly_equal'],vector_distance=distance,
+                            branches={n:traces[n] for n in branches},
+                            references={n:traces[n] for n in refnames})
+                        out.write(json.dumps(rec)+'\n'); out.flush()
+                        print(json.dumps(dict(case_id=rec['case_id'],status=rec['status'],q=len(qs))),flush=True)
             if graph_count != a.n_graphs:
                 raise ValueError(f'{stratum}: fewer than requested fixed graph count; no refill')
             del ctx, lit

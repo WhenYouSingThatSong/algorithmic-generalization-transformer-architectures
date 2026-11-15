@@ -30,6 +30,17 @@ class SummaryTest(unittest.TestCase):
             meta=json.loads((root/'summary/meta.json').read_text())
             self.assertEqual(meta['common_b_cases'],1)
             self.assertEqual(meta['included_cases'],2)
+            # A late-only eligible target must not leak into the matched timing comparison.
+            for name in inputs:
+                path=Path(name)
+                rows=[json.loads(line) for line in path.read_text().splitlines()]
+                late=[dict(r,case_id=r['case_id']+':complete',timing='whole_graph_complete',status='eligible') for r in rows]
+                path.write_text(''.join(json.dumps(r)+'\n' for r in rows+late))
+            subprocess.run([sys.executable,str(script),'--inputs',*inputs,'--require_timings',
+                'just_solved','whole_graph_complete','--out_dir',str(root/'matched')],check=True)
+            matched=json.loads((root/'matched/meta.json').read_text())
+            self.assertEqual(matched['common_b_cases'],2)
+            self.assertEqual(matched['included_cases'],4)
 
 
 if __name__ == '__main__':

@@ -14,6 +14,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent / 'b_mechanism'))
 import core
+import multifanin
 
 
 def main():
@@ -26,9 +27,12 @@ def main():
     p.add_argument('--horizon', type=int, default=16)
     p.add_argument('--batch_size', type=int, default=8)
     p.add_argument('--include_anchor', action='store_true')
+    p.add_argument('--multi_parent', action='store_true', help='new structural selection: one target per fan-in 1/2/3 per graph')
+    p.add_argument('--all_values_first_graphs', type=int, default=8, help='multi-parent mode only: fixed first N candidate graph IDs enumerate all wrong values')
+    p.add_argument('--selection_seed', type=int, default=20261115)
     p.add_argument('--num_threads', type=int, default=4)
     a = p.parse_args()
-    if min(a.candidate_count, a.horizon, a.batch_size) < 1 or a.candidate_start < 0:
+    if min(a.candidate_count, a.horizon, a.batch_size) < 1 or a.candidate_start < 0 or a.all_values_first_graphs<0:
         p.error('invalid candidate/horizon/batch arguments')
     from trajectory_io import configure_runtime
     configure_runtime()
@@ -47,11 +51,12 @@ def main():
         gids.add(142)
     graphs = {g['graph_id']: g for g in manifest['graphs'] if g['graph_id'] in gids}
     a.out_dir.mkdir(parents=True, exist_ok=False)
-    metadata = dict(status='running', experiment='B_existing_value_v1',
+    metadata = dict(status='running', experiment='B_multi_parent_v1' if a.multi_parent else 'B_existing_value_v1',
                     args={k: str(v) if isinstance(v, Path) else v for k, v in vars(a).items()},
                     model=spec, dataset=ds_file, dataset_sha256=core.sha(ds_file),
                     manifest_sha256=core.sha(a.manifest), script_sha256=core.sha(__file__),
                     core_sha256=core.sha(HERE/'core.py'),
+                    selection_sha256=core.sha(HERE/'multifanin.py'),
                     common_sha256=core.sha(HERE.parent/'b_mechanism/b_mechanism_common.py'),
                     missing_manifest_graphs=sorted(gids-graphs.keys()))
     core.write_json(a.out_dir/'meta.json', metadata)
@@ -60,7 +65,8 @@ def main():
                               batch_size=a.batch_size, num_workers=0)
     lit, tok, teacher, mc = (ctx[k] for k in ('lit', 'tok', 'teacher', 'mc'))
     written, skipped, scanned = 0, 0, []
-    with (a.out_dir/'records.jsonl').open('x', encoding='utf-8') as dst, torch.no_grad():
+    with (a.out_dir/'records.jsonl').open('x', encoding='utf-8') as dst, \
+         (a.out_dir/'selection.jsonl').open('x', encoding='utf-8') as selection, torch.no_grad():
         for batch_index, raw in enumerate(ctx['dm'].val_dataloader()):
             if batch_index*a.batch_size > max(gids):
                 break
@@ -79,7 +85,14 @@ def main():
                 _, original = C.rollout(lit, teacher, data[bi:bi+1], mg['n_loops'])
                 targets = []
                 if a.candidate_start <= gid < a.candidate_start+a.candidate_count:
-                    for ch in mg['chains']:
+                    if a.multi_parent:
+                        depths = {u:int(meta['depth'][u]) for u in positions}
+                        picked, coverage = multifanin.select_targets(parents,depths,gid,a.selection_seed)
+                        selection.write(json.dumps(dict(graph_id=gid,coverage=coverage))+'\n'); selection.flush()
+                        chains = [dict(pos=u) for u in picked]
+                    else:
+                        chains = mg['chains']
+                    for ch in chains:
                         first_correct = next((t+1 for t, state in enumerate(original)
                                               if int(state[0,ch['pos'],C.V]) == int(label[bi,ch['pos'],C.V])), None)
                         targets.append((ch['pos'], 'just_solved', first_correct, 'fixed_candidates'))
@@ -87,6 +100,8 @@ def main():
                         targets.append((ch['pos'], 'whole_graph_complete', complete_round, 'fixed_candidates'))
                 if a.include_anchor and gid == 142 and mg.get('T') is not None:
                     targets.append((128, 'after_original_fault', mg['T']+3, 'diagnostic_anchor'))
+                    if a.multi_parent:
+                        targets.append((128, 'clean_context', mg['T']+3, 'diagnostic_anchor'))
                 for target, timing, state_round, cohort in targets:
                     rec = dict(case_id=f'B:{gid}:{target}:{timing}', graph_id=gid,
                                weight=a.model, cohort=cohort, timing=timing, category='existing_value',
@@ -95,6 +110,13 @@ def main():
                                descendant_positions=core.descendants(parents, target),
                                node_positions=positions, truth4=truth4,
                                data_sha256=metadata['dataset_sha256'], status='eligible')
+                    exhaustive = a.multi_parent and (cohort=='diagnostic_anchor' or
+                        gid < a.candidate_start+a.all_values_first_graphs)
+                    rec.update(fan_in=len(parents[target]),depth=int(meta['depth'][target]),
+                               all_parents=parents,depths={u:int(meta['depth'][u]) for u in positions},
+                               exhaustive_values=exhaustive)
+                    if a.multi_parent:
+                        rec['selection_group'] = f"fanin_{len(parents[target])}:"+('enumerated' if exhaustive else 'sampled')
                     if state_round is None:
                         rec.update(status='ineligible', reason='no_qualifying_state_in_original_budget')
                         skipped += 1
@@ -103,11 +125,17 @@ def main():
                     if cohort == 'diagnostic_anchor':
                         base = original[mg['T']].clone()
                         old = int(label[bi, 26, C.V])
-                        base[0, 26, C.V] = tok.value_tok2idx[str((old+1) % tok.mod_val)]
+                        if timing == 'after_original_fault':
+                            base[0, 26, C.V] = tok.value_tok2idx[str((old+1) % tok.mod_val)]
                         _, trace = C.rollout(lit, teacher, base, 2)
                         base = trace[-1]
-                        rec['anchor_preparation'] = dict(injected_pos=26, from_value=old,
-                                                         to_value=(old+1) % tok.mod_val, forwards=2)
+                        rec['anchor_preparation'] = dict(injected_pos=26 if timing=='after_original_fault' else None,
+                                                         from_value=old,to_value=(old+1) % tok.mod_val,
+                                                         forwards=2,comparison='same elapsed time, different current context')
+                        if a.multi_parent:
+                            rec['anchor_full_state']=base[0].cpu().tolist()
+                            rec['original_input_tokens']=data[bi].cpu().tolist()
+                            rec['label_tokens']=label[bi].cpu().tolist()
                     else:
                         base = original[state_round-1].clone()
                     ps = parents[target]
@@ -123,7 +151,9 @@ def main():
                     else:
                         truth_value = int(label[bi, target, C.V])
                         rec['branches'] = {}
-                        for name, value in core.b_variants(truth_value, tok.mod_val, tok.value_tok2idx['EMPTY']):
+                        variants = (multifanin.value_branches(truth_value,tok.mod_val,tok.value_tok2idx['EMPTY'],exhaustive)
+                                    if a.multi_parent else core.b_variants(truth_value,tok.mod_val,tok.value_tok2idx['EMPTY']))
+                        for name, value in variants:
                             start = base.clone()
                             if name != 'unchanged':
                                 start[0, target, C.V] = value

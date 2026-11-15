@@ -1,5 +1,7 @@
 # 通用同值 / 异值来源对照
 
+新增阶段（2026-11-15）：`run.py --stage_study`在相同结构候选上比较early、首次整图VALUE完成、完成后16轮；阶段实验采用统一VALUE源资格并另报四属性严格子集，协议名与原首批分开。`summarize.py --common_stages early complete late`使用同一目标及同一q交集；可再加`--strict_sources`。默认不传新开关仍执行原首批时点和四属性资格。完整方案见[下一批交接](../../ai-collab/handoff/2026-11-15-b-multiparent-c-stages-joint.md)。
+
 2026-11-15。用户授权补齐来源对照，并明确不能只测4、5，要在不同数据与节点场景中构造通用情况。此实验不训练C+，不修改B或现有训练代码。
 
 ## 研究问题与操作

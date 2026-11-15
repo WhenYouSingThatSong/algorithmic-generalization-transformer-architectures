@@ -28,6 +28,7 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--inputs', type=Path, nargs='+', required=True, help='records.jsonl files')
     p.add_argument('--out_dir', type=Path, required=True)
+    p.add_argument('--require_timings', nargs='+', help='B only: keep targets jointly eligible in both models at every listed timing')
     a = p.parse_args()
     records, identities, metadata = [], set(), []
     for path in a.inputs:
@@ -49,7 +50,17 @@ def main():
         if not all(any(r['weight']==w for r in records) for w in bsets):
             raise ValueError('B primary comparison requires both model_a and model_b files')
     common = bsets['model_a'] & bsets['model_b']
-    metrics, target_rows, coverage = [], [], []
+    if a.require_timings:
+        availability = defaultdict(set)
+        for r in records:
+            if r['cohort']=='fixed_candidates' and (r['case_id'],r['data_sha256']) in common:
+                availability[(r['graph_id'],r['target_pos'],r['data_sha256'])].add(r['timing'])
+        allowed = {k for k,v in availability.items() if set(a.require_timings)<=v}
+        common = {(r['case_id'],r['data_sha256']) for r in records
+                  if r['cohort']=='fixed_candidates' and r['timing'] in a.require_timings
+                  and (r['case_id'],r['data_sha256']) in common
+                  and (r['graph_id'],r['target_pos'],r['data_sha256']) in allowed}
+    metrics, target_rows, coverage, endpoints = [], [], [], []
     for r in records:
         included = r['status']=='eligible' and (r['cohort']!='fixed_candidates' or
                                                 (r['case_id'], r['data_sha256']) in common)
@@ -73,6 +84,11 @@ def main():
             for role, positions in roles.items():
                 for row in core.pair_metrics(r, branch, positions):
                     metrics.append(dict(**base_fields, branch=name, role=role, **row))
+                if len(branch['outputs'])>=2:
+                    ids=[pos.index(p) for p in positions if p in pos]
+                    for metric in ('value','first4'):
+                        endpoints.append(dict(**base_fields,branch=name,role=role,metric=metric,
+                            **core.window_counts(truth,r['branches']['unchanged']['outputs'],branch['outputs'],ids,metric)))
             for metric in ('value', 'first4'):
                 def ok(row):
                     return row[i][3]==truth[i][3] if metric=='value' else row[i]==truth[i]
@@ -106,6 +122,9 @@ def main():
     save_csv(a.out_dir/'coverage.csv', coverage)
     save_csv(a.out_dir/'target_cases.csv', target_rows)
     save_csv(a.out_dir/'node_curves.csv', aggregated)
+    save_csv(a.out_dir/'endpoint_cases.csv', endpoints)
+    save_csv(a.out_dir/'endpoint_summary.csv',core.summarize_endpoints(endpoints,
+        ['weight','cohort','timing','category','selection_group','stratum','branch','role','metric']))
     tg = defaultdict(list)
     names = ['weight','cohort','timing','category','selection_group','stratum','branch','metric']
     for row in target_rows:
@@ -124,6 +143,7 @@ def main():
         target_summary.append(result)
     save_csv(a.out_dir/'target_summary.csv', target_summary)
     core.write_json(a.out_dir/'meta.json', dict(inputs=metadata, common_b_cases=len(common),
+        require_timings=a.require_timings,
         source_cases=len(records), included_cases=sum(r['included'] for r in coverage),
         notes=['No single pooled recovery rate across different roles/cohorts/windows.',
                'First correct forward can reflect initial replacement; inspect initial_correct.',

@@ -180,3 +180,38 @@ def pair_metrics(rec, branch, role):
                                helped=sum(not x and y for x, y in zip(b, v)),
                                harmed=sum(x and not y for x, y in zip(b, v))))
     return result
+
+
+def window_counts(truth, baseline, outputs, ids, metric='value'):
+    """Paired last-two endpoints; never call an always-correct node recovered."""
+    if len(baseline)!=len(outputs) or len(outputs)<2:
+        raise ValueError('matched windows of at least two forwards required')
+    def ok(row,i):
+        return row[i][3]==truth[i][3] if metric=='value' else row[i]==truth[i]
+    b=[all(ok(row,i) for row in baseline[-2:]) for i in ids]
+    end=[all(ok(row,i) for row in outputs[-2:]) for i in ids]
+    wrong=[any(not ok(row,i) for row in outputs) for i in ids]
+    return dict(n=len(ids),baseline_final_two=sum(b),final_two_correct=sum(end),
+                final_two_helped=sum(not x and y for x,y in zip(b,end)),
+                final_two_harmed=sum(x and not y for x,y in zip(b,end)),
+                ever_output_wrong=sum(wrong),wrong_then_final_two_correct=sum(x and y for x,y in zip(wrong,end)))
+
+
+def summarize_endpoints(rows, keys):
+    groups=defaultdict(list)
+    for row in rows:
+        groups[tuple(row[k] for k in keys)].append(row)
+    result=[]
+    for key,pool in sorted(groups.items()):
+        graphs=defaultdict(list)
+        for row in pool:
+            if row['n']:
+                graphs[row['graph_id']].append(row)
+        out=dict(zip(keys,key),cases=len(pool),graphs_with_nodes=len(graphs),n=sum(r['n'] for r in pool))
+        for field in ('baseline_final_two','final_two_correct','final_two_helped','final_two_harmed',
+                      'ever_output_wrong','wrong_then_final_two_correct'):
+            out[field+'_count']=sum(r[field] for r in pool)
+            out[field+'_graph_equal']=(sum(sum(r[field]/r['n'] for r in g)/len(g)
+                for g in graphs.values())/len(graphs)) if graphs else None
+        result.append(out)
+    return result

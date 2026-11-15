@@ -122,7 +122,7 @@ def choose_candidates(parents, depths, leaf_values, graph_key, limit=2,
     return selected, coverage
 
 
-def qualify(truth4, positions, parents, candidate, source_initial, baseline_first):
+def qualify(truth4, positions, parents, candidate, source_initial, baseline_first, value_only=False):
     """Common source qualification; q eligibility uses unchanged branch only."""
     lookup = {p: i for i,p in enumerate(positions)}
     u = candidate['target_pos']; ui = lookup[u]
@@ -132,8 +132,11 @@ def qualify(truth4, positions, parents, candidate, source_initial, baseline_firs
         if name != 'original':
             expected[3] = candidate['donor_truth'][name][u]
         flags[name+'_target_first4'] = source_initial[name][ui] == expected
+        flags[name+'_target_value'] = source_initial[name][ui][3] == expected[3]
+        flags[name+'_nonvalue_matches_original'] = source_initial[name][ui][:3] == source_initial['original'][ui][:3]
     eligible_q = []
-    if all(flags.values()):
+    source_ok = all(v for k,v in flags.items() if k.endswith('_target_value')) if value_only else all(flags.values())
+    if source_ok:
         for q in candidate['ready_children']:
             qi = lookup[q]
             parents_ok = all(source_initial['original'][lookup[p]][3] == truth4[lookup[p]][3]
