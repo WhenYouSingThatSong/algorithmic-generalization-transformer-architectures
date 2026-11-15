@@ -216,11 +216,114 @@
     "clean_summary_sha256": "7b9547ea0eb5c6d9b47342b667ae0dd3c40a0222b4afbffbc67f55ad937a9cca",
     "intervention_summary_sha256": "014a175c2f2f884d6c1fcee15bc893bb28523a3a8ce8cecf14d3eba4c8eef2ee",
     "event_summary_sha256": "2a2688a428c16fd576a510b0f95ac60a93204afb0cb5551a5cd4ecc4e56c4a6e",
-    "training_dose_sha256": "eeb37afa6bd6c343cdd1fa05cf05df70a7a4c1c6de40fa72c68f20d8f85367bc"
+    "training_dose_sha256": "eeb37afa6bd6c343cdd1fa05cf05df70a7a4c1c6de40fa72c68f20d8f85367bc",
+    "noise_dose_sha256": "a3b0e20682a2e4b5532c3583bfd993fc8371aee60e9c9593da55163a55c0ae24",
+    "joint_pairs_sha256": "0081f07406ed28ea74d8dd38231608a4bcc1fcc490cedec3483890cf5f666d05",
+    "joint_highlights_sha256": "ab6b693abb60da2d56c194db9e8707f243c9264b4da437064b8fedcb8c85c6f3",
+    "example_values_sha256": "0a5da9ff9e9788158c7226e7237494b3978a5115335064f95bf608fe379665de",
+    "example_expressions_sha256": "106b3671a9b235d9c3c05b4ab2f12d42626506cf2797729eb6952108c1279a59"
   },
   "notes": [
     "No weights/raw tensors are copied.",
     "Full raw records/NPZ/checkpoints remain in tmp.",
     "The validation split is the already-viewed long-pilot split; not an independent final test."
+  ],
+  "exports": [
+    {
+      "name": "clean_summary",
+      "source_path": "tmp/analysis/c-corruption-pilot-20261115/summary/clean_summary.csv",
+      "source_sha256": "7b9547ea0eb5c6d9b47342b667ae0dd3c40a0222b4afbffbc67f55ad937a9cca",
+      "export_path": "docs/records/2026-11-15/c-corruption-clean-summary.csv",
+      "export_sha256": "7b9547ea0eb5c6d9b47342b667ae0dd3c40a0222b4afbffbc67f55ad937a9cca",
+      "filter": "none (full source summary)"
+    },
+    {
+      "name": "intervention_summary",
+      "source_path": "tmp/analysis/c-corruption-pilot-20261115/summary/intervention_summary.csv",
+      "source_sha256": "014a175c2f2f884d6c1fcee15bc893bb28523a3a8ce8cecf14d3eba4c8eef2ee",
+      "export_path": "docs/records/2026-11-15/c-corruption-intervention-summary.csv",
+      "export_sha256": "014a175c2f2f884d6c1fcee15bc893bb28523a3a8ce8cecf14d3eba4c8eef2ee",
+      "filter": "none (full source summary; all cohorts/groups/rounds)"
+    },
+    {
+      "name": "event_summary",
+      "source_path": "tmp/analysis/c-corruption-pilot-20261115/summary/event_summary.csv",
+      "source_sha256": "2a2688a428c16fd576a510b0f95ac60a93204afb0cb5551a5cd4ecc4e56c4a6e",
+      "export_path": "docs/records/2026-11-15/c-corruption-event-summary.csv",
+      "export_sha256": "2a2688a428c16fd576a510b0f95ac60a93204afb0cb5551a5cd4ecc4e56c4a6e",
+      "filter": "none (full source summary; all cohorts/groups)"
+    },
+    {
+      "name": "training_dose",
+      "source_path": "tmp/analysis/c-corruption-pilot-20261115/summary/training_dose.csv",
+      "source_sha256": "eeb37afa6bd6c343cdd1fa05cf05df70a7a4c1c6de40fa72c68f20d8f85367bc",
+      "export_path": "docs/records/2026-11-15/c-corruption-training-dose.csv",
+      "export_sha256": "eeb37afa6bd6c343cdd1fa05cf05df70a7a4c1c6de40fa72c68f20d8f85367bc",
+      "filter": "none (full source summary)"
+    },
+    {
+      "name": "budget",
+      "source_path": "tmp/analysis/c-corruption-pilot-20261115/summary/budget.csv",
+      "source_sha256": "c33cc3facb493dba5e9b4733a93f7dc245f63a3651a06d772b9d11202da9f6c5",
+      "export_path": "docs/records/2026-11-15/c-corruption-budget.csv",
+      "export_sha256": "c33cc3facb493dba5e9b4733a93f7dc245f63a3651a06d772b9d11202da9f6c5",
+      "filter": "none (full source summary)"
+    },
+    {
+      "name": "coverage",
+      "source_path": "tmp/analysis/c-corruption-pilot-20261115/evaluation/coverage.csv",
+      "source_sha256": "298adfe8bbd7e5e789c53db905ab689769c8d1f794a1958260e34caa3a04aaab",
+      "export_path": "docs/records/2026-11-15/c-corruption-coverage.csv",
+      "export_sha256": "4fdaec26461e1e004fd8ee4412f7b2e54622e6900cfa820027ca2d4fa82cc367",
+      "filter": "derived from evaluation/coverage.csv; per arm/timing plus common totals"
+    },
+    {
+      "name": "evaluation_dose",
+      "source_path": "tmp/analysis/c-corruption-pilot-20261115/summary/evaluation_dose.csv",
+      "source_sha256": "dd2d7a6b62397ad7c432a35e0b56c9de26dbeefa51e3d8e0dece3767251a9ef8",
+      "export_path": "docs/records/2026-11-15/c-corruption-evaluation-dose.csv",
+      "export_sha256": "03c0f56cce845cdfdb7644b1a9496e2d164fdc69ba8f9b2365b66ebd7ff1045e",
+      "filter": "aggregated from summary/evaluation_dose.csv by arm/timing/branch"
+    },
+    {
+      "name": "joint_pairs",
+      "source_path": "tmp/analysis/c-corruption-pilot-20261115/evaluation/records.jsonl",
+      "source_sha256": "40d574f76605d36ecfeee67efac6fe1fb2e8fa446be42ba4d7bb8fd89426d401",
+      "export_path": "docs/records/2026-11-15/c-corruption-joint-pairs.csv",
+      "export_sha256": "0081f07406ed28ea74d8dd38231608a4bcc1fcc490cedec3483890cf5f666d05",
+      "filter": "derived per graph×timing from evaluation/records.jsonl; hold/semantic, unchanged/same/semantic"
+    },
+    {
+      "name": "joint_highlights",
+      "source_path": "tmp/analysis/c-corruption-pilot-20261115/evaluation/records.jsonl",
+      "source_sha256": "40d574f76605d36ecfeee67efac6fe1fb2e8fa446be42ba4d7bb8fd89426d401",
+      "export_path": "docs/records/2026-11-15/c-corruption-joint-highlights.csv",
+      "export_sha256": "ab6b693abb60da2d56c194db9e8707f243c9264b4da437064b8fedcb8c85c6f3",
+      "filter": "target first wrong in both hold/semantic and semantic child-first > hold"
+    },
+    {
+      "name": "examples",
+      "source_path": "tmp/analysis/c-corruption-pilot-20261115/evaluation/records.jsonl",
+      "source_sha256": "40d574f76605d36ecfeee67efac6fe1fb2e8fa446be42ba4d7bb8fd89426d401",
+      "export_path": "docs/records/2026-11-15/c-corruption-examples.csv",
+      "export_sha256": "65c845321be6e5c2b2bd7c8bb33cca56d93d5b9a6abfe30bdd9d4b0318ad1a1a",
+      "filter": "selected graph 32/68/89, late, all arms/branches; selected illustrative"
+    },
+    {
+      "name": "example_values",
+      "source_path": "tmp/analysis/c-corruption-pilot-20261115/evaluation/records.jsonl",
+      "source_sha256": "40d574f76605d36ecfeee67efac6fe1fb2e8fa446be42ba4d7bb8fd89426d401",
+      "export_path": "docs/records/2026-11-15/c-corruption-example-values.csv",
+      "export_sha256": "0a5da9ff9e9788158c7226e7237494b3978a5115335064f95bf608fe379665de",
+      "filter": "selected graph 68/89, late, target+children, all arms/branches/rounds"
+    },
+    {
+      "name": "example_expressions",
+      "source_path": "tmp/analysis/c-long-pilot-20261115/data/val.pt + tmp/analysis/c-corruption-pilot-20261115/plan/val.jsonl",
+      "source_sha256": "676aabd2173d007b9c70c1e044ed69b7afe26d1f88e6bfcfd842778af3bcf66f",
+      "export_path": "docs/records/2026-11-15/c-corruption-example-expressions.json",
+      "export_sha256": "106b3671a9b235d9c3c05b4ab2f12d42626506cf2797729eb6952108c1279a59",
+      "filter": "derived node expressions from plan/val and data constants; immediate/expanded"
+    }
   ]
 }

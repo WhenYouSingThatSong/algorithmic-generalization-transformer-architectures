@@ -108,9 +108,11 @@
   为 1.33（hold 时）/1.27（late），hold 为 1.45/1.45；差异小且没有重复 seed。
 - descendants 的方向相同，semantic 的即时 damaged 数和 excess wrong rounds
   略低，但末两轮 graph-equal 仍接近；不能据此声称下游恢复机制改善。
-- 服务器完整汇总包含all_fixed/common_value/common_strict与first4；当前入库两个CSV
-  只有all_fixed/common_value、target/children/descendants，未提交strict、unrelated/all视图。
-  这些视图及导出哈希映射待CPU补交，报告正文仅列common VALUE主视图。
+- 服务器完整汇总包含all_fixed/common_value/common_strict与first4；现在入库的
+  `c-corruption-intervention-summary.csv` / `c-corruption-event-summary.csv`
+  是**完整源汇总**（不是过滤子集），包含 common_strict、unrelated、all 等视图。
+  `c-corruption-audit.json` 另列 source→export SHA256 与“无过滤”映射；报告正文
+  只列 common VALUE 主视图。
 
 ### 时点与噪声压力评估
 
@@ -124,23 +126,60 @@
 
 ## 4. 两个完整例子
 
-例子是固定选的，不是随机抽样；完整 17 轮（含初始读出）见
-`c-corruption-examples.csv`。
+例子是固定选的，不是随机抽样；可核对的逐节点值轨迹见
+`c-corruption-example-values.csv`，u/q 表达式见
+`c-corruption-example-expressions.json`，汇总计数见 `c-corruption-examples.csv`。
 
 | case | 分支 | target VALUE（真值：初始/首轮/末轮） | children 正确（r1/r4/r16） | descendants 正确（r1/r4/r16） |
 |---|---|---|---|---|
-| graph89 / late / semantic | initial | 14: 22 / 20 / 14 | 3/3/3 | 6/6/6 |
+| graph89 / late / semantic | initial | 14: 22 / 8 / 14 | 0/0/0 | 3/0/0 |
 | graph89 / late / semantic | hold | 14: 22 / 20 / 14 | 1/3/3 | 4/6/6 |
 | graph89 / late / semantic | semantic | 14: 22 / 20 / 14 | 3/3/3 | 6/6/6 |
 | graph68 / late / semantic | hold | 6: 0 / 6 / 6 | 2/1/2（n=5） | 13/5/3（n=16） |
 | graph68 / late / semantic | semantic | 6: 0 / 6 / 6 | 4/2/2（n=5） | 15/12/3（n=16） |
 
-- graph89：目标本身在三个模型都被注入成 22（真值 14），但 semantic 训练后的
-  直接子节点首轮 3/3、后代 6/6，hold 为 1/3、4/6；到 r4 两者都恢复。
-  这是“即时下游损伤更小”的例子，不是最终恢复更好。
+实际 u/q 立即式（完整展开和叶值在 `c-corruption-example-expressions.json`）：
+
+- graph89：`x1 = x60(21)+x64(16) mod23 = 14`；q 为
+  `x106 = x1(14) mod23 = 14`、`x99 = x76(12)+x78(10)+x1(14) mod23 = 13`、
+  `x77 = x109(17)+x1(14)+x99(13) mod23 = 21`。
+- graph68：`x105 = x57(14)+x84(15) mod23 = 6`；q 为
+  `x49 = x105(6)+x96(0)=6`、`x79 = x105(6)+x71(11)=17`、
+  `x26 = x96(0)+x105(6)+x114(10)=16`、`x93 = x105(6)+x49(6)=12`、
+  `x33 = x13(3)+x4(8)+x105(6)=17`。
+
+- graph89：所有模型的目标初始读出都被注入成 22（真值 14）；initial 首轮回到 8，
+  hold/semantic 首轮为 20，随后都回到 14。semantic 训练后的直接子节点首轮
+  3/3、后代 6/6，hold 为 1/3、4/6；到 r4 两者都恢复。这是
+  “即时下游损伤更小”的例子，不是最终恢复更好。
 - graph68：目标从错误初值恢复到真值 6，但 hold 和 semantic 的子节点末轮都只有
   2/5，后代只有 3/16；说明目标修复不等于整条依赖链恢复，且这里 semantic
   训练没有消除该残留。是否由结构/数值吸引域造成，本批没有机制证据。
+
+### CPU 补交：联合配对、噪声剂量与完整导出
+
+- `c-corruption-joint-pairs.csv` 是 256 个 graph×timing 的宽表：hold/semantic
+  的 target 首轮正确、children 首轮正确/受损数，并列保留 unchanged/same。
+  `c-corruption-joint-highlights.csv` 是其中“hold 与 semantic 的 target 首轮
+  都错、但 semantic 的 children 首轮正确数更多”的 9 个 graph×timing：graph12
+  hold/late、32 hold/late、67 hold/late、89 hold/late、113 late。
+  这些是同一图/同一目标/同一批子节点上的配对案例，而不是两组边际总数拼出来的；
+  例如 graph89 hold 子节点首轮 0/3 或 1/3，semantic 为 3/3；graph67 为 0/2
+  vs 2/2；但末轮 children final2 多数相同（见 CSV）。所以“下游即时保护”有
+  联合案例支持，仍不等于恢复率或末两轮稳定性更好。
+- `c-corruption-noise-dose.csv`：noise 训练 1489 次调度中，before VALUE
+  correct→after wrong 的真实新增只 **24/1481（1.62%）**；另有 8 次 before
+  已错→after wrong，32 次 after wrong 不等于 32 个新增错误。按 epoch：
+  10/512（1.95%）、5/486（1.03%）、9/483（1.86%）。actual norm 的
+  min/p25/median/p75/max 为 2.88/5.61/6.34/7.01/8.96；24 个新增错误的
+  norm 中位 6.39（范围约4.40–7.91），与未新增错误的 6.34 接近，不能只用
+  L2 解释哪些扰动造成读出错误。
+- `c-corruption-example-expressions.json` 给出 graph89/graph68 的 target 和
+  直接子节点立即式/展开式；`c-corruption-example-values.csv` 保存这两个例子
+  target+children 的逐分支、逐轮预测数值和 truth，可用于核对上面的
+  `22→8/20→14` 以及 q 轨迹。`c-corruption-audit.json` 的 `exports` 列出每个
+  入库表的 source SHA256、export SHA256 和过滤条件；本次两个主表是无过滤的
+  完整源汇总，哈希与 audit 的 source hash 一致。
 
 ## 5. 解释与边界
 
@@ -172,9 +211,15 @@
   - `c-corruption-evaluation-dose.csv`
   - `c-corruption-budget.csv`
   - `c-corruption-examples.csv`
+  - `c-corruption-noise-dose.csv`
+  - `c-corruption-joint-pairs.csv`
+  - `c-corruption-joint-highlights.csv`
+  - `c-corruption-example-values.csv`
+  - `c-corruption-example-expressions.json`
   - `c-corruption-audit.json`
 - 源码/依赖/数据/计划哈希和 checkpoint SHA 见 `c-corruption-audit.json`；
   budget 三组相同，checkpoint 不同但评估规则固定。
 - 原始 NPZ/权重/完整 records 不提交；GPU2 已释放。
 
-> 2026-11-15 19:04 GPT审阅：主表计数/预算与提交CSV一致；更正字段归因、initial late末两轮、人工注错状态和强噪声解释。两个干预汇总入库为子集，其哈希与审计JSON所列不符；等待CPU补齐完整小表及源/导出哈希区分，不据此断言执行错误，不重跑模型。
+> 2026-11-15 19:04 GPT审阅：主表计数/预算与提交CSV一致；更正字段归因、initial late末两轮、人工注错状态和强噪声解释。两个干预汇总入库为子集，其哈希与审计JSON所列不符；等待CPU补齐完整小表及源/导出哈希区分，不据此断言执行错误，不重跑模型。  
+> 2026-11-15 19:30 执行 agent C 补：干预/event 改为完整源汇总；新增 noise-dose、joint-pairs/highlights、example-values/expressions，并在 audit 中记录 source→export SHA 与无过滤映射。仅读现有 records，不重跑模型。

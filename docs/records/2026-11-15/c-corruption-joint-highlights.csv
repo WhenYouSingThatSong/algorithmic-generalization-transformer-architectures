@@ -1,0 +1,10 @@
+graph_id,timing,D,target,delta,truth_value,children_n,hold_target_first,hold_children_first,hold_children_first_harmed,hold_children_final2,semantic_target_first,semantic_children_first,semantic_children_first_harmed,semantic_children_final2
+12,hold,7,126,10,10,1,0,0,1,1,0,1,0,1
+12,late,7,126,10,10,1,0,0,1,1,0,1,0,1
+32,hold,6,58,16,4,3,0,0,3,3,0,1,2,3
+32,late,6,58,16,4,3,0,0,3,3,0,2,1,3
+67,hold,7,108,15,12,2,0,0,2,2,0,2,0,2
+67,late,7,108,15,12,2,0,0,2,2,0,2,0,2
+89,hold,7,76,8,14,3,0,0,3,3,0,3,0,3
+89,late,7,76,8,14,3,0,1,2,3,0,3,0,3
+113,late,6,102,9,12,1,0,0,1,1,0,1,0,1
