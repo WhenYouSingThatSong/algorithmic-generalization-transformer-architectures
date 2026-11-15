@@ -5,7 +5,7 @@
 代码：`reproduction@0f2e619`（运行期间未 pull、未改配置/输入）。
 起点：原始 C0 s2026/e143，SHA256
 `40babb206b1393d0892b047202b9d6469cd140c82f3ba82c96a466fa3c76e780`。
-交接：[C 腐蚀后训练三组](../handoff/2026-11-15-c-corruption-pilot.md)。
+交接：[C 腐蚀后训练三组](../../../ai-collab/handoff/2026-11-15-c-corruption-pilot.md)。
 
 ## 1. 设计、数据与执行
 
@@ -51,14 +51,13 @@
 | semantic | 1.0000 / 0.9998 | 1.0000 / 0.9304 | 0.9927 / 0.3523 | 0.9954 / 0.4468 |
 
 - 四个 endpoint 的 SYNTAX/OPERATION 在所有时点都是 1.0000；first4 的下降
-  全部由 VARIABLE 解释。完整逐字段曲线见 `c-corruption-clean-summary.csv`。
+  主要与 VARIABLE 错误有关，但 VALUE 也有独立贡献，first4不等于VARIABLE准确率。完整逐字段曲线见 `c-corruption-clean-summary.csv`。
 - 与 initial 相比，三组后训练在 D+16/32/64 都有明显的 VALUE/first4 长程改善；
   这是 +D 后训练配方本身的效应，不是本批注错组的额外收益。
 - hold 与 semantic 的干净指标接近（D+64 VALUE 0.9873 vs 0.9927，first4
   0.3506 vs 0.3523；abs64 方向也不完全一致）；noise 在 D+64/abs64 的 first4
   较低（0.2883/0.3743），但这是单次训练、单 seed，不能据此认定噪声训练损伤。
-- 没有看到三组相对于 hold 的一致“干净保持受损”签名；也没有看到 semantic
-  一致优于 hold 的干净指标。
+- 本次noise的后期四属性准确率较hold低；semantic的干净数值略高，但四属性优势很小且不是所有切片都更高。单次结果不作总体排序。
 
 ## 3. 固定干预评估
 
@@ -100,16 +99,18 @@
 
 ### 完成后事件与额外错误轮数
 
-- target：四个模型的 semantic 分支都 128/128 受损、128/128 曾恢复；semantic
-  各有 1 个 reerror（hold 无），末两轮均为 128/128。没有目标持续错误差异。
+- target：四个模型的 semantic 分支都 128/128 受损、128/128 曾恢复；semantic训练组
+  两时点各有1个reerror（hold训练组无），三组后训练模型末两轮均128/128。
+  原始initial的late分支末两轮是127/128、reerror=1，不能写所有四模型末两轮均128/128。
 - children：hold 时 semantic 的 damaged=227/266，hold=255/266；但
   final2 among damaged 为 224/227 vs 252/255，graph-equal final2 为 0.9947 vs
   0.9952；late 类似。semantic 的 graph-equal excess wrong rounds 在 children
   为 1.33（hold 时）/1.27（late），hold 为 1.45/1.45；差异小且没有重复 seed。
 - descendants 的方向相同，semantic 的即时 damaged 数和 excess wrong rounds
   略低，但末两轮 graph-equal 仍接近；不能据此声称下游恢复机制改善。
-- 完整 event_summary / intervention_summary（含 all_fixed、common、strict 与
-  first4）在 CSV；报告正文只列 common VALUE 主视图。
+- 服务器完整汇总包含all_fixed/common_value/common_strict与first4；当前入库两个CSV
+  只有all_fixed/common_value、target/children/descendants，未提交strict、unrelated/all视图。
+  这些视图及导出哈希映射待CPU补交，报告正文仅列common VALUE主视图。
 
 ### 时点与噪声压力评估
 
@@ -118,8 +119,8 @@
 - noise3 只在评估中，不加入训练。其高幅度会造成较大的子/后代损伤；
   semantic 模型在 noise3 下的 damaged 数和 excess wrong rounds 低于 hold/
   noise（例如 hold 时 children damaged 65 vs 96/101，late 76 vs 102/105）。
-  这可以作为一个待验证的鲁棒性观察，但不能说成本批训练出了噪声鲁棒性：
-  noise3 没有参与训练，且模型权重/干净状态不同。
+  这是未训练的强噪声下出现的鲁棒性改善观察；未在训练中出现并不排除迁移收益。
+  但当前只有单次训练，且各模型源向量/实际扰动距离略有不同，不能据此确定内部机制或普遍收益。
 
 ## 4. 两个完整例子
 
@@ -147,9 +148,9 @@
   semantic 当前模型反事实源向量）。但三组训练权重不同，评估时的源向量/干净状态
   也不同；这是实际干预实现差异，不能仅凭胜负判定“内部错误检测/纠错机制”。
 - 本批只验证一次注入后的 16 轮；没有反复钳制、多个节点、不同错误幅度搜索、
-  人工注错、自然错误重放、混合训练、N64/N128 训练或从头训练。
+  自然错误重放、混合训练、N64/N128训练或从头训练；本批已经做了人工向量注错后训练。
 - semantic 的目标首轮更易错、下游即时损伤更少，但没有稳定/复现的恢复增益；
-  这不支持“semantic 注错训练已带来纠错能力”，也不支持“noise 训练更好”。
+  尚未证明相对hold增加了持续恢复能力；首轮传播和强噪声下的改善仍是有限的行为收益，不能抹去，也不能据此认定内部纠错机制。
 - 128 图验证集在上一批已查看过，不能称最终独立测试；单 seed，不能做总体排序。
 - 保留继承的 `reduce_batch` factor-PAD 裁剪缺口；三组一致，评估节点 mask 排除
   PAD。本批没有修原训练 recipe。
@@ -175,3 +176,5 @@
 - 源码/依赖/数据/计划哈希和 checkpoint SHA 见 `c-corruption-audit.json`；
   budget 三组相同，checkpoint 不同但评估规则固定。
 - 原始 NPZ/权重/完整 records 不提交；GPU2 已释放。
+
+> 2026-11-15 19:04 GPT审阅：主表计数/预算与提交CSV一致；更正字段归因、initial late末两轮、人工注错状态和强噪声解释。两个干预汇总入库为子集，其哈希与审计JSON所列不符；等待CPU补齐完整小表及源/导出哈希区分，不据此断言执行错误，不重跑模型。

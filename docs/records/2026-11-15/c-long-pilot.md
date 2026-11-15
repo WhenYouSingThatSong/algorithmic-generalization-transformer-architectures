@@ -212,8 +212,9 @@ H64（同一诊断集，节点/整图）：
 | plus_2d / same=equal | 128/128 | 3/128 | 47 | 128/128 | 31 | 128/128 |
 
 - SYNTAX 和 OPERATION 在所有 endpoint 的所有时点都是 1.0000；first4 的下降
-  全部落在 VARIABLE（first4 accuracy 与 VARIABLE accuracy 对齐）。这是本批
-  validation 的字段事实，不是对旧 C0 的机制归因。
+  主要来自VARIABLE，但first4与VARIABLE准确率并不完全相等。例如+D equal在D+64
+  分别为1714/4096与1719/4096，另5个节点在VARIABLE正确时VALUE错误。
+  因此不能把first4损失全部归因于VARIABLE，更不能据此确定隐藏状态机制。
 - VALUE 的改善是“首次失错更晚/更少”：plus_2d 只有 3/128 在 D 后发生整图
   VALUE 失错；但 first4/VARIABLE 仍在 D+32 后持续下降，最终 all 为 0。
 - `initial` 的 VALUE all@D 是 127/128（1 图在 D 处未全对），所以 VALUE 的
