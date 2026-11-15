@@ -1,6 +1,6 @@
 # 工作看板
 
-> 最近更新：2026-11-15 17:36 CST · [gpt]
+> 最近更新：2026-11-15 17:58 CST · [claude]
 > 活看板：任务可以移动；状态变化在 `log.md` 记一行。条目格式 `[YYYY-MM-DD HH:MM][author]`。
 
 ## 当前新增执行：C长程小比较（2026-11-15 17:36）
@@ -8,8 +8,9 @@
 - [2026-11-15 17:36][user/gpt] 用户授权核对s2026并实现额外D/2D小规模比较；具体见[方案与执行命令](handoff/2026-11-15-c-long-pilot.md)、[代码入口](../tools/c_long_pilot/README.md)。这条授权替代下方历史“不得开始任何C后训练”，但仅限普通续训/+D/+2D三组，不启动人工注错、自然错误重放、混合或从头训练。
 - [x] [gpt] s2026/e143报告、CSV与归档身份已核对：384图曾VALUE完成383；H16六档整图63–64/64，H64 N128两档整图0，节点VALUE仍69.36%–76.61%。归档hash匹配，未独立重放NPZ/模型。固定此权重作为小试起点，不换best/final。
 - [x] [gpt] 实现tools/c_long_pilot：官方新N32/depth≤6数据1024 train/128 val、同D固定batch、base/+D/+2D完整连续BPTT、固定阶段权重、两套预算端点、新验证自由续算至D+64、节点VALUE/四属性与漂移/恢复、逐节点配对改善损伤。原model.py/训练配置未改。stdlib6测试通过；torch1项留服务器，不代表实际训练已验证。
-- [ ] [执行agent C] 领取并确认共享工作树空闲后固定本提交。先生成新数据、三组各2 batch smoke（含原loss/D等价与新ckpt标准eval load），正常后串行base→plus_d→plus_2d→新验证→三个等计算量端点六档诊断。命令见交接单；不得边跑边pull。首次执行本小试已授权，无需重复问启动。
-- [ ] [执行agent C] 提交短报告、budget/summary/paired/event小表和少量轨迹；同时呈现2遍数据的同曝光端点，以及base6遍/+D3遍/+2D2遍的等循环计算代理量端点。参数统一lr1e-4、batch8；不得按有利口径或验证效果换checkpoint。N64/N128只诊断，不训练；异常/需要改参数时反馈。
+- [x] [执行agent C] 领取并确认共享工作树空闲后固定本提交。先生成新数据、三组各2 batch smoke（含原loss/D等价与新ckpt标准eval load），正常后串行base→plus_d→plus_2d→新验证→三个等计算量端点六档诊断。命令见交接单；不得边跑边pull。首次执行本小试已授权，无需重复问启动。
+- [x] [执行agent C] 提交短报告、budget/summary/paired/event小表和少量轨迹；同时呈现2遍数据的同曝光端点，以及base6遍/+D3遍/+2D2遍的等循环计算代理量端点。参数统一lr1e-4、batch8；不得按有利口径或验证效果换checkpoint。N64/N128只诊断，不训练；异常/需要改参数时反馈。
+- [2026-11-15 17:58][claude] **C 长程 pilot 完成**：同步 `08e8264`，未边跑边 pull；7 项 CPU/torch 测试通过，smoke 的 base loss/D 等价和标准 eval load 通过，正式训练无 NaN/OOM。新数据 1024/128（manifest status=complete，8 个排重参考）；三组 equal_compute 的 optimizer steps 786/393/262，sample/token/attention 代理量同为 40284/10312704/2640052224。新验证：D+64 节点 VALUE/first4：initial 0.9143/0.0293，base equal 0.8862/0.0332，plus_d equal 0.9980/0.4185，plus_2d 0.9985/0.4663；整图 VALUE D+64：initial 57/128、base equal 44/128、plus_d equal 124/128、plus_2d 125/128。plus 组 VALUE 完成后失稳仅 3–4/128，但 first4 仍 128/128 出现完成后错误、末两轮整图 0。旧六档 H64：plus_2d 节点 VALUE 0.983–0.991、first4 0.559–0.595、整图 VALUE 0.688–0.969，较 initial 的 0.694–0.944、0.021–0.044、0–0.641 明显改善；H16 正常 D 和 tV/t4 中位数保持。单 seed/128 图新验证，旧六档非独立测试，不能归因机制或称正式配方。报告 `docs/records/2026-11-15/c-long-pilot.md` + 7 小表，提交 `8934d0a`；GPU2 已释放，未训练 C+。
 - [执行agent B] 继续上轮已交办的CPU残留链条补交，不新增B GPU实验。C训练期间不更新共享运行树；按既定串行交接。
 
 ## 当前审阅：三项首批已完成，补现有数据解释（2026-11-15 16:36）
