@@ -15,6 +15,10 @@
   - `just_solved`：该模型第一次实际输出目标正确值的时点；
   - `whole_graph_complete`：原 manifest 中两模型首次共同整图数值全对的时点。
 - 要求 target 和全部数值父节点在该时点正确；不满足则判不合格，不补样。
+- **主样本的单父限制**：`run_b.py` 沿用 manifest 的 chains，而 manifest
+  选择默认只保留单数值父节点（`parents=1`）；因此主表 92 target/时点
+  只覆盖单父节点。graph142/128 是三父节点，仅作为 anchor 诊断，
+  不并入主表，也不能作为“多父节点行为已重复验证”的证据。
 - 五分支：`unchanged`、`correct_write`、`wrong_plus_1`、`wrong_plus_3`、
   `empty`；只改 target VALUE 一次，之后自由续算 16 轮。
 - anchor：graph142，`after_original_fault`，target 128，单独 cohort，
@@ -65,6 +69,13 @@ python tools/repair_study/run_b.py \
 
 ## 3. 下游与其它区域（第16轮，VALUE，fixed_candidates）
 
+**观察分母说明**：主表每个模型 92 个 target；`all_nodes` 2944 =
+92 次干预 ×32 个节点观察（不是 2944 个独立节点/独立图）。`downstream`
+541 是这些干预下重复观察到的下游节点数，不是 541 个独立 target。
+以下先列第16轮，再列 `node_curves.csv` 的逐轮临时损伤；第16轮无损伤
+不能概括为全程无损伤。
+
+第16轮：
 - B 五分支：`all_nodes` 2944/2944，`downstream` 541/541，
   `outside_local_region` 2219/2219，`parents` 92/92；harmed 0。
 - A′：
@@ -76,6 +87,19 @@ python tools/repair_study/run_b.py \
     `parents` 92/92；harmed 92（target 本身）。
   - unchanged/correct_write/empty：all_nodes 2944/2944，downstream 541/541，
     outside 2219/2219，parents 92/92。
+
+逐轮（`node_curves.csv`，VALUE）：
+- B 的 wrong_plus_1/3 和 empty 分支在第1–7轮存在临时受损，第8轮起
+  all_nodes harmed 为 0。以 all_nodes harmed 为例：
+  - just_solved wrong_plus_1：`133, 228, 143, 72, 26, 10, 2, 0...`；
+  - just_solved wrong_plus_3：`136, 245, 150, 78, 27, 10, 2, 0...`；
+  - just_solved empty：`356, 312, 188, 98, 34, 10, 2, 0...`；
+  - whole_graph wrong_plus_1：`195, 251, 140, 64, 20, 7, 2, 0...`；
+  - whole_graph wrong_plus_3：`210, 265, 152, 72, 25, 8, 2, 0...`；
+  - whole_graph empty：`176, 233, 147, 65, 20, 5, 1, 0...`。
+- 这些临时受损也出现在 downstream/outside_local_region 的逐轮行中；
+  `parents` 逐轮 harmed 为 0。完整逐轮列在
+  `docs/records/2026-11-15/b-value-update-node-curves.csv`。
 
 ## 4. 具体轨迹
 
@@ -109,9 +133,11 @@ anchor 目标初始值/父值按实际准备结果记录；没有强行改成旧
 2. 我认为 graph142 anchor 的 B unchanged 从 `8` 保持到 `8`，而其它分支
    回到 `2`，与旧异常现象相容；A′ 的 empty 能回到 `2`、wrong_plus
    不能，值得 GPT 单独核查。
-3. 我认为下游/其它区域在这批固定样本上没有出现新增损伤（B 全部
-   2944/2944、downstream 541/541），但这只覆盖本批图和 16 轮窗口，
-   不能外推到其它 seed、N128 或训练腐蚀。
+3. 我认为第16轮下游/其它区域没有新增损伤（B all_nodes 2944/2944、
+   downstream 541/541），但逐轮表显示 wrong_plus/empty 在第1–7轮
+   有临时受损，第8轮后才归零；不能把第16轮结果说成全程无损伤，也
+   不能把 2944/541 当成独立节点样本数。该结果只覆盖本批单父主样本
+   和 16 轮窗口，不能外推到其它 seed、N128、多父节点或训练腐蚀。
 
 ## 6. 产物与边界
 
@@ -120,7 +146,9 @@ anchor 目标初始值/父值按实际准备结果记录；没有强行改成旧
 - 汇总：`tmp/analysis/b-value-update-20261115/summary/`；
   仓库内小表：
   `docs/records/2026-11-15/b-value-update-target-summary.csv`、
-  `docs/records/2026-11-15/b-value-update-coverage.csv`。
+  `docs/records/2026-11-15/b-value-update-coverage.csv`、
+  `docs/records/2026-11-15/b-value-update-node-curves.csv`、
+  `docs/records/2026-11-15/b-value-update-anchor-trajectories.csv`。
 - 本报告只覆盖 B 问题①、主 manifest 子集和 graph142 anchor；不包含
   C 的局部修复、M3/M4、C+ 或问题②。C 的对应结果另见
   `docs/records/2026-11-15/c-local-repair.md`，不与本报告合并成单一
