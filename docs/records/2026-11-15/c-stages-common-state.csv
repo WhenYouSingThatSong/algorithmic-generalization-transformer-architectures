@@ -1,0 +1,10 @@
+scope,stage,records,nodes,value_correct,value_rate,first4_correct,first4_rate
+common_included,early,169,12096,6980,0.577050,6980,0.577050
+common_included,complete,169,12096,12096,1.000000,12086,0.999173
+common_included,late,169,12096,11956,0.988426,9040,0.747354
+status_eligible,early,185,13632,8015,0.587955,8015,0.587955
+status_eligible,complete,184,13632,13632,1.000000,13594,0.997212
+status_eligible,late,173,12544,12390,0.987723,9342,0.744739
+all_rows_with_state_or_unavailable,early,192,14336,8551,0.596470,8551,0.596470
+all_rows_with_state_or_unavailable,complete,192,13632,13632,1.000000,13594,0.997212
+all_rows_with_state_or_unavailable,late,192,13632,13336,0.978286,9868,0.723885

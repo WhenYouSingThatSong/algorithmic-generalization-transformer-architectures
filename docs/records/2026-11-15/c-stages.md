@@ -1,6 +1,6 @@
 # C 同值/异值来源对照：early / complete / late 时点
 
-日期：2026-11-15 16:08 CST。  
+日期：2026-11-15 16:08 CST；17:13 CST 按 1636 审阅补 coverage 来源、共同状态表与分母，未重跑。
 状态：**10 项 counterfactual CPU 测试、stage smoke、两 seed 正式 main 已完成；不是 C+，也不是总体准确率**。  
 代码：`reproduction@572cc10`（固定运行版本；运行期间未 pull/改代码）。  
 交接：[C stages/joint](../../../ai-collab/handoff/2026-11-15-b-multiparent-c-stages-joint.md)。
@@ -29,17 +29,37 @@ python tools/counterfactual_control/summarize.py ...
 - smoke：N32_shallow/N128_deep 各 2 图，8 个结构候选 ×3 stage =24 条；23 eligible、1 ineligible（late 的 q=0）。
 - 正式 main：每 seed 6 档 × 前 8 图，每图至多 2 个结构候选；共 576 条 stage 记录
   （2 seeds × 6 strata × 8 graphs × 2 candidates × 3 stages）。
-  - stage eligible：early 185/192、complete 184/192、late 173/192；
-  - 非 included：18 ineligible + 16 unavailable；complete 有 8 个、late 有 8 个
-    unavailable（首次整图完成超出 64 轮预算/无法取得），early 有 7 个 ineligible，
-    late 有 11 个 ineligible（q 或源资格失败）。未补样。
-- 三阶段共同交集：**169 个 target/stage 记录（507 条），每阶段同一目标、同一 q**；
-  严格来源（三阶段来源 target first-four 全对）：**72 个 target/stage（216 条）**，
-  每阶段 128 个 q。
-- 原始状态：
-  - early：原图全节点 VALUE 8015/13632 = 0.588（early 尚未算完）；
-  - complete：13632/13632 = 1.000，first4 0.997；
-  - late：VALUE 0.988、first4 0.745（VARIABLE 已漂移，但 VALUE 多数仍对）。
+  - stage eligible（单时点 `status`）：early 185/192、complete 184/192、late 173/192。
+  - 提交的 `c-stages-coverage.csv` 来自 `summary_matched`；其中 `included=True`
+    是**三阶段共同交集**，不是单时点 `status=eligible`。两种口径不能混用：
+    | stage | included（共同交集） | eligible 但不在交集 | ineligible | unavailable | 总记录 |
+    |---|---:|---:|---:|---:|---:|
+    | early | 169 | 16 | 7 | 0 | 192 |
+    | complete | 169 | 15 | 0 | 8 | 192 |
+    | late | 169 | 4 | 11 | 8 | 192 |
+    `complete`/`late` 的 unavailable 是首次整图完成超出 64 轮预算/无法取得；
+    `early`/`late` 的 ineligible 是 q 或源资格失败。未补样。
+- 三阶段共同交集：**169 个目标，每个时点 169 条，共 507 条**；跨阶段固定同一目标、
+  同一 q，每阶段 287 个 q。严格来源（三阶段来源 target first-four 全对）：
+  **72 个目标、每时点 72 条（216 条）**，每阶段 128 个 q。
+- 原状态节点观察率（按目标重复计数图内节点；**条件诊断样本，不是总体准确率，
+  也不是独立图准确率**）：
+  | scope | stage | records | nodes | VALUE | first4 |
+  |---|---:|---:|---:|---:|---:|
+  | 共同交集 `included` | early | 169 | 12096 | 6980 (57.71%) | 6980 (57.71%) |
+  | 共同交集 `included` | complete | 169 | 12096 | 12096 (100%) | 12086 (99.92%) |
+  | 共同交集 `included` | late | 169 | 12096 | 11956 (98.84%) | 9040 (74.74%) |
+  | 单时点 `status=eligible` | early | 185 | 13632 | 8015 (58.80%) | 8015 (58.80%) |
+  | 单时点 `status=eligible` | complete | 184 | 13632 | 13632 (100%) | 13594 (99.72%) |
+  | 单时点 `status=eligible` | late | 173 | 12544 | 12390 (98.77%) | 9342 (74.47%) |
+  | 所有记录（unavailable 按 0 节点） | early | 192 | 14336 | 8551 (59.65%) | 8551 (59.65%) |
+  | 所有记录（unavailable 按 0 节点） | complete | 192 | 13632 | 13632 (100%) | 13594 (99.72%) |
+  | 所有记录（unavailable 按 0 节点） | late | 192 | 13632 | 13336 (97.83%) | 9868 (72.39%) |
+  - 只有共同交集三行是同一批目标、同一批节点的匹配状态；`status=eligible`
+    三行组成不同（late 的 173 条对应 12544 个节点），不能当作同一组图的漂移曲线。
+  - 之前写的 0.588/1.000/0.988 与 late first4=0.745 来自 `status=eligible`
+    子集；所有可用状态口径则是 early 8551/14336、complete 13632/13632、
+    late 13336/13632。完整数值见 `c-stages-common-state.csv`。
 - stage 绝对轮次：late = complete + 16；early 使用 `d(u)+1` 的预定状态。
   smoke 实测 early 3 / complete 7 / late 23，符合预期。
 
@@ -58,24 +78,32 @@ python tools/counterfactual_control/summarize.py ...
   368/370、368/368、346/346。q 的异值命中不等于 u 自身保持异值。
 - 异值来源的效果随阶段明显减弱：early 的 shifted q 正确 0，complete 为
   70/316（+1）和 25/316（+3），late 为 110/300 和 83/300。
-  同时，q 命中局部预期的比例也从 early 的约 99% 降到 complete/late 的约
-  15–40%；early 的“局部影响”最强，complete/late 已有较多其它状态可分摊。
+  q 命中局部预期的比例也从 early 的约 99% 降到 complete/late 的约
+  15–40%。更准确的说法是：**早期的特定数值传播最清楚，完成后这一关系改变**；
+  不能只说“异值影响消失”或“晚期更稳定”。例如 late/+1 仍有 177/287 个 q
+  错误，其中只有 42 个符合注入数值的局部预期，其余 135 个是其它错误或无数值；
+  late/+3 为 204 个错误，其中 46 个符合预期、158 个其它。局部预期命中率下降
+  的一个**候选解释**是周围其它状态分摊了影响；本数据没有验证这个机制，不能
+  把它写成已证结论。
 - 这不表示 late 更“稳定”：late 的 same correct 296/300，但周围节点 first4
-  已降到 0.745；VALUE 主表与四属性严格表必须分开。
+  在 `status=eligible` 子集已降到 9342/12544=0.745；VALUE 主表与四属性严格表
+  必须分开。
 
 ### 共同交集与严格子集
 
 | set | stage | q | same correct | diff correct d1/d3 | diff expected d1/d3 |
 |---|---|---:|---:|---:|---:|
-| 三阶段共同（169 target/stage） | early | 287 | 287 | 0 / 0 | 285 / 286 |
+| 三阶段共同（169 targets） | early | 287 | 287 | 0 / 0 | 285 / 286 |
 | 三阶段共同 | complete | 287 | 287 | 69 / 25 | 114 / 105 |
 | 三阶段共同 | late | 287 | 286 | 110 / 83 | 42 / 46 |
-| 严格来源（72 target/stage） | early | 128 | 128 | 0 / 0 | 126 / 127 |
+| 严格来源（72 targets） | early | 128 | 128 | 0 / 0 | 126 / 127 |
 | 严格来源 | complete | 128 | 128 | 32 / 15 | 50 / 49 |
 | 严格来源 | late | 128 | 128 | 48 / 35 | 21 / 20 |
 
 严格来源子集仍显示同样的阶段顺序：early 影响最大，complete 次之，late
-最小；同值来源在所有交集里都是 correct=全部（仅 late 1 个 changed）。
+最小。同值来源的正确数要按交集分开读：共同交集为 early 287/287、
+complete 287/287、late 286/287（1 个 changed）；只有严格子集在三个时点都是
+128/128 全对。不能说“所有交集同值来源都全部 correct”。
 
 ### 逐轮（共同交集，delta 1）
 
@@ -112,5 +140,5 @@ python tools/counterfactual_control/summarize.py ...
 - summaries：`.../summary_all/`、`summary_matched/`、`summary_strict_matched/`
 - 提交小表：`c-stages-coverage.csv`、`c-stages-summary-all.csv`、
   `c-stages-summary-matched.csv`、`c-stages-summary-strict_matched.csv`、
-  `c-stages-endpoint-summary.csv`
+  `c-stages-endpoint-summary.csv`、`c-stages-common-state.csv`
 - 完整 records、case_curves、paired_effects 留在 tmp。

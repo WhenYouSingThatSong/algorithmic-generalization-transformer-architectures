@@ -1,0 +1,6 @@
+case_id,weight,stratum,category,n,helped_n,harmed_n,helped_positions,harmed_positions,branches
+C:s1234_e143:N128_deep:49:416:43:value_parent_correct:natural_error_state,s1234_e143,N128_deep,value_parent_correct,128,2,4,360;436,482;488;492;594,restore_parents;restore_joint (identical endpoint flags)
+C:s1234_e143:N128_shallow:46:456:55:value_parent_wrong:natural_error_state,s1234_e143,N128_shallow,value_parent_wrong,128,1,0,436,,restore_parents;restore_joint (identical endpoint flags)
+C:s1234_e143:N32_shallow:14:170:53:value_parent_wrong:natural_error_state,s1234_e143,N32_shallow,value_parent_wrong,32,4,0,90;146;170;178,,restore_parents;restore_joint (identical endpoint flags)
+C:s1234_e143:N64_shallow:24:346:53:value_parent_wrong:natural_error_state,s1234_e143,N64_shallow,value_parent_wrong,64,0,2,,84;220,restore_parents;restore_joint (identical endpoint flags)
+C:s42_e143:N64_deep:0:306:52:value_parent_wrong:natural_error_state,s42_e143,N64_deep,value_parent_wrong,64,0,1,,306,restore_parents;restore_joint (identical endpoint flags)

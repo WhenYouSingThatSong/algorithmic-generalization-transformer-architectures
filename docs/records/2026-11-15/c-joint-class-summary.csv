@@ -1,0 +1,13 @@
+category,n,branch,initial_correct,first_correct,ever_wrong,final2_correct
+value_parent_wrong,22,unchanged,0,0,22,6
+value_parent_wrong,22,restore_target,22,8,22,6
+value_parent_wrong,22,restore_parents,0,3,22,6
+value_parent_wrong,22,restore_joint,22,17,20,6
+value_parent_correct,23,unchanged,0,0,23,7
+value_parent_correct,23,restore_target,23,0,23,7
+value_parent_correct,23,restore_parents,0,0,23,7
+value_parent_correct,23,restore_joint,23,0,23,7
+variable_only,12,unchanged,12,12,0,12
+variable_only,12,restore_target,12,12,0,12
+variable_only,12,restore_parents,12,12,0,12
+variable_only,12,restore_joint,12,12,0,12

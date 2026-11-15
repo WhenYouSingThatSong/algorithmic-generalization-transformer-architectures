@@ -1,6 +1,6 @@
 # C 自然错误联合修复：target + 直接父节点
 
-日期：2026-11-15 16:08 CST。  
+日期：2026-11-15 16:08 CST；17:13 CST 按 1636 审阅补分类/身份/轨迹口径，未重跑。
 状态：**复用原 57 事件/114 条自然与健康状态，新增联合分支 smoke/main 已完成；不是 C+，没有重新选事件或 donor**。  
 代码：`reproduction@572cc10`（运行期间未 pull/改代码）。  
 交接：[C stages/joint](../../../ai-collab/handoff/2026-11-15-b-multiparent-c-stages-joint.md)。
@@ -55,6 +55,31 @@ python tools/repair_study/summarize.py \
 - 联合替换把第一轮 forward 正确数从 12 提到 29（高于 target-only 20、
   parent-only 15），ever-wrong 从 45 降到 43；但 **final2 仍是 25/57，
   与 unchanged 相同**。
+- 按原采样分类拆开第一轮 VALUE 正确数（分类是采样定义，**父状态取 t−1**，
+  不是“干预瞬间父正确/错误”）：
+
+  | 原分类 | n | unchanged | restore_target | restore_parents | restore_joint |
+  |---|---:|---:|---:|---:|---:|
+  | `value_parent_wrong` | 22 | 0 | 8 | 3 | **17** |
+  | `value_parent_correct` | 23 | 0 | 0 | 0 | 0 |
+  | `variable_only` | 12 | 12 | 12 | 12 | 12 |
+
+  12→29 的首轮增量全部来自 `value_parent_wrong`（0→17）；
+  `value_parent_correct` 与 `variable_only` 各分支完全不变。
+- 保存的 `initial` 字段说明实际起点：在 `value_parent_wrong` 和
+  `value_parent_correct` 两组共 45 个自然错误里，unchanged/parents 的
+  target VALUE 初始均错（0/45 correct），target/joint 初始均对（45/45）；
+  后者的“对”是写入局部正确值的结果，不是模型修复。`variable_only` 的
+  12 个 case 各分支初始 VALUE 本来就都对。
+- 末两轮按同一分类：
+
+  | 原分类 | n | unchanged | restore_target | restore_parents | restore_joint |
+  |---|---:|---:|---:|---:|---:|
+  | `value_parent_wrong` | 22 | 6 | 6 | 6 | 6 |
+  | `value_parent_correct` | 23 | 7 | 7 | 7 | 7 |
+  | `variable_only` | 12 | 12 | 12 | 12 | 12 |
+
+  三类合计 6+7+12=25/57；首轮增益没有转成任何一类的末两轮增益。
 - 自然 target first4：unchanged 0/57、restore_target 1/57、restore_parents
   1/57、restore_joint 3/57；final2 都只有 1/57。VALUE 与 first4 都不能
   说成持续修复。
@@ -69,7 +94,8 @@ python tools/repair_study/summarize.py \
 | restore_joint | 53 / 57 | 29 / 57 |
 
 健康对照也出现首轮变化；final2 只有小幅差异（+2），不能作为联合修复的
-特异性收益。
+特异性收益。并且 parents 与 joint 的 final2 同为 29/57：联合相对仅父
+first 为 +4/0，但 final2 为 +0/0，首轮差异同样没有转成末两轮增量。
 
 ### 端点区域（natural、VALUE、final2）
 
@@ -83,8 +109,40 @@ python tools/repair_study/summarize.py \
 | restore_joint | all_nodes | 4352 | 3526 | 3526 | 7 | 7 |
 
 parents/downstream 区域的 helped/harmed 在该轮汇总中均为 0/0；all_nodes
-的 7/7 是节点轮次计数，不是独立图数。改善和损伤相抵，不支持“联合替换
-带来稳定下游恢复”。
+的 7/7 是 **case×节点的末两轮端点观察**（两轮是联合判定，没有把两轮分别
+计数），不是节点轮次，也不是独立图数。57 个 case 共 4352 个 case×节点
+端点观察，其中 5 个 case 有变化：3 个 case 出现 helped、3 个出现 harmed、
+1 个两者都有；具体位置见 `c-joint-allnode-endpoint-deltas.csv`。
+逐节点集合核对后，restore_parents 与 restore_joint 的 helped/harmed
+位置完全相同（不是只总数相同），所以这 7/7 不能区分联合与仅父；净变化
+为 0，不支持“联合替换带来稳定下游恢复”。
+
+### target 末两轮 1 改善 / 1 恶化的身份
+
+每格为 `首轮正确 / 末两轮正确`（1=correct，0=wrong）：
+
+| case | 原分类 | unchanged | target | parents | joint | joint 相对 parents |
+|---|---|---:|---:|---:|---:|---|
+| `C:s1234_e143:N32_shallow:14:170:53:value_parent_wrong:natural_error_state` | `value_parent_wrong` | 0/0 | 1/0 | 0/1 | 1/1 | 首轮 +1，末两轮 0 |
+| `C:s42_e143:N64_deep:0:306:52:value_parent_wrong:natural_error_state` | `value_parent_wrong` | 0/1 | 1/1 | 0/0 | 1/0 | 首轮 +1，末两轮 0 |
+
+- 1 个改善（N32_shallow:14:170:53）和 1 个恶化（N64_deep:0:306:52）
+  是**两个不同的 case**，不是同一 case 被同时记一次；25/57→25/57 是
+  这两个相反 case 的数值相抵，不代表没有逐例变化。
+- 但相对于仅父分支，两个 case 的末两轮结果相同：改善 case 的 parents
+  已为 1，恶化 case 的 parents 已为 0；joint 相对 parents 的末两轮是
+  0 改善 / 0 恶化。两者都属于首轮 +1（parents 首轮为 0、joint 首轮为 1），
+  首轮增益没有改变末两轮。
+- 逐轮轨迹（`c-joint-two-case-rounds.csv`）显示：改善 case 的 parents
+  从第 3 轮起保持正确值 0、joint 从替换后的 0 一直保持到第 16 轮，而
+  target-only 在第 15/16 轮漂到 19；恶化 case 的 joint 初始与第 1 轮
+  forward 都是 16，第 2 轮已回到 0 并停在第 16 轮的 7，parents 从未
+  回到 16，而 unchanged 和 target-only 从第 4 轮起回到 16。这里只记录
+  轨迹，不据此推断机制。
+- 全 57 个 case 中，joint 相对 parents 首轮为 **+14/0**（全部落在
+  `value_parent_wrong`，与上表 3→17 一致），末两轮为 **+0/0**。
+  因此“联合的首轮增益”与“仅父的末两轮收益”必须分开；不能把 25/57
+  的相同总数解释成同一批节点或同一轨迹。
 
 ## 3. 解释边界
 
@@ -104,5 +162,7 @@ parents/downstream 区域的 helped/harmed 在该轮汇总中均为 0/0；all_no
 - summary：`.../summary/`（coverage、target_cases、target_summary、
   endpoint_cases、endpoint_summary、node_curves）
 - 提交小表：`c-joint-coverage.csv`、`c-joint-target-summary.csv`、
-  `c-joint-endpoint-summary.csv`
+  `c-joint-endpoint-summary.csv`、`c-joint-class-summary.csv`、
+  `c-joint-case-deltas.csv`、`c-joint-two-case-rounds.csv`、
+  `c-joint-allnode-endpoint-deltas.csv`
 - 完整 records、hidden snapshot 留在 tmp。
