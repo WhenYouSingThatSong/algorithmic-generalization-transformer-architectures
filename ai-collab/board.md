@@ -1,6 +1,6 @@
 # 工作看板
 
-> 最近更新：2026-11-15 18:29 CST · [gpt]
+> 最近更新：2026-11-15 18:56 CST · [claude]
 > 活看板：任务可以移动；状态变化在 `log.md` 记一行。条目格式 `[YYYY-MM-DD HH:MM][author]`。
 
 ## 当前授权：C腐蚀后训练三组小比较（2026-11-15 18:29）
@@ -8,8 +8,9 @@
 - [2026-11-15 18:29][user/gpt] 用户授权先核对B注错规模，再实现C三组并交执行；时机/位置按C设计，不照搬B。具体见[本批方案与命令](handoff/2026-11-15-c-corruption-pilot.md)、[代码入口](../tools/c_corruption_pilot/README.md)。此条替代下方历史“不得新增后训练”，仅授权本批hold/noise/semantic。
 - [x] [gpt] B配置/代码/256batch审计记录核对：batch5%×候选50%，last为新槽EMPTY；每图每次约0.7897替换/0.6954错误数字，有批级聚集，不是已填值注错。未重跑B审计。
 - [x] [gpt] 核心实现：固定s2026/e143、复用1024/128、三组均+D/3遍/batch8/lr1e-4；每图每遍50%尝试一个内部节点，保持阶段前半单次注错。在线当前模型反事实源，同计划同计算预算；noise匹配L2，三倍噪声仅评估。非零模偏移1–22，记录实际语义成功/原值正确与损伤规模。原训练代码不变。
-- [ ] [执行agent C] 领取后确认共享树/GPU空闲，固定提交；先计划生成、三组4batch smoke、各8图评估汇总、3项torch检查。小验证通过即按方案串行三组正式训练与128图两时点评估，首次执行已获用户授权，无需再问启动。若语义替换没有有效错值/共同资格，先交证据、不偷偷改参数。
-- [ ] [执行agent C] 交报告/小表/元数据哈希与预算、实际训练dose、all_fixed及共同资格、节点VALUE/四属性与分字段、配对损伤/恢复/再错/末两轮。原始JSON/NPZ/权重留tmp；不按val挑checkpoint，模型更新后不改测试规则。
+- [x] [执行agent C] 领取后确认共享树/GPU空闲，固定提交；先计划生成、三组4batch smoke、各8图评估汇总、3项torch检查。小验证通过即按方案串行三组正式训练与128图两时点评估，首次执行已获用户授权，无需再问启动。若语义替换没有有效错值/共同资格，先交证据、不偷偷改参数。
+- [x] [执行agent C] 交报告/小表/元数据哈希与预算、实际训练dose、all_fixed及共同资格、节点VALUE/四属性与分字段、配对损伤/恢复/再错/末两轮。原始JSON/NPZ/权重留tmp；不按val挑checkpoint，模型更新后不改测试规则。
+- [2026-11-15 18:56][claude] **C 腐蚀后训练三组完成**：同步 `0f2e619` 后固定运行；9 项测试、三组 4-batch smoke/8 图评估和标准加载通过，无 NaN/OOM。1489 次调度、semantic 1489/1489 注入命中指定异值，noise 32/1489 首读出错误；三组预算相同（393 steps、3072 图曝光、recipient sample×loop 40284）。干净 D+64 VALUE/first4：hold 0.9873/0.3506、noise 0.9878/0.2883、semantic 0.9927/0.3523；SYNTAX/OPERATION 全 1.0，收益均来自 VARIABLE。共同 VALUE 资格 256 个 graph×timing，common strict 201。semantic 目标首轮 VALUE 更易错（hold 时 91 vs hold105；late 93 vs106），但直接子节点首轮损伤更少（67 vs22；late77 vs22），到 r4/末轮与 hold 接近；没有稳定恢复增益。完整报告/小表/哈希见 `docs/records/2026-11-15/c-corruption-pilot.md`，提交 `eace08d`；GPU2 已释放，未训练 C+。
 - [执行agent B] 不新增GPU任务；继续原CPU补交，和C按串行共享树协议交接。运行中不pull、改配置或输入。
 - 本地6项stdlib（含真实汇总CLI样例）通过，3项torch留服务器；尚未加载模型或运行本批训练。当前源/配置/数据指纹检查用于对齐本批，不扩展防御性验证。
 
@@ -17,7 +18,8 @@
 
 - [x] [gpt] 审阅至0e6aefd；执行源码未变，核对预算/节点/事件/配对/六档/轨迹小表。+D/+2D 两套预算均改善长程保持；+2D不是数值准确率处处优于+D。新验证first4仍全部图最终失稳，不能称纠错机制已建立。详见[审阅记录](handoff/2026-11-15-1805-c-long-results-review.md)。
 - [x] [gpt] 更正报告末轮76/128与末两轮75/128混用、优化器措辞和字段归因边界；未改执行代码或重跑。继承的reduce_batch不能裁剪factor PAD已记录，暂不改变训练recipe。
-- [ ] [执行agent C] 仅CPU补本批manifest/train meta/eval meta来源与预算审计摘要；若现有NPZ支持，补分字段曲线/首次失错时间，不支持则说明，不重跑GPU。不提交权重/原始训练数据。
+- [x] [执行agent C] 仅CPU补本批manifest/train meta/eval meta来源与预算审计摘要；若现有NPZ支持，补分字段曲线/首次失错时间，不支持则说明，不重跑GPU。不提交权重/原始训练数据。
+- [2026-11-15 18:56][claude] **C 长程审阅CPU补交完成**：提交 `51d88ff`；新增 `c-long-pilot-audit.json`（source/data/train/validation 哈希、参数、checkpoint/预算）及 `c-long-pilot-field-curves.csv`/`c-long-pilot-field-drift.csv`。validation NPZ 的 predictions 含四字段，直接确认 SYNTAX/OPERATION 全 1.0、first4=VARIABLE；VALUE D 后失错图：initial 71/127、base equal 85/128、+D equal 4/128、+2D 3/128；VARIABLE 失错中位约 8.5–31 轮。未重跑模型。
 - 本轮不新增训练。第二seed、人工注错和长程比例设计继续与用户讨论；B既有CPU任务不受影响。
 
 ## 当前新增执行：C长程小比较（2026-11-15 17:36）
