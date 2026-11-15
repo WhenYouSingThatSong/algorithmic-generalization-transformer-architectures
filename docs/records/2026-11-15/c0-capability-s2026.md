@@ -65,4 +65,10 @@ GPU6，95.2 s；无 Traceback/OOM。
   - `c0-capability-s2026-capability_by_H.csv`
   - `c0-capability-s2026-by_node_type.csv`
   - `c0-capability-s2026-drift.csv`
-- 原始 NPZ/数据不进 git；如需要，单独压缩包/临时目录交接。未训练 C+。
+- 原始逐图 NPZ、`run_meta.json`、`index.jsonl`、logs 和三权重 summary 已打包为
+  `ai-collab/artifacts/c0-capability-s2026-e143-raw.zip`（1.4 MB，405 files），
+  并附 `.sha256`；SHA256 为
+  `b593537633e50c4b46dab88c834e3e23c77c807d1a530821a7d7a6a064ea4681`。
+  包内目录为 `c0-capability-s2026-e143/{run,summary,docs,logs}`，与
+  `README_RAW_DATA.md` 的说明一致；解包后不放回 `tmp/` 参与重算。
+- 未训练 C+；没有因为补档改旧 s42/s1234 表格。
