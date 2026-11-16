@@ -1,0 +1,21 @@
+{
+  "chain_rows": 3328,
+  "notes": [
+    "Paired unchanged (clean) and wrong_plus_11 discrete VALUE reads.",
+    "round=1 input is the branch initial state; later input is previous output.",
+    "first_persistent_round is the first round after which the node remains wrong (while its unchanged branch remains correct)."
+  ],
+  "script_sha256": "77fa96a7c022fed990898e5378955161fdcdde5babe61c0dd040b19e784fe5a4",
+  "selection": "fixed_candidates; target correct; unchanged final-two correct; wrong_plus_11 leaves >=1 descendant wrong in final two",
+  "source": "tmp/analysis/b-multiparent-20261115/main_B/records.jsonl",
+  "source_sha256": "53e45c4c05b68827549af4883f8b14cfe4db57fd93fd3c4bde1a93b922d7bd39",
+  "summary_rows": 10,
+  "target_cases": [
+    "39:54",
+    "41:82",
+    "44:26",
+    "54:84",
+    "89:106"
+  ],
+  "value_index": 3
+}

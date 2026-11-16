@@ -1,7 +1,7 @@
 # B 多父节点与多错值：已有答案更新（repair study 第二批）
 
 日期：2026-11-15
-运行 commit：`8907018`（`tools/repair_study/run_b.py`、`multifanin.py`、`summarize.py`）
+运行 commit：`8907018`（`tools/repair_study/run_b.py`、`multifanin.py`、`summarize.py`）；16:36 审阅的 CPU 链条补交使用 `tools/repair_study/export_b_residual.py`。
 权重：A′ s42 e86（`0b66e196...`）；B-M6 s42 e92（`ef58ba26...`）
 数据：heldout N32（`08f52382...`），同一 main256 manifest
 状态：**数据报告；未重训，未启动 M3/M4/C+，不作机制结论。**
@@ -65,7 +65,7 @@
 观察到的下游节点数，不是 795 个独立节点/独立图；`parents=384`
 = 192×2 个父节点观察；`outside_local_region=4773` 是其他节点观察。
 
-第16轮（末两轮）VALUE 正确数：
+末两轮（第15、16轮）VALUE 正确数：
 
 | 模型/时点/分支 | target | downstream | parents | outside | all_nodes |
 |---|---:|---:|---:|---:|---:|
@@ -88,12 +88,16 @@
   7 个节点；其余 20 个错值在该枚举集中为 0/116。
 - A′ 的 22 个错值在 `just_solved` 枚举集中每个错值都是
   116/116 下游受损；在 `whole_graph_complete` 枚举集中每个都是
-  0/116。采样集的四个错值同样表现为 just_solved 的 795/795 下游
-  受损、whole_graph 的 795/795 下游正确。
+  0/116。四个采样错值在采样+枚举合并口径下为 just_solved 的
+  795/795 下游受损、whole_graph 的 795/795 下游正确；仅采样集的
+  分母是 679（795−116 个枚举下游观察），不是 795。
 - `first4` 与 VALUE 的末两轮端点计数：在 1920 个主表分组中逐组
   相同，没有看到本批四属性端点与 VALUE 端点分离。
 - 父节点 VALUE 在所有分支的末两轮均为 384/384；这里没有钳制父值，
-  但本批窗口内未观察到父值变化。`outside_local_region` 也全部正确。
+  但本批窗口内未观察到父值变化。`outside_local_region` 的末两轮也
+  全部正确；这不等于全程无误：例如 B whole 的 `wrong_plus_1`
+  在 `B:94:72` 有 2 个 outside 节点曾输出错误（末两轮回到正确），
+  逐轮细节见 round summary。
 
 逐轮 `downstream` 受损数（VALUE，`node_curves`/round summary 的
 1/2/4/8/16 轮切片）：
@@ -115,6 +119,39 @@
 B 的 wrong_plus_1/3/7 和 empty 在第1–7轮有临时下游损伤，第8轮
 起为 0；wrong_plus_11 的 35 个节点没有在16轮内恢复。A′ 的
 wrong_plus 在 just_solved 从第1轮扩大到 795 后保持不变。
+
+### 3.1 五个残留案例的完整链条（CPU 补交）
+
+对 B 的 `wrong_plus_11` 按固定规则选出 5 个 target：`fixed_candidates`
+目标自身正确，`unchanged` 末两轮正确，且至少一个下游节点末两轮
+仍不正确。两个时点各 5 条记录，合计 10 条；两个时点最终不正确的
+下游节点集合相同，各 35 个观察。下表先列 `just_solved`：
+
+| case | target | 真值 | +11 写入 | 父数 | state_round | 下游节点 | 曾受损 | 持续错误 | 曾错后恢复 | 末两轮错 | 首个持续轮 | 首个持续节点(深度) |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| B:39:54 | 54 | 21 | 9 | 3 | 2 | 12 | 7 | 7 | 0 | 7 | 1 | 76 (2) |
+| B:41:82 | 82 | 12 | 0 | 2 | 3 | 8 | 7 | 7 | 0 | 7 | 1 | 112 (3) |
+| B:44:26 | 26 | 12 | 0 | 1 | 2 | 21 | 21 | 16 | 5 | 16 | 1 | 68 (2) |
+| B:54:84 | 84 | 11 | 22 | 1 | 4 | 2 | 2 | 2 | 0 | 2 | 1 | 122 (4) |
+| B:89:106 | 106 | 12 | 0 | 3 | 4 | 3 | 3 | 3 | 0 | 3 | 1 | 118 (4) |
+
+- 在 `just_solved` 表中，5 个 target 在 `wrong_plus_11` 的首轮和
+  末两轮都回到真值；首个持续错误都出现在第1轮的一个直接子节点，
+  而不是 target 本身。B:44:26 的第1轮受损直接子节点是
+  `56/60/68`（深度2），其中
+  `56/60` 后来恢复，`68` 及其下游共 16 个节点保持错误；其余四个
+  case 的首个持续节点分别为 `76/112/122/118`。
+- `whole_graph_complete` 的最终 35 个错误节点与 `just_solved`
+  相同，但早期“曾受损/曾错后恢复”的节点数可以不同（例如
+  B:39:54 为 12/5，B:41:82 为 8/1，B:44:26 为 21/5）；因此不能
+  只看最终 35 个节点就省略逐轮链条。
+- 链条 CSV 每行同时给出 `unchanged` 与 `wrong_plus_11` 的
+  `input/output` VALUE、初始值、父子位置、`is_damage_round`、
+  `first_damage_round`、`persistent_start` 和末两轮标记。第1轮的
+  `input` 是分支初始状态，之后 `input` 是上一轮输出；这样可以直接
+  看出某个节点在自身输入已经正确/尚未正确时何时首次偏离。
+- 该表是 5 个残留 target 的条件导出，不是新的总体恢复率；不把
+  “直接子节点先持续错”解释成内部机制。
 
 ## 4. 同目标跨时点
 
@@ -145,7 +182,7 @@ graph142/128 的父节点为 `[92,64,22]`，真值 VALUE 分别为
 | B fault | 8 | 8 | 2 | 2 | 2 | 2 | 8 | 2 | 2 |
 | B clean | 2 | 2 | 2 | 2 | 2 | 2 | 8 | 2 | 2 |
 
-表中为第16轮/末两轮 target VALUE；A′ 的 22 个错值全部保持为
+表中为末两轮（第15、16轮）target VALUE；A′ 的 22 个错值全部保持为
 写入值，B 的 21/22 个错值回到真值 2，只有 `wrong_plus_6` 保持为 8。
 B 的 fault 起点 target 已经是 8，所以 `wrong_plus_6` 是当前值的
 无操作分支；clean 起点写 8 后同样保持 8。两个起点所有分支的
@@ -191,9 +228,13 @@ B 的 fault 起点 target 已经是 8，所以 `wrong_plus_6` 是当前值的
   - `b-multiparent-round-summary.csv`（1/2/4/8/16 轮）
   - `b-multiparent-cross-timing.csv` / `-cross-timing-summary.csv`
   - `b-multiparent-anchor-trajectories.csv`（target+父节点，17 轮）
+  - `b-multiparent-residual-chains.csv`（5 target×2 时点、target+祖先+下游）
+  - `b-multiparent-residual-summary.csv` / `-residual-meta.json`
 - 汇总修正：`--require_timings` 现在按 model_a/model_b 分别要求
-  指定时点，再取交集；新增回归测试，repair-study 12 项 CPU 测试
+  指定时点，再取交集；新增回归测试，repair-study 14 项 CPU 测试
   通过。该修正只影响匹配汇总，不改变主运行记录或选点/时点。
+- 残留链条导出使用 `tools/repair_study/export_b_residual.py`；meta
+  记录 records 与脚本 SHA、固定筛选规则和 5 个 target 身份。
 - 边界：本批只覆盖固定 64 张 N32 探索图、单次 VALUE 干预、16 轮
   自由续算；全错值枚举只覆盖 `graph32–39`；anchor 只有 graph142
   一张图。没有 C+、M3/M4、N256、局部自洽或新训练授权。
