@@ -73,8 +73,10 @@ scratch与warm比较的是同样多的**后续**前向，不是总算力相同�
 
 本批回答能否适应合法的新题面，不证明已经学会槽位释放/版本化，也不证明突破128节点。
 
+报告小表由`export_reassignment_tables.py`从两个完整run的records重新推导；它只读记录、不加载模型，并复核覆盖、起跑单格差异、clean/sham、pinned常数、pinned/free轨迹和VALUE/前四属性一致。输出`priority-reassignment-{coverage,last-two,curves,constant-drift,damage,warm-scratch}.csv`和audit；完整16轮records仍留tmp。
+
 ## 3. 本地检查与服务器职责
 
-本地11项stdlib测试覆盖实际四格汇总、图均权/节点加权差异、持续强制输入、配对q污染参照、缺值、反复恢复、独立新真值/模抵消、输入只改指定槽、新旧真值汇总、末两轮和空分母。三个CLI的help通过。
+本地11项stdlib测试覆盖实际四格汇总、图均权/节点加权差异、持续强制输入、配对q污染参照、缺值、反复恢复、独立新真值/模抵消、输入只改指定槽、新旧真值汇总、末两轮和空分母。四个CLI的help通过。
 
 本地无PyTorch/服务器权重，未运行真实模型。服务器执行agent完成依赖检查、W两图四轮小验证后，再按固定范围执行。实现语义变化须反馈；路径/设备适配可记录后处理。结果无收益也可验收，代码/时序/真值不合格不可验收。
