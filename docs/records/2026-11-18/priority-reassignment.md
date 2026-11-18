@@ -55,7 +55,7 @@
 
 ## 4. 末两轮与逐轮结果
 
-以下每格是“正确节点数”，分母见表头；`r1/r2/r4/r8/r16/L2` 依次是输出轮 1、2、4、8、16 和最后两轮同时正确。`L2` 是主终点。表中的 `VALUE` 计数同时是前四属性联合计数。
+以下每格是“正确节点数”，分母见表头；`r1/r2/r4/r8/r16/L2` 依次是输出轮 1、2、4、8、16 和最后两轮同时正确。`L2` 是主终点。表中的 `VALUE` 计数同时是前四属性联合计数。`priority-reassignment-last-two.csv` 另给每个图先算比例再平均的 `value_macro`；其方向与节点计数一致：A′ `new_warm` changed nodes 为 0.0040–0.0072、changed descendants 为 0，A′ `new_scratch` 为 1.0；A′ `state_error` changed nodes 为 0.9160–0.9195、changed descendants 为 1.0（叶 0.031–0.094）。B `new_warm` changed nodes 为 1.0（δ=11 为 0.9876）、`new_scratch` 为 1.0；B `state_error` changed nodes 为 1.0（δ=11 为 0.9588）、changed descendants 为 1.0（δ=11 为 0.9569）。32 图全部 selected，`own_qualified` 与 `common_qualified` 成员相同。
 
 #### A：逐轮（VALUE=first4）
 **leaf** (node_n=32 per delta)
