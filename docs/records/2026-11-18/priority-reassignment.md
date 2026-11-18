@@ -5,7 +5,7 @@
 - 运行版本：`reproduction@f89677baea5c613299d449598be1ef5489463626`。运行核心代码hash与该版本一致；报告导出器为后续新增，其审阅修复不改变模型运行结果。
 - 本批 32 图参与过旧探索，是开发验证子样本，不是独立最终测试。本报告只给行为计数，不把计数命名成机制，也不声称已经突破 128 节点或完成槽位复用。
 
-> 2026-11-18审阅：统一称A/B，旧名称和机器ID见[命名映射](model-name-aliases.md)。已核对提交小表与代码hash；服务器原始记录未在本地重放。报告导出器的结果断言和硬编码已修复，但本批原始CSV/audit保持不变；下方脚本hash指修复前ad0315e中的历史版本。详见[审阅](../../../ai-collab/handoff/2026-11-18-priority-review.md)。
+> 2026-11-18审阅：统一称A/B，旧名称和机器ID见[命名映射](model-name-aliases.md)。历史CSV/audit保留为 ad0315e 产物；已用修复后导出器重导，6 CSV逐字节相同（`priority-reassignment-reexport.json`），并补交 scratch 六字段审计（`priority-reassignment-scratch-audit.json`）。详见[审阅](../../../ai-collab/handoff/2026-11-18-priority-review.md)。
 
 ## 1. 覆盖、权重与预算
 
@@ -46,8 +46,8 @@
 ## 3. 执行验收（实际记录复核）
 
 1. **旧真值与新真值**：A/B 各 128 条 case 的旧标签都由独立 ADD 求值复现；新常数标签均已更新。没有触发旧标签不一致，也没有用解码后的旧答案替代真值。
-2. **起跑差异**：服务器报告每个模型 128/128 case 中，`state_error` 的起跑状态与 `clean` 只差叶节点的 VALUE 一格；`new_warm` 只差常数的 VALUE 一格。对已记录的33个位置（32个节点及被改常数）的四字段，服务器另行用 tokenizer 比较 `new_scratch` 与 `raw_input_tokens`：A、B 各128/128 case 均只有常数 VALUE 一格不同（每模型共核对16,896格）。这项额外检查的脚本待补交；当前小表不能独立证明完整序列、六字段均已核验。运行源码构造 scratch 时从原始输入出发，没有写入新叶值或下游答案。
-3. **clean/sham 与辅助字段**：A/B 各 128 条 case 的 `clean` 与 `sham` 的 initial/inputs/outputs 全轨迹逐项相同，0 条不同。`force_aux_false` 在初始 `xs` 和 `rollout` 每次输出后都把 `REGRET`、`MODIFICATION` 覆盖为 `FALSE`；原始输入中的两辅助字段 ID 全为 0（FALSE）。
+2. **起跑差异**：服务器报告每个模型 128/128 case 中，`state_error` 的起跑状态与 `clean` 只差叶节点的 VALUE 一格；`new_warm` 只差常数的 VALUE 一格。已补交 `tools/priority_pilots/verify_scratch_start.py`：用实际 tokenizer 和 `reassignment_core.starts` 对 A/B 各 128 case、完整原始序列（1024 token）× 六字段重放，共核对 1,572,864 格；只有 256 个预期常数 VALUE 格不同，`unexpected=0`，raw aux 非 FALSE=0，记录首四字段不一致 case=0（`priority-reassignment-scratch-audit.json`）。运行源码构造 scratch 时从原始输入出发，没有写入新叶值或下游答案。
+3. **clean/sham 与辅助字段**：A/B 各 128 条 case 的 `clean` 与 `sham` 的 initial/inputs/outputs 全轨迹逐项相同，0 条不同。`force_aux_false` 在初始 `xs` 和 `rollout` 每次输出后都把 `REGRET`、`MODIFICATION` 覆盖为 `FALSE`；原始输入中的两辅助字段 ID 全为 0（FALSE；`priority-reassignment-scratch-audit.json` 的六字段共 1,572,864 格，raw aux 非 FALSE=0）。
 4. **pinned**：A/B 各自的 `new_warm_pinned`、`new_scratch_pinned` 全部 H=16 轮输入常数 VALUE 都等于新值，0 个违规；只固定该常数 VALUE，没有固定节点答案或其他字段。自由组与 pinned 组的 initial/inputs/outputs 在 128 条 case 上逐项相同（A 和 B 各 2 对分支，0 差异）。
 5. **时序**：`post0` 只是起跑；warm 的 `pre_forward_round=T+1`，scratch 的 `pre_forward_round=0`。每个 case 的 7 分支都完整记录 H=16 个 inputs/outputs。
 6. **覆盖与协议**：两模型候选 ID、horizon、batch size、deltas、数据/manifest/代码 hash 完全一致；所有候选图都有 selection 行，所有合格图恰好 4 条 case；没有空分支、缺失轮次或重复 target。
@@ -55,7 +55,7 @@
 
 ## 4. 末两轮与逐轮结果
 
-以下每格是“正确节点数”，分母见表头；`r1/r2/r4/r8/r16/L2` 依次是输出轮 1、2、4、8、16 和最后两轮同时正确。`L2` 是主终点。表中的 `VALUE` 计数同时是前四属性联合计数。`priority-reassignment-last-two.csv` 另给每个图先算比例再平均的 `value_macro`；其方向与节点计数一致：A′ `new_warm` changed nodes 为 0.0040–0.0072、changed descendants 为 0，A′ `new_scratch` 为 1.0；A′ `state_error` changed nodes 为 0.9160–0.9195、changed descendants 为 1.0（叶 0.031–0.094）。B `new_warm` changed nodes 为 1.0（δ=11 为 0.9876）、`new_scratch` 为 1.0；B `state_error` changed nodes 为 1.0（δ=11 为 0.9588）、changed descendants 为 1.0（δ=11 为 0.9569）。32 图全部 selected，`own_qualified` 与 `common_qualified` 成员相同。
+以下每格是“正确节点数”，分母见表头；`r1/r2/r4/r8/r16/L2` 依次是输出轮 1、2、4、8、16 和最后两轮同时正确。`L2` 是主终点。表中的 `VALUE` 计数同时是前四属性联合计数。`priority-reassignment-last-two.csv` 另给每个图先算比例再平均的 `value_macro`；其方向与节点计数一致：A `new_warm` changed nodes 为 0.0040–0.0072、changed descendants 为 0，A `new_scratch` 为 1.0；A `state_error` changed nodes 为 0.9160–0.9195、changed descendants 为 1.0（叶 0.031–0.094）。B `new_warm` changed nodes 为 1.0（δ=11 为 0.9876）、`new_scratch` 为 1.0；B `state_error` changed nodes 为 1.0（δ=11 为 0.9588）、changed descendants 为 1.0（δ=11 为 0.9569）。32 图全部 selected，`own_qualified` 与 `common_qualified` 成员相同。
 
 #### A：逐轮（VALUE=first4）
 **leaf** (node_n=32 per delta)
@@ -237,7 +237,7 @@
 读法上的关键计数：
 
 - **A `new_warm`**：changed nodes 只有 3/486 个节点在末两轮达到新真值（每个 delta 都是 3 个叶），没有一条 case 是“全部 changed nodes 接受新题”。changed descendants 为 0/454；末两轮多数 changed nodes 仍等于旧值（478–483/486），另有 0–5 个节点既非旧值也非新值。
-- **A `new_scratch`**：changed nodes 486/486、changed descendants 454/454 在末两轮达到新真值；叶在 post1 即为 32/32，下游按 0→60→253→450→454 逐轮恢复（r8 后稳定）。这说明同一模型从原始输入求新题的行为与从完成旧态续算不同；本报告只记录这个差异，不据此断言内部机制。
+- **A `new_scratch`**：changed nodes 486/486、changed descendants 454/454 在末两轮达到新真值；叶在 post1 即为 32/32，下游按 0→60→253→450→454 逐轮变化：r8=450/454，r16 及末两轮=454/454。这说明同一模型从原始输入求新题的行为与从完成旧态续算不同；本报告只记录这个差异，不据此断言内部机制。
 - **B `new_warm`**：δ=1/3/7 的 changed nodes 486/486、changed descendants 454/454 都达到新真值；δ=11 为 changed nodes 480/486（4 个旧值、2 个其他值）、changed descendants 448/454（4 个旧值、2 个其他值），例外集中在 graph57 与 graph63。
 - **B `new_scratch`**：所有 delta 的 changed nodes 486/486、changed descendants 454/454 达到新真值。
 - **`state_error`**：A 的叶在末两轮多数停在“新值”（旧 3/2/1/3，新 26–30/32），而 changed descendants 454/454 仍等于旧值；B 的叶 32/32 全部回到旧值，changed descendants 在 δ=1/3/7 为 454/454 旧值，δ=11 为 424/454 旧值、4 个新值、26 个其他值。A 与 B 对同一数值扰动的末两轮行为不同；这是计数，不是“谁具备机制”的证明。
@@ -259,7 +259,7 @@
 | model_b | 11 | 32/32 of 32 | 448/454 of 454 | 480/486 of 486 | 30/2 |
 
 
-- A：32/32 个 case 在 changed nodes 上 scratch 优于 warm；leaf 上 29 个 case scratch 更好、3 个相同。A warm 的 3 个叶正确节点没有扩展到下游；scratch 的下游在 r8 后达到 454/454。
+- A：32/32 个 case 在 changed nodes 上 scratch 优于 warm；leaf 上 29 个 case scratch 更好、3 个相同。A warm 的 3 个叶正确节点没有扩展到下游；scratch 下游 r8=450/454，r16 及末两轮=454/454。
 - B：δ=1/3/7 每个 case 的 warm 与 scratch 都相同；δ=11 有 30 个 case 相同、2 个 case scratch 更好。B warm 的主要例外是 graph57 的 2 个下游节点和 graph63 的 4 个下游节点。
 - warm 的 `T+1` 旧题成本没有计入上述 H；因此“warm 与 scratch 后续同预算”不等于总计算量相同。A 的 warm 失败不能仅凭这个表归因于某个内部更新步骤。
 
@@ -434,15 +434,21 @@
 
 ## 10. 复现与 hash
 
-- 报告导出脚本：`tools/priority_pilots/export_reassignment_tables.py`（只读记录，不加载模型；SHA-256 `df6873b9ba5c5855b3515ee02946919536a16171d802e7de0748932b9fb3b790`）。运行命令：
-  `python tools/priority_pilots/export_reassignment_tables.py --run-dir tmp/analysis/priority-pilots-20261118/reassign-main-A --run-dir tmp/analysis/priority-pilots-20261118/reassign-main-B --out-dir tmp/analysis/priority-pilots-20261118/report-tables`
+- 报告导出脚本：`tools/priority_pilots/export_reassignment_tables.py`（只读记录，不加载模型）。历史 ad0315e 版本 SHA-256 `df6873b9ba5c5855b3515ee02946919536a16171d802e7de0748932b9fb3b790`；审阅修复后版本 SHA-256 `62bf095d4819f4b5923481107ed0d96facc155867473170e3513f22f28a00278`。重导命令：
+  `python tools/priority_pilots/export_reassignment_tables.py --run-dir tmp/analysis/priority-pilots-20261118/reassign-main-A --run-dir tmp/analysis/priority-pilots-20261118/reassign-main-B --out-dir tmp/analysis/priority-pilots-20261118/report-tables-review`
+- 重导对比：修复后导出器生成的 6 个 CSV 与已提交历史文件逐字节相同；新 audit 的 `pinned_free_identical=true`、`value_equals_first4=true`，并明确 `raw_scratch_check`/`aux_fields` 由独立审计负责。证据 `priority-reassignment-reexport.json` 与 `priority-reassignment-audit-reexport.json`。
+- scratch 六字段审计：`tools/priority_pilots/verify_scratch_start.py`（SHA-256 `b92aa4321f990a19d4d462114050b71ff25ffcfd5e09eb31714a2ab7f09a9563`）；输出 `priority-reassignment-scratch-audit.json`。命令：
+  `python tools/priority_pilots/verify_scratch_start.py --run-dir tmp/analysis/priority-pilots-20261118/reassign-main-A --run-dir tmp/analysis/priority-pilots-20261118/reassign-main-B --out docs/records/2026-11-18/priority-reassignment-scratch-audit.json`
 - 运行记录 SHA：A `c846b754d37b317bcdbce5c75aea9931865c001093f04894c9171241243eee67`，B `e53a7de2a9c423a0dfd7ed483b3f767981f68e985210d6e3e1dd02dba71b7f8a`；共同 selection SHA `aa4d3205ee2f6e7b76c518683e2d73728ac593dc3a1e8c720671acc59bb0c9ad`。
 - 运行代码 hash：runner `31ee6d6e…`，reassignment_core `92297eb8…`，io_utils `402b2c6b…`，b_mechanism_common `85af46c4…`，model `dccaeaf2…`，tokenizers `611e9964…`（完整值见各 `meta.json` 与 audit）。
 - 小表 hash（本目录）：
 
 | 文件 | SHA-256 |
 |---|---|
-| `priority-reassignment-audit.json` | `fd135df102da31208bedc2a1740108dd5a08aa7af2694e8c68c2d3f1040dba3b` |
+| `priority-reassignment-audit.json`（历史 ad0315e） | `fd135df102da31208bedc2a1740108dd5a08aa7af2694e8c68c2d3f1040dba3b` |
+| `priority-reassignment-audit-reexport.json` | `e43f97f8e4472e465628d99c29350ed9ad35350cb5ee9009adb664766429f456` |
+| `priority-reassignment-reexport.json` | `fb3d396e76e0039785b563820575aefdaf49b82c8ac7ed6c5b3f5a3e8614c730` |
+| `priority-reassignment-scratch-audit.json` | `10062f4a1ef76a925129062ec8b53b2115bed9e14e5d0f7be4bd201c478519d7` |
 | `priority-reassignment-coverage.csv` | `46d541649335fc7ffe007a1180facccdd1c2896d9e852cfa2f8e714de762b622` |
 | `priority-reassignment-last-two.csv` | `c0c624a5100096ee56eab873ef2f96d6c84039614c4fe16bbd3ed9df1866c603` |
 | `priority-reassignment-curves.csv` | `6e1be3ddbb032dfd377a400d946e20a065cf1e70c3488e305b7e63d0925db962` |
