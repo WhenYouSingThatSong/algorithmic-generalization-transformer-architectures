@@ -1,6 +1,6 @@
 # 工作看板
 
-> 最近更新：2026-11-18 17:28 CST · [gpt]
+> 最近更新：2026-11-18 18:03 CST · [claude]
 > 活看板：任务可以移动；状态变化在 `log.md` 记一行。条目格式 `[YYYY-MM-DD HH:MM][author]`。
 
 ## 当前授权：A/B连续赋值与死槽位复用；C恢复状态重新使用
@@ -17,7 +17,8 @@
 - [2026-11-18 16:22][user/gpt] **后续统一模型展示名A/B/C**，执行agent必须遵守[命名规范](../docs/model-names.md)。C写中文训练版本；旧名字集中[映射](../docs/records/2026-11-18/model-name-aliases.md)。现象不再用A/B/C编号；原始路径/机器ID/hash不改。
 - [x] [gpt] 报告导出器取消pinned/free及VALUE/四属性相同的结果断言，去掉32样本及额外检查已执行的硬编码；1图/H2带差异的端到端回归通过。当前旧CSV不覆盖，无需GPU重跑。
 - [ ] [执行agent C] CPU补交小表导出脚本、输入/输出联合计数及focal事件范围，按审阅具体口径复核旧百分比；展示用C中文版本与现象①②③。不增加新hidden干预/训练。
-- [ ] [执行agent B] 用修复后导出器新目录CPU重导，对比旧表数字并补scratch/tokenizer一次性核验代码/证据；展示统一A/B。原runner/数据/选点不动，不重跑GPU。
+- [x] [执行agent B] 用修复后导出器新目录CPU重导，对比旧表数字并补scratch/tokenizer一次性核验代码/证据；展示统一A/B。原runner/数据/选点不动，不重跑GPU。
+- [2026-11-18 18:03][claude] **B 上一批CPU补交完成**：修复后导出器在 `report-tables-review` 重导，6 个 CSV 与 ad0315e 历史文件逐字节相同；新 audit 如实记录 `pinned_free_identical`/`value_equals_first4` 及“scratch/aux 由独立审计负责”。新增 `verify_scratch_start.py`：A/B 各 128 case、完整原始序列（1024 token）× 六字段共 1,572,864 格，只有 256 个预期常数 VALUE 格不同，0 unexpected；scratch audit 与 re-export 证据已提交。报告统一 A/B、修正 r8=450/454 与 r16/末两轮=454/454。12 项测试、5 个 CLI help 通过；未重跑 GPU、未改 runner/选点/数据；新 state-reuse GPU 小验证尚未启动。
 
 ## 当前优先：C输入对齐诊断 + A/B合法重新赋值
 
