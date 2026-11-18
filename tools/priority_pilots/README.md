@@ -2,7 +2,7 @@
 
 2026-11-18。对应研究索引 **E2/E4 + M1**、**W1/W2**。
 本批只使用现有权重；不训练C+、不复用物理槽位、不扩图规模、不改历史实验源码。
-具体服务器交接见[执行与验收](../../ai-collab/handoff/2026-11-18-priority-pilots.md)。
+模型展示名按[统一规范](../../docs/model-names.md)使用A/B/C，旧机器ID保留。具体服务器交接见[执行与验收](../../ai-collab/handoff/2026-11-18-priority-pilots.md)。
 
 ## 1. C：输入对齐的读出/下游观察
 
@@ -32,10 +32,10 @@
 
 用途是确定接下来的功能干预需要排除什么，不把已有q输出叫成“已经证明的功能探针”。健康q保持正确，仍可能是复制旧值；父值读对，仍可能有其他隐藏成分异常。
 
-## 2. A′/B：旧任务出错与新题面更新
+## 2. A/B：旧任务出错与新题面更新
 
 入口：`run_reassignment.py`；汇总：`summarize_reassignment.py`。只支持离散ADD mod23。
-沿用N32主manifest、A′ s42/e86和B s42/e92，严格核对权重/数据hash。
+沿用N32主manifest、A s42/e86和B s42/e92，严格核对权重/数据hash。
 
 固定候选graph32–63，共32图，不补样。每图按固定hash选1个有下游的叶变量及其题面常数；选点不看本次模型表现。delta固定1/3/7/11，取模23，不限定4→5。
 
@@ -73,7 +73,7 @@ scratch与warm比较的是同样多的**后续**前向，不是总算力相同�
 
 本批回答能否适应合法的新题面，不证明已经学会槽位释放/版本化，也不证明突破128节点。
 
-报告小表由`export_reassignment_tables.py`从两个完整run的records重新推导；它只读记录、不加载模型，并复核覆盖、起跑单格差异、clean/sham、pinned常数、pinned/free轨迹和VALUE/前四属性一致。输出`priority-reassignment-{coverage,last-two,curves,constant-drift,damage,warm-scratch}.csv`和audit；完整16轮records仍留tmp。
+报告小表由`export_reassignment_tables.py`从两个完整run的records重新推导；它只读记录、不加载模型，并复核覆盖、起跑单格差异、clean/sham及pinned常数。pinned/free是否相同、VALUE/四属性是否相同是结果，记录布尔值而不作为报错条件；实际case数由数据统计。scratch与辅助字段的额外验证须提供独立证据，不由导出器硬编码已验证。输出`priority-reassignment-{coverage,last-two,curves,constant-drift,damage,warm-scratch}.csv`和audit；完整16轮records仍留tmp。
 
 ## 3. 本地检查与服务器职责
 

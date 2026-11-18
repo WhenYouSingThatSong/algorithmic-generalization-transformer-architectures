@@ -1,20 +1,22 @@
-# A′/B 合法重新赋值：原题纠错与新题面更新（W 首步）
+# A/B 合法重新赋值：原题纠错与新题面更新（首步）
 
 - 日期：2026-11-18。
-- 状态：**仅离散 A′/B 现有权重、固定 graph32–63、H=16；未训练、未改架构、未复用物理槽位、未扩图**。
-- 运行版本：`reproduction@f89677baea5c613299d449598be1ef5489463626`。之后仓库只增加了 C 的文档提交，`tools/priority_pilots`、`tools/b_mechanism`、`experiments/model.py`、`experiments/tokenizers.py` 的代码 hash 未变。
+- 状态：**仅离散 A/B 现有权重、固定 graph32–63、H=16；未训练、未改架构、未复用物理槽位、未扩图**。
+- 运行版本：`reproduction@f89677baea5c613299d449598be1ef5489463626`。运行核心代码hash与该版本一致；报告导出器为后续新增，其审阅修复不改变模型运行结果。
 - 本批 32 图参与过旧探索，是开发验证子样本，不是独立最终测试。本报告只给行为计数，不把计数命名成机制，也不声称已经突破 128 节点或完成槽位复用。
+
+> 2026-11-18审阅：统一称A/B，旧名称和机器ID见[命名映射](model-name-aliases.md)。已核对提交小表与代码hash；服务器原始记录未在本地重放。报告导出器的结果断言和硬编码已修复，但本批原始CSV/audit保持不变；下方脚本hash指修复前ad0315e中的历史版本。详见[审阅](../../../ai-collab/handoff/2026-11-18-priority-review.md)。
 
 ## 1. 覆盖、权重与预算
 
-- 固定候选图为 N32 图 32–63，共 32 图；每图恰好 32 个节点。A′/B 都扫描 32 图、选中 32 图，`selection.jsonl` 没有 `no_common_manifest_completion`、`no_leaf_with_descendant` 或资格失败行。每图恰好 1 个叶、4 个 delta、7 个分支；两模型各 128 条 case，128 条共同 case，32 个共同图。
+- 固定候选图为 N32 图 32–63，共 32 图；每图恰好 32 个节点。A/B 都扫描 32 图、选中 32 图，`selection.jsonl` 没有 `no_common_manifest_completion`、`no_leaf_with_descendant` 或资格失败行。每图恰好 1 个叶、4 个 delta、7 个分支；两模型各 128 条 case，128 条共同 case，32 个共同图。
 - 32 图每图每 delta 的分母相同：leaf 32、changed nodes 486（leaf+changed descendants）、changed descendants 454、unchanged nodes 538、constant 32，合计 1024 个节点。4 个 delta 是同一批 32 图的重复观察，不是 4 份独立图样本；下表每个 delta 单列。
-- 小验证先跑：graph32–33、H=4，A′/B 各 2/2 选中、8 条 case，共同 8 条；随后才跑主批。主批图数和 case 数没有补样。
-- 运行设备：GPU2 上单进程串行跑 A′ 再 B；未触碰 GPU4–7 的其他作业，未启动训练或额外 GPU 方向。
-- 权重严格来自 `manifest_main256.json`：A′ `A-L4D384fast` s42/e86，B-M6 s42/e92。数据 SHA `08f52382f6e3a2b62ec50e4603b8a10454cba48e0f5449543dd79c9925cee707`，manifest SHA `19c992643a8b2c6892a98fead06d67bd47fd3820d25864f5379d3ef4444928cf`。
+- 小验证先跑：graph32–33、H=4，A/B 各 2/2 选中、8 条 case，共同 8 条；随后才跑主批。主批图数和 case 数没有补样。
+- 运行设备：GPU2 上单进程串行跑 A 再 B；未触碰 GPU4–7 的其他作业，未启动训练或额外 GPU 方向。
+- 权重严格来自 `manifest_main256.json`：A `A-L4D384fast` s42/e86，B s42/e92。数据 SHA `08f52382f6e3a2b62ec50e4603b8a10454cba48e0f5449543dd79c9925cee707`，manifest SHA `19c992643a8b2c6892a98fead06d67bd47fd3820d25864f5379d3ef4444928cf`。
 - 主批记录直接留在 tmp：`reassign-main-A/records.jsonl` 约 39 MB、`reassign-main-B/records.jsonl` 约 39 MB；`reassign-main-summary/case_curves.csv` 约 22 MB。未上传大记录。小表与 audit 已进 git。
 
-| 项目 | A′ | B |
+| 项目 | A | B |
 |---|---:|---:|
 | 扫描/选中图 | 32 / 32 | 32 / 32 |
 | 原始 case | 128 | 128 |
@@ -43,10 +45,10 @@
 
 ## 3. 执行验收（实际记录复核）
 
-1. **旧真值与新真值**：A′/B 各 128 条 case 的旧标签都由独立 ADD 求值复现；新常数标签均已更新。没有触发旧标签不一致，也没有用解码后的旧答案替代真值。
-2. **起跑差异**：每个模型 128/128 case 中，`state_error` 的初始 tensor 与 `clean` 只差叶节点的 VALUE 一格；`new_warm` 只差常数的 VALUE 一格。`new_scratch` 的初始四字段与 `raw_input_tokens` 解码结果逐位置比较：A′ 128/128、B 128/128 都只在常数 VALUE 上不同，其余 33 个位置 × 4 字段无差异（每模型核对 16,896 格）。没有把新叶值或下游答案写入 scratch 输入。
-3. **clean/sham 与辅助字段**：A′/B 各 128 条 case 的 `clean` 与 `sham` 的 initial/inputs/outputs 全轨迹逐项相同，0 条不同。`force_aux_false` 在初始 `xs` 和 `rollout` 每次输出后都把 `REGRET`、`MODIFICATION` 覆盖为 `FALSE`；原始输入中的两辅助字段 ID 全为 0（FALSE）。
-4. **pinned**：A′/B 各自的 `new_warm_pinned`、`new_scratch_pinned` 全部 H=16 轮输入常数 VALUE 都等于新值，0 个违规；只固定该常数 VALUE，没有固定节点答案或其他字段。自由组与 pinned 组的 initial/inputs/outputs 在 128 条 case 上逐项相同（A′ 和 B 各 2 对分支，0 差异）。
+1. **旧真值与新真值**：A/B 各 128 条 case 的旧标签都由独立 ADD 求值复现；新常数标签均已更新。没有触发旧标签不一致，也没有用解码后的旧答案替代真值。
+2. **起跑差异**：服务器报告每个模型 128/128 case 中，`state_error` 的起跑状态与 `clean` 只差叶节点的 VALUE 一格；`new_warm` 只差常数的 VALUE 一格。对已记录的33个位置（32个节点及被改常数）的四字段，服务器另行用 tokenizer 比较 `new_scratch` 与 `raw_input_tokens`：A、B 各128/128 case 均只有常数 VALUE 一格不同（每模型共核对16,896格）。这项额外检查的脚本待补交；当前小表不能独立证明完整序列、六字段均已核验。运行源码构造 scratch 时从原始输入出发，没有写入新叶值或下游答案。
+3. **clean/sham 与辅助字段**：A/B 各 128 条 case 的 `clean` 与 `sham` 的 initial/inputs/outputs 全轨迹逐项相同，0 条不同。`force_aux_false` 在初始 `xs` 和 `rollout` 每次输出后都把 `REGRET`、`MODIFICATION` 覆盖为 `FALSE`；原始输入中的两辅助字段 ID 全为 0（FALSE）。
+4. **pinned**：A/B 各自的 `new_warm_pinned`、`new_scratch_pinned` 全部 H=16 轮输入常数 VALUE 都等于新值，0 个违规；只固定该常数 VALUE，没有固定节点答案或其他字段。自由组与 pinned 组的 initial/inputs/outputs 在 128 条 case 上逐项相同（A 和 B 各 2 对分支，0 差异）。
 5. **时序**：`post0` 只是起跑；warm 的 `pre_forward_round=T+1`，scratch 的 `pre_forward_round=0`。每个 case 的 7 分支都完整记录 H=16 个 inputs/outputs。
 6. **覆盖与协议**：两模型候选 ID、horizon、batch size、deltas、数据/manifest/代码 hash 完全一致；所有候选图都有 selection 行，所有合格图恰好 4 条 case；没有空分支、缺失轮次或重复 target。
 7. **真值分离与区域**：`state_error` 按旧真值统计；`new_*` 按新真值统计；old/new 计数并列。changed nodes 是实际旧/新真值不同的节点，模抵消后值不变的节点不会进入“需要更新”分母。required 四区域本批均非空；空区域在完整 CSV 中留空。
@@ -55,7 +57,7 @@
 
 以下每格是“正确节点数”，分母见表头；`r1/r2/r4/r8/r16/L2` 依次是输出轮 1、2、4、8、16 和最后两轮同时正确。`L2` 是主终点。表中的 `VALUE` 计数同时是前四属性联合计数。
 
-#### A′：逐轮（VALUE=first4）
+#### A：逐轮（VALUE=first4）
 **leaf** (node_n=32 per delta)
 
 | branch | δ=1 | δ=3 | δ=7 | δ=11 |
@@ -159,7 +161,7 @@
 
 每格是 `旧值正确/新值正确/两者都不是` 的节点数。`clean/sham/state_error` 的目标是旧真值，`new_*` 的目标是新真值；old/new 两列仅作行为对照，不改变各分支的目标。`other` 表示末两轮既不全等于旧真值、也不全等于新真值的节点。
 
-**model_a / leaf**
+**A / leaf**
 
 | branch | δ=1 old/new/other | δ=3 | δ=7 | δ=11 |
 |---|---:|---:|---:|---:|
@@ -171,7 +173,7 @@
 | new_warm_pinned | 24/3/5 | 29/3/0 | 28/3/1 | 29/3/0 |
 | new_scratch_pinned | 0/32/0 | 0/32/0 | 0/32/0 | 0/32/0 |
 
-**model_a / changed_nodes**
+**A / changed_nodes**
 
 | branch | δ=1 old/new/other | δ=3 | δ=7 | δ=11 |
 |---|---:|---:|---:|---:|
@@ -183,7 +185,7 @@
 | new_warm_pinned | 478/3/5 | 483/3/0 | 482/3/1 | 483/3/0 |
 | new_scratch_pinned | 0/486/0 | 0/486/0 | 0/486/0 | 0/486/0 |
 
-**model_a / changed_descendants**
+**A / changed_descendants**
 
 | branch | δ=1 old/new/other | δ=3 | δ=7 | δ=11 |
 |---|---:|---:|---:|---:|
@@ -195,7 +197,7 @@
 | new_warm_pinned | 454/0/0 | 454/0/0 | 454/0/0 | 454/0/0 |
 | new_scratch_pinned | 0/454/0 | 0/454/0 | 0/454/0 | 0/454/0 |
 
-**model_b / leaf**
+**B / leaf**
 
 | branch | δ=1 old/new/other | δ=3 | δ=7 | δ=11 |
 |---|---:|---:|---:|---:|
@@ -207,7 +209,7 @@
 | new_warm_pinned | 0/32/0 | 0/32/0 | 0/32/0 | 0/32/0 |
 | new_scratch_pinned | 0/32/0 | 0/32/0 | 0/32/0 | 0/32/0 |
 
-**model_b / changed_nodes**
+**B / changed_nodes**
 
 | branch | δ=1 old/new/other | δ=3 | δ=7 | δ=11 |
 |---|---:|---:|---:|---:|
@@ -219,7 +221,7 @@
 | new_warm_pinned | 0/486/0 | 0/486/0 | 0/486/0 | 4/480/2 |
 | new_scratch_pinned | 0/486/0 | 0/486/0 | 0/486/0 | 0/486/0 |
 
-**model_b / changed_descendants**
+**B / changed_descendants**
 
 | branch | δ=1 old/new/other | δ=3 | δ=7 | δ=11 |
 |---|---:|---:|---:|---:|
@@ -234,11 +236,11 @@
 
 读法上的关键计数：
 
-- **A′ `new_warm`**：changed nodes 只有 3/486 个节点在末两轮达到新真值（每个 delta 都是 3 个叶），没有一条 case 是“全部 changed nodes 接受新题”。changed descendants 为 0/454；末两轮多数 changed nodes 仍等于旧值（478–483/486），另有 0–5 个节点既非旧值也非新值。
-- **A′ `new_scratch`**：changed nodes 486/486、changed descendants 454/454 在末两轮达到新真值；叶在 post1 即为 32/32，下游按 0→60→253→450→454 逐轮恢复（r8 后稳定）。这说明同一模型从原始输入求新题的行为与从完成旧态续算不同；本报告只记录这个差异，不据此断言内部机制。
+- **A `new_warm`**：changed nodes 只有 3/486 个节点在末两轮达到新真值（每个 delta 都是 3 个叶），没有一条 case 是“全部 changed nodes 接受新题”。changed descendants 为 0/454；末两轮多数 changed nodes 仍等于旧值（478–483/486），另有 0–5 个节点既非旧值也非新值。
+- **A `new_scratch`**：changed nodes 486/486、changed descendants 454/454 在末两轮达到新真值；叶在 post1 即为 32/32，下游按 0→60→253→450→454 逐轮恢复（r8 后稳定）。这说明同一模型从原始输入求新题的行为与从完成旧态续算不同；本报告只记录这个差异，不据此断言内部机制。
 - **B `new_warm`**：δ=1/3/7 的 changed nodes 486/486、changed descendants 454/454 都达到新真值；δ=11 为 changed nodes 480/486（4 个旧值、2 个其他值）、changed descendants 448/454（4 个旧值、2 个其他值），例外集中在 graph57 与 graph63。
 - **B `new_scratch`**：所有 delta 的 changed nodes 486/486、changed descendants 454/454 达到新真值。
-- **`state_error`**：A′ 的叶在末两轮多数停在“新值”（旧 3/2/1/3，新 26–30/32），而 changed descendants 454/454 仍等于旧值；B 的叶 32/32 全部回到旧值，changed descendants 在 δ=1/3/7 为 454/454 旧值，δ=11 为 424/454 旧值、4 个新值、26 个其他值。A′ 与 B 对同一数值扰动的末两轮行为不同；这是计数，不是“谁具备机制”的证明。
+- **`state_error`**：A 的叶在末两轮多数停在“新值”（旧 3/2/1/3，新 26–30/32），而 changed descendants 454/454 仍等于旧值；B 的叶 32/32 全部回到旧值，changed descendants 在 δ=1/3/7 为 454/454 旧值，δ=11 为 424/454 旧值、4 个新值、26 个其他值。A 与 B 对同一数值扰动的末两轮行为不同；这是计数，不是“谁具备机制”的证明。
 - **pinned 的改善**：pinned 与 free 的完整轨迹逐项相同，末两轮所有区域计数也相同；**没有观察到 pinned 改善**。本批自由组的常数 VALUE 在记录输入/输出中都没有漂移（见下节），所以 pinned 在这里是冗余对照，不等同于证明常数维护机制无关。
 
 ## 6. warm 与 scratch 的同后续预算差异
@@ -257,14 +259,14 @@
 | model_b | 11 | 32/32 of 32 | 448/454 of 454 | 480/486 of 486 | 30/2 |
 
 
-- A′：32/32 个 case 在 changed nodes 上 scratch 优于 warm；leaf 上 29 个 case scratch 更好、3 个相同。A′ warm 的 3 个叶正确节点没有扩展到下游；scratch 的下游在 r8 后达到 454/454。
+- A：32/32 个 case 在 changed nodes 上 scratch 优于 warm；leaf 上 29 个 case scratch 更好、3 个相同。A warm 的 3 个叶正确节点没有扩展到下游；scratch 的下游在 r8 后达到 454/454。
 - B：δ=1/3/7 每个 case 的 warm 与 scratch 都相同；δ=11 有 30 个 case 相同、2 个 case scratch 更好。B warm 的主要例外是 graph57 的 2 个下游节点和 graph63 的 4 个下游节点。
-- warm 的 `T+1` 旧题成本没有计入上述 H；因此“warm 与 scratch 后续同预算”不等于总计算量相同。A′ 的 warm 失败不能仅凭这个表归因于某个内部更新步骤。
+- warm 的 `T+1` 旧题成本没有计入上述 H；因此“warm 与 scratch 后续同预算”不等于总计算量相同。A 的 warm 失败不能仅凭这个表归因于某个内部更新步骤。
 
 ## 7. 常数保持与未改真值节点
 
 - **常数漂移**：`priority-reassignment-constant-drift.csv` 核对了 2 模型 × 4 delta × 7 分支 × 32 case × 16 轮 = 28,672 个 branch-case-round，输入和输出常数 VALUE 相对该分支目标的漂移均为 **0**。自由 `new_warm`/`new_scratch` 的常数也全程等于新值；pinned 的常数输入约束没有改变任何记录轨迹。
-- **未改真值节点相对 clean 的新增损伤**：`unchanged_nodes` 在末两轮对 2 模型 × 4 delta × 7 分支均为 **0/538**（`last_two_any` 和 `last_two_both` 都是 0）。单轮峰值只有：B `state_error` 为 1/1/5/0（δ=1/3/7/11，峰值轮 r2/r3/r3/—），B `new_warm` δ=7 为 2（r2）；A′ 这些分支峰值为 0。`new_scratch` 的 378/538 峰值出现在 r1，是原始 `EMPTY` 输入重新求解造成的暂态，不能当作“改题造成的损伤”；到 r8 已为 0/538。
+- **未改真值节点相对 clean 的新增损伤**：`unchanged_nodes` 在末两轮对 2 模型 × 4 delta × 7 分支均为 **0/538**（`last_two_any` 和 `last_two_both` 都是 0）。单轮峰值只有：B `state_error` 为 1/1/5/0（δ=1/3/7/11，峰值轮 r2/r3/r3/—），B `new_warm` δ=7 为 2（r2）；A 这些分支峰值为 0。`new_scratch` 的 378/538 峰值出现在 r1，是原始 `EMPTY` 输入重新求解造成的暂态，不能当作“改题造成的损伤”；到 r8 已为 0/538。
 - 结论仅限：在本记录口径下，合法改常数没有造成末两轮未改真值节点的额外错误；早期 `new_scratch` 未解节点不是同一类损伤。
 
 ## 8. 固定排序案例
@@ -428,13 +430,13 @@
 
 - 本批不应直接进入“真正槽位复用”或 128 节点容量结论：每图只有一个叶/一个常数、32 图固定子样本，且 4 个 delta 不是独立图。
 - 从计数看，**可观察的题面常数保持不是区分点**：自由组常数在输入/输出中都没有漂移，pinned 与 free 轨迹逐项相同，pinned 没有改善。因此下一步不应先把“输入保持”当作已定位的瓶颈；更应先做**已有答案更新**诊断（同一合法新常数下，旧叶/旧下游答案是否被覆盖），再决定是否需要改更新结构。
-- A′ 的 warm/scratch 差异与 B 的 warm 成功都只是行为对照；两种起点还差 `T+1` 预计算和 `EMPTY`/旧答案状态，不能仅凭本批把差异归因于单一的“状态更新”机制。任何后续干预应保持同一常数、同一 H、同一真值口径，并继续分开 old/new 与 warm/scratch 成本。
+- A 的 warm/scratch 差异与 B 的 warm 成功都只是行为对照；两种起点还差 `T+1` 预计算和 `EMPTY`/旧答案状态，不能仅凭本批把差异归因于单一的“状态更新”机制。任何后续干预应保持同一常数、同一 H、同一真值口径，并继续分开 old/new 与 warm/scratch 成本。
 
 ## 10. 复现与 hash
 
 - 报告导出脚本：`tools/priority_pilots/export_reassignment_tables.py`（只读记录，不加载模型；SHA-256 `df6873b9ba5c5855b3515ee02946919536a16171d802e7de0748932b9fb3b790`）。运行命令：
   `python tools/priority_pilots/export_reassignment_tables.py --run-dir tmp/analysis/priority-pilots-20261118/reassign-main-A --run-dir tmp/analysis/priority-pilots-20261118/reassign-main-B --out-dir tmp/analysis/priority-pilots-20261118/report-tables`
-- 运行记录 SHA：A′ `c846b754d37b317bcdbce5c75aea9931865c001093f04894c9171241243eee67`，B `e53a7de2a9c423a0dfd7ed483b3f767981f68e985210d6e3e1dd02dba71b7f8a`；共同 selection SHA `aa4d3205ee2f6e7b76c518683e2d73728ac593dc3a1e8c720671acc59bb0c9ad`。
+- 运行记录 SHA：A `c846b754d37b317bcdbce5c75aea9931865c001093f04894c9171241243eee67`，B `e53a7de2a9c423a0dfd7ed483b3f767981f68e985210d6e3e1dd02dba71b7f8a`；共同 selection SHA `aa4d3205ee2f6e7b76c518683e2d73728ac593dc3a1e8c720671acc59bb0c9ad`。
 - 运行代码 hash：runner `31ee6d6e…`，reassignment_core `92297eb8…`，io_utils `402b2c6b…`，b_mechanism_common `85af46c4…`，model `dccaeaf2…`，tokenizers `611e9964…`（完整值见各 `meta.json` 与 audit）。
 - 小表 hash（本目录）：
 
@@ -451,5 +453,5 @@
 ## 11. 限制
 
 - 所有“正确”都是解码字段的 VALUE/前四属性正确；不证明内部使用了读出的数值，也不证明某个隐藏状态被保留或覆盖。
-- 32 图是已有开发图；A′/B 的差异同时包含权重、训练配方和模型差异，不能当作架构因果关系。
+- 32图是已有开发图；A/B主体架构相同（L4H16D384，fast），权重与纠错训练设置不同。本批展示同架构下的行为差异，不是Loop对普通架构的因果比较，也不是多种子结论。
 - `new_warm` 与 `new_scratch` 的起点不同、预计算成本不同；`state_error` 与 `new_warm` 的目标真值和输入修改位置也不同。本报告不把任何单表差异命名为机制。

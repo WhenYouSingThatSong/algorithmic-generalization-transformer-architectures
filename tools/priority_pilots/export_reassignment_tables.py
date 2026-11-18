@@ -109,12 +109,13 @@ def start_checks(records):
                 unexpected_start_differences=0)
 
 
-def assert_trajectory_equality(records, left, right):
+def trajectories_equal(records, left, right):
     for rec in records.values():
         a, b = rec["branches"][left], rec["branches"][right]
         for field in ("initial", "inputs", "outputs"):
             if a[field] != b[field]:
-                raise ValueError(f"{left}/{right} differ in {field}")
+                return False
+    return True
 
 
 def last_two_counts(rec, branch_name, positions):
@@ -197,7 +198,7 @@ def write_curves(out, records, common):
             for delta in metas["model_a"]["deltas"]:
                 for branch in BRANCHES:
                     for region in REQUIRED_REGIONS:
-                        for step, window in [(r, str(r)) for r in KEY_ROUNDS] + [(None, "last_two")]:
+                        for step, window in [(r, str(r)) for r in KEY_ROUNDS if r <= metas[arm]["horizon"]] + [(None, "last_two")]:
                             vals = []
                             for k, rec in records[arm].items():
                                 if k[3] != delta or k not in common:
@@ -289,9 +290,11 @@ def write_warm_vs_scratch(out, records):
                 for region in ("leaf", "changed_descendants", "changed_nodes"):
                     counts = Counter()
                     warm_n = scratch_n = n = 0
+                    cases = 0
                     for k, rec in records[arm].items():
                         if k[3] != delta:
                             continue
+                        cases += 1
                         new = rec["new_truth4"]
                         ix = [rec["positions"].index(p) for p in rec["regions"][region]]
                         w = sum(all(row[i][3] == new[i][3] for row in rec["branches"]["new_warm"]["outputs"][-2:]) for i in ix)
@@ -300,7 +303,7 @@ def write_warm_vs_scratch(out, records):
                         scratch_n += s
                         n += len(ix)
                         counts["equal" if w == s else "warm>scratch" if w > s else "scratch>warm"] += 1
-                    rows.add(dict(arm=arm, delta=delta, region=region, cases=32, node_n=n,
+                    rows.add(dict(arm=arm, delta=delta, region=region, cases=cases, node_n=n,
                                   warm_new_n=warm_n, scratch_new_n=scratch_n,
                                   equal_cases=counts["equal"], warm_better_cases=counts["warm>scratch"],
                                   scratch_better_cases=counts["scratch>warm"]))
@@ -335,6 +338,8 @@ def main():
     for field in ("dataset_sha256", "manifest_sha256", "candidate_ids", "horizon", "batch_size", "deltas", "code_hashes"):
         if metas["model_a"][field] != metas["model_b"][field]:
             raise ValueError("unmatched protocol: " + field)
+    if metas["model_a"]["horizon"] < 2:
+        raise ValueError("last-two reporting requires at least two outputs")
     common = set(records["model_a"]) & set(records["model_b"])
     if len(common) != len(records["model_a"]) or len(common) != len(records["model_b"]):
         raise ValueError("A/B record sets differ")
@@ -347,12 +352,11 @@ def main():
     start_diffs_b = start_checks(records["model_b"])
     if start_diffs != start_diffs_b:
         raise ValueError("A/B start checks differ")
-    assert_trajectory_equality(records["model_a"], "new_warm", "new_warm_pinned")
-    assert_trajectory_equality(records["model_a"], "new_scratch", "new_scratch_pinned")
-    assert_trajectory_equality(records["model_b"], "new_warm", "new_warm_pinned")
-    assert_trajectory_equality(records["model_b"], "new_scratch", "new_scratch_pinned")
-    # first4 and VALUE counts should be identical in these four regions because
-    # only VALUE differs between old/new truth and no auxiliary field is recorded.
+    pinned_free_identical = all(trajectories_equal(records[arm], left, right)
+        for arm in records for left, right in
+        (("new_warm", "new_warm_pinned"), ("new_scratch", "new_scratch_pinned")))
+    # These are outcomes, not validity conditions. Other first-four fields can drift.
+    value_equals_first4 = True
     for arm in records:
         for rec in records[arm].values():
             for branch in BRANCHES:
@@ -360,7 +364,7 @@ def main():
                     for step in range(1, metas[arm]["horizon"] + 1):
                         got = round_counts(rec, branch, rec["regions"][region], step)
                         if got["value_n"] != got["first4_n"]:
-                            raise ValueError("VALUE/first4 mismatch")
+                            value_equals_first4 = False
     args.out_dir.mkdir(parents=True, exist_ok=False)
     write_coverage(args.out_dir, metas, selected, common)
     write_last_two(args.out_dir, records, common)
@@ -383,13 +387,11 @@ def main():
             selected_a=sum(s["status"] == "selected" for s in selected["model_a"].values()),
             selected_b=sum(s["status"] == "selected" for s in selected["model_b"].values()),
             horizon=metas["model_a"]["horizon"], deltas=metas["model_a"]["deltas"],
-            clean_sham_identical=True, pinned_free_identical=True,
+            clean_sham_identical=True, pinned_free_identical=pinned_free_identical,
             pinned_constant_input=True, start_checks=start_diffs,
-            value_equals_first4=True,
-            raw_scratch_check="verified by a separate one-off tokenizer audit on all 128 A and 128 B cases: "
-                              "new_scratch.initial differs from raw_input_tokens only at constant VALUE",
-            aux_fields="force_aux_false is applied to the initial start and to every rollout output; "
-                       "raw input auxiliary ids were all 0 (FALSE)",
+            value_equals_first4=value_equals_first4,
+            raw_scratch_check="not checked by this exporter; needs separate tokenizer-based evidence",
+            aux_fields="not present in first-four trajectories; verify feedback code and raw tokens separately",
         ),
         state_round_counts=dict(sorted(state_rounds.items())),
         code_hashes=metas["model_a"]["code_hashes"],
