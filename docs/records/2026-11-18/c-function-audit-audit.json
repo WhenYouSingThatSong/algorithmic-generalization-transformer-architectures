@@ -1,0 +1,304 @@
+{
+  "status": "audit_summary",
+  "report": "docs/records/2026-11-18/priority-function-audit.md",
+  "code_commit": "f89677b",
+  "protocol": "C_function_audit_v1",
+  "note": "Existing records only; no model rerun, no GPU, no hidden-state read. Quadrants are decoded-field observations, not proof of internal use.",
+  "sources": {
+    "pair": {
+      "path": "tmp/analysis/c-evaluation-suite-20261115/pair",
+      "meta_sha256": "82a408adbb60f4f052622566b5d330e4fbdda1b6b940ad01254c092a02cf0c43",
+      "records_sha256": "07640fea7acfaae1479b9f92514895cafa291b83ad99b0617b8200544717ea74",
+      "coverage_sha256": "9492491dd56333ff4ef4f856c5ce66cca4e0a398a8a0eff269c12b5f00367609",
+      "records": 1024,
+      "paired_graph_timings": 256,
+      "common_graph_timings": 256,
+      "models": [
+        {
+          "arm": "initial",
+          "sha256": "40babb206b1393d0892b047202b9d6469cd140c82f3ba82c96a466fa3c76e780"
+        },
+        {
+          "arm": "hold",
+          "sha256": "24f6b0715cb5d76775a9c93fd4a466b75b69d5c7e949f8d681d9062d79dc3aee"
+        },
+        {
+          "arm": "noise",
+          "sha256": "cdf398a7ff407a60fc9a7548cc651df1b420daf3a3626871cc9c14616da4cf9a"
+        },
+        {
+          "arm": "semantic",
+          "sha256": "559fed2b0665164671e0176ee5b7ec1fde5682b328741d73fe78d8aa758fd9be"
+        }
+      ],
+      "protocol": "C_uq_pair_eval_v1",
+      "candidate_graphs": 128,
+      "horizon": 16,
+      "durations": [
+        1
+      ]
+    },
+    "sustained": {
+      "path": "tmp/analysis/c-sustained-noise-20261115/sustained",
+      "meta_sha256": "d74fed0c03e81c4e7a96fee7200f1fc9e97fb3c08481f27eac29601e0f51d006",
+      "records_sha256": "9af2dd1746d22dbf46fb4781b2b997909f3224bb7a223c89e69e68fc225bbae6",
+      "coverage_sha256": "de4704b40bd09a698ab2e34058cc579e903bb8bb1a30cf96992e063fc7df4502",
+      "records": 2048,
+      "paired_graph_timings": 256,
+      "common_graph_timings": 256,
+      "models": [
+        {
+          "arm": "initial",
+          "sha256": "40babb206b1393d0892b047202b9d6469cd140c82f3ba82c96a466fa3c76e780"
+        },
+        {
+          "arm": "hold",
+          "sha256": "24f6b0715cb5d76775a9c93fd4a466b75b69d5c7e949f8d681d9062d79dc3aee"
+        },
+        {
+          "arm": "noise",
+          "sha256": "cdf398a7ff407a60fc9a7548cc651df1b420daf3a3626871cc9c14616da4cf9a"
+        },
+        {
+          "arm": "semantic",
+          "sha256": "559fed2b0665164671e0176ee5b7ec1fde5682b328741d73fe78d8aa758fd9be"
+        }
+      ],
+      "protocol": "C_stress_v1",
+      "candidate_graphs": 128,
+      "horizon": 16,
+      "durations": [
+        2,
+        4
+      ]
+    },
+    "noise": {
+      "path": "tmp/analysis/c-sustained-noise-20261115/noise",
+      "meta_sha256": "38a996d0bebeab8c9543af831eb9919fc44f51210b511ca615cbe1e5c9c706f3",
+      "records_sha256": "9ec6fc4e10e896a68c1f5c4507dde4599cb29cf803dd45de476ca44da1f5b146",
+      "coverage_sha256": "a6e31d867484e7fe369a309275872fd0cd474fe29070ecced6f7bfe550c74a31",
+      "records": 512,
+      "paired_graph_timings": 128,
+      "common_graph_timings": 128,
+      "models": [
+        {
+          "arm": "initial",
+          "sha256": "40babb206b1393d0892b047202b9d6469cd140c82f3ba82c96a466fa3c76e780"
+        },
+        {
+          "arm": "hold",
+          "sha256": "24f6b0715cb5d76775a9c93fd4a466b75b69d5c7e949f8d681d9062d79dc3aee"
+        },
+        {
+          "arm": "noise",
+          "sha256": "cdf398a7ff407a60fc9a7548cc651df1b420daf3a3626871cc9c14616da4cf9a"
+        },
+        {
+          "arm": "semantic",
+          "sha256": "559fed2b0665164671e0176ee5b7ec1fde5682b328741d73fe78d8aa758fd9be"
+        }
+      ],
+      "protocol": "C_stress_v1",
+      "candidate_graphs": 64,
+      "horizon": 16,
+      "durations": [
+        1
+      ]
+    }
+  },
+  "raw": {
+    "edge_rounds.csv": {
+      "path": "tmp/analysis/priority-pilots-20261118/function-audit/edge_rounds.csv",
+      "sha256": "16eaf58bc92a5d0c147869dc95ce2fcbd2a4afab1d35eebb686b92ea6d940671"
+    },
+    "quadrants.csv": {
+      "path": "tmp/analysis/priority-pilots-20261118/function-audit/quadrants.csv",
+      "sha256": "ae9f08a92a7b2942043436033050598d2181e81eafaae6ff5062e4315e635caa"
+    },
+    "events.csv": {
+      "path": "tmp/analysis/priority-pilots-20261118/function-audit/events.csv",
+      "sha256": "9a126222e02d077baf8deb4f8ecd6836a17977737517e7830a174d3e77abf3c1"
+    },
+    "coverage.csv": {
+      "path": "tmp/analysis/priority-pilots-20261118/function-audit/coverage.csv",
+      "sha256": "5fdbce4455ba91dbb853b316343776eb0dd3335b1d35df28d14e6cb3deb2ec7b"
+    },
+    "meta.json": {
+      "path": "tmp/analysis/priority-pilots-20261118/function-audit/meta.json",
+      "sha256": "8988d7766d4a4fd34548844b7c7ec805120e8c163be73fb0d75b704fd8cacc4c"
+    }
+  },
+  "exports": [
+    {
+      "name": "source_summary",
+      "source_path": "tmp/analysis/priority-pilots-20261118/exports/source_summary.csv",
+      "source_sha256": "240a96d71b88b8b13bfa63ef1458432f9cd62dd1c50813233b1ce33a7b386416",
+      "export_path": "docs/records/2026-11-18/c-function-audit-source-summary.csv",
+      "export_sha256": "240a96d71b88b8b13bfa63ef1458432f9cd62dd1c50813233b1ce33a7b386416",
+      "filter": "metadata/coverage counts; no row filter"
+    },
+    {
+      "name": "quadrants",
+      "source_path": "tmp/analysis/priority-pilots-20261118/exports/quadrants_pooled.csv",
+      "source_sha256": "fda76fff1cf8b2d5935ca225791ee4c59aa15159a613700b118bb029a50ee24d",
+      "export_path": "docs/records/2026-11-18/c-function-audit-quadrants.csv",
+      "export_sha256": "fda76fff1cf8b2d5935ca225791ee4c59aa15159a613700b118bb029a50ee24d",
+      "filter": "source quadrants.csv filtered to key branches/contexts/rounds 1,2,3,4,5,6,8,10,16,18,20; pooled 4 models (noise directions kept separate); both cohorts; no dataset mix"
+    },
+    {
+      "name": "situation_counts",
+      "source_path": "tmp/analysis/priority-pilots-20261118/exports/situation_counts.csv",
+      "source_sha256": "6595144728585e4807df47a0da85c0bedbf06f07a6d49b52f8f693339dacb4fd",
+      "export_path": "docs/records/2026-11-18/c-function-audit-situation-counts.csv",
+      "export_sha256": "6595144728585e4807df47a0da85c0bedbf06f07a6d49b52f8f693339dacb4fd",
+      "filter": "source edge_rounds.csv; intervention branches only, all child edges per u; per model/timing/duration/branch"
+    },
+    {
+      "name": "matched",
+      "source_path": "tmp/analysis/priority-pilots-20261118/exports/matched.csv",
+      "source_sha256": "523aacef7f873a83d952936d42463873f0d0e44ba69f20f24ac32f8930f422a4",
+      "export_path": "docs/records/2026-11-18/c-function-audit-matched.csv",
+      "export_sha256": "523aacef7f873a83d952936d42463873f0d0e44ba69f20f24ac32f8930f422a4",
+      "filter": "source edge_rounds.csv; fixed reference/target pairs; matched by arm/graph/timing/duration/q/round"
+    },
+    {
+      "name": "events",
+      "source_path": "tmp/analysis/priority-pilots-20261118/exports/events.csv",
+      "source_sha256": "cafc34c1a16f349a689dd34c26321a78dec5efe5fb73a3d7d95a71d22c82c087",
+      "export_path": "docs/records/2026-11-18/c-function-audit-events.csv",
+      "export_sha256": "cafc34c1a16f349a689dd34c26321a78dec5efe5fb73a3d7d95a71d22c82c087",
+      "filter": "source events.csv aggregated by source/arm/branch; q edges include all children"
+    },
+    {
+      "name": "examples",
+      "source_path": "tmp/analysis/priority-pilots-20261118/exports/examples.csv",
+      "source_sha256": "833af8b4efbe10431bff95913d1cf89e2a8578458aaae6ea1482f1630c9e83ef",
+      "export_path": "docs/records/2026-11-18/c-function-audit-examples.csv",
+      "export_sha256": "833af8b4efbe10431bff95913d1cf89e2a8578458aaae6ea1482f1630c9e83ef",
+      "filter": "focal q only, first two distinct graphs per source/situation; fixed ordering source pair<sustained<noise, arm initial<hold<noise<semantic, timing hold<late, graph id, duration, branch, q, round"
+    }
+  ],
+  "code": {
+    "function_audit.py": "0bc1a31fb4b16321cdada5147b2e3db094344fcd5c90419eaa64f3a001fd163e",
+    "io_utils.py": "402b2c6b8b40c3f5cd67fda49bdbf2c5f7ffa3e852a48543ee68b86c34c25ed0"
+  },
+  "checks": {
+    "manual": {
+      "pair": {
+        "record": "initial/g0/hold/u_wrong",
+        "post1_input_is_initial": true,
+        "post2_input_is_post1_output": true,
+        "post1_u_input": 6,
+        "post1_u_output": 18,
+        "post2_u_input": 18,
+        "post2_q_input": 4
+      },
+      "sustained": {
+        "record": "initial/g0/hold/L2/wrong_q_clean",
+        "n_in": 18,
+        "n_out": 18,
+        "post1_eq_record_input0": true,
+        "post2_eq_record_input1": true,
+        "post3_release_input_is_post2_output": true,
+        "forced_inputs_differ_from_outputs": true
+      },
+      "noise": {
+        "record": "initial/g0/hold/noise_s3_r0",
+        "post1_input_is_record_input0": true,
+        "post2_input_is_post1_output": true,
+        "post1_u_input": 18,
+        "post1_u_output": 1
+      },
+      "references": {
+        "pair:u_wrong": [
+          "unchanged"
+        ],
+        "pair:q_wrong": [
+          "q_wrong"
+        ],
+        "pair:both_wrong": [
+          "q_wrong"
+        ],
+        "sustained:wrong_q_clean": [
+          "free_q_clean"
+        ],
+        "sustained:wrong_q_wrong": [
+          "free_q_wrong"
+        ],
+        "noise:wrong": [
+          "free"
+        ],
+        "noise:noise_s3_r0": [
+          "free"
+        ]
+      }
+    },
+    "graph_macro_example": {
+      "group": "pair/initial/hold/u_wrong/round2/output-axis/all/common_value",
+      "graphs": 128,
+      "edges": 266,
+      "per_graph_edges_min": 1,
+      "max": 6,
+      "micro": [
+        0.0,
+        0.0,
+        0.364662,
+        0.635338
+      ],
+      "macro": [
+        0.0,
+        0.0,
+        0.326953,
+        0.673047
+      ]
+    },
+    "quadrant_groups_checked": 94664,
+    "quadrant_groups_bad": 0,
+    "focal_sensitivity": {
+      "note": "A/B/C edge-round counts with focal_q only vs all children",
+      "pair": {
+        "all": [
+          3605,
+          2216,
+          114
+        ],
+        "focal": [
+          1774,
+          1119,
+          38
+        ]
+      },
+      "sustained": {
+        "all": [
+          20922,
+          5906,
+          6
+        ],
+        "focal": [
+          10074,
+          2948,
+          2
+        ]
+      },
+      "noise": {
+        "all": [
+          2557,
+          23982,
+          2230
+        ],
+        "focal": [
+          1224,
+          13185,
+          1088
+        ]
+      }
+    }
+  },
+  "notes": [
+    "All three sources report status=complete and four-model paired records.",
+    "All selected records are value_qualified in these sources; all candidate graphs entered coverage. no_candidate/structural skips: 0.",
+    "all_recorded and common_value cohorts are both exported; in this batch their membership is identical.",
+    "Missing parent values, wrong other-parent readouts, reference drift and nonnumeric q are retained in edge_rounds.csv; controlled contexts exclude them by definition.",
+    "Development graphs already viewed; single seed per model; not an independent final test."
+  ]
+}
