@@ -6,6 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
+import export_function_audit_tables as X
 import function_audit as F
 import reassignment_core as P
 import summarize_reassignment as W
@@ -94,6 +95,34 @@ class FunctionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             tmp=Path(tmp);save_source(tmp/"src",[pair()],arms=("initial","hold"))
             with self.assertRaises(ValueError):F.run({"x":tmp/"src"},tmp/"out")
+
+class ExportHelperTests(unittest.TestCase):
+    def test_joint_intersection_and_focal_event_flags(self):
+        row = dict(u_input_correct="True", u_output_correct="True",
+                   q_input_correct="True", q_output_correct="False",
+                   other_parents_input_correct="True", q_reference_correct="True",
+                   q_output_numeric="True")
+        j = X.edge_joint(row)
+        self.assertTrue(j["controlled_phenomenon_3"])
+        self.assertTrue(j["controlled_u_in_out_ok_q_out_wrong"])
+        self.assertEqual(j["all_readouts_ok"], True)
+        self.assertTrue(X.event_flags([False, True, False])["reerror"])
+        self.assertEqual(X.event_flags([False, True, False])["first_wrong"], 1)
+        self.assertEqual(X.event_flags([False, True, False])["first_return"], 2)
+        self.assertFalse(X.event_flags([True, True])["ever_wrong"])
+
+    def test_pair_branch_normalization(self):
+        meta = dict(sources=dict(pair=dict(source_meta=dict(branches=dict(
+            unchanged=[], u_wrong=["u_wrong"], q_wrong=["q_wrong"],
+            both_wrong=["u_wrong", "q_wrong"], both_same=["u_same", "q_same"])))))
+        specs = X.branch_specs(meta)["pair"]
+        self.assertEqual(specs["unchanged"]["u_mode"], "free")
+        self.assertFalse(specs["unchanged"]["q_wrong"])
+        self.assertEqual(specs["u_wrong"]["u_mode"], "wrong")
+        self.assertFalse(specs["u_wrong"]["q_wrong"])
+        self.assertTrue(specs["both_wrong"]["q_wrong"])
+        self.assertEqual(specs["both_same"]["u_mode"], "same")
+
 
 class ReassignmentTests(unittest.TestCase):
     def plan(self):

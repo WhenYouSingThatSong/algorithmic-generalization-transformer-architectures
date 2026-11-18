@@ -32,6 +32,16 @@
 
 用途是确定接下来的功能干预需要排除什么，不把已有q输出叫成“已经证明的功能探针”。健康q保持正确，仍可能是复制旧值；父值读对，仍可能有其他隐藏成分异常。
 
+报告小表由`export_function_audit_tables.py`从`function_audit.py`的完整输出重新导出；它只读`--audit-dir`，不加载模型、不改源run目录：
+
+```bash
+python tools/priority_pilots/export_function_audit_tables.py \
+  --audit-dir tmp/analysis/priority-pilots-20261118/function-audit \
+  --out-dir docs/records/2026-11-18/function-audit-v2
+```
+
+输出source-summary、quadrants、situation-counts、matched、events、events-focal、joint和examples八份CSV及audit。`joint.csv`按模型版本/时点/持续长度/分支/轮次/focal或全部边分别给u输入、u输出、q输入、q输出的直接交集及controlled交集；`events-focal.csv`按同一分组给直接q注错边数、首轮输出对/错、曾错后的返回/未返回、再错和首次轮次范围，不合并成单一恢复率。展示名映射：initial→C（原始）、hold→C（保持后训练）、noise→C（噪声后训练）、semantic→C（语义后训练）；机器arm保留。v2表另存`docs/records/2026-11-18/function-audit-v2/`，首版CSV不覆盖。
+
 ## 2. A/B：旧任务出错与新题面更新
 
 入口：`run_reassignment.py`；汇总：`summarize_reassignment.py`。只支持离散ADD mod23。
