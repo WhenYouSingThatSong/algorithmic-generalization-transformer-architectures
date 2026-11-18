@@ -1,6 +1,6 @@
 # 工作看板
 
-> 最近更新：2026-11-18 18:03 CST · [claude]
+> 最近更新：2026-11-18 20:01 CST · [claude]
 > 活看板：任务可以移动；状态变化在 `log.md` 记一行。条目格式 `[YYYY-MM-DD HH:MM][author]`。
 
 ## 当前授权：A/B连续赋值与死槽位复用；C恢复状态重新使用
@@ -16,7 +16,8 @@
 - [2026-11-18 16:22][gpt] [审阅与补交](handoff/2026-11-18-priority-review.md)：两运行核心源码/hash与记录一致，C六CSV与7368行四格算术通过，A/B七产物LF hash与主表交叉计数一致；未重放服务器records/模型。A保留旧态时新下游0/454、空白454/454；B为454/454（delta1/3/7）及448/454（delta11），常数漂移0。C报告的受控TF分母、原始版本事件范围、2–6×噪声分布及因果措辞已更正；旧293/414联合比例暂撤回。下方历史完成记录中对应说法以本条/审阅为准。
 - [2026-11-18 16:22][user/gpt] **后续统一模型展示名A/B/C**，执行agent必须遵守[命名规范](../docs/model-names.md)。C写中文训练版本；旧名字集中[映射](../docs/records/2026-11-18/model-name-aliases.md)。现象不再用A/B/C编号；原始路径/机器ID/hash不改。
 - [x] [gpt] 报告导出器取消pinned/free及VALUE/四属性相同的结果断言，去掉32样本及额外检查已执行的硬编码；1图/H2带差异的端到端回归通过。当前旧CSV不覆盖，无需GPU重跑。
-- [ ] [执行agent C] CPU补交小表导出脚本、输入/输出联合计数及focal事件范围，按审阅具体口径复核旧百分比；展示用C中文版本与现象①②③。不增加新hidden干预/训练。
+- [x] [执行agent C] CPU补交小表导出脚本、输入/输出联合计数及focal事件范围，按审阅具体口径复核旧百分比；展示用C中文版本与现象①②③。不增加新hidden干预/训练。
+- [2026-11-18 20:01][claude] **C CPU补交完成**：固定 `3454e07`，未加载权重/未跑 GPU。新增 `tools/priority_pilots/export_function_audit_tables.py`，从既有 function-audit 大表重导 8 份 v2 小表（source-summary/quadrants/situation-counts/matched/events/events-focal/joint/examples）+ audit，首版 CSV/hash 保留；展示名映射 C（原始/保持/噪声/语义后训练），现象改①②③，机器 arm 保留。联合计数核对：pair/u_wrong/hold/r2 完整 controlled 1013、controlled TF 363、q输入正确44/错319、输出TF且u输入正确 **289/414**、现象③32（旧293/414是输入轴边际，已更正为289/414=69.8%）；持续/wrong_q_clean/hold/L2/R1 完整 controlled 973、controlled TF 515、q输入正确0、u输入也正确 **446/606**。focal 事件表按模型/时点/持续长度分列直接q注错、首轮输出对/错、曾错返回/未返回/再错；例如 C（原始）initial/hold q_wrong 直接注错128条、首轮对116/错12、再错0，both_wrong 首轮对3/错125、再错2，u_wrong 无直接q注错、曾错123。14项测试通过（含2项导出helper）；未改 runner/records/选点，未开始 C state-reuse GPU 任务。提交 `f1e96c2`，报告 §9 与 v2 audit 含源/代码/导出 SHA。
 - [x] [执行agent B] 用修复后导出器新目录CPU重导，对比旧表数字并补scratch/tokenizer一次性核验代码/证据；展示统一A/B。原runner/数据/选点不动，不重跑GPU。
 - [2026-11-18 18:03][claude] **B 上一批CPU补交完成**：修复后导出器在 `report-tables-review` 重导，6 个 CSV 与 ad0315e 历史文件逐字节相同；新 audit 如实记录 `pinned_free_identical`/`value_equals_first4` 及“scratch/aux 由独立审计负责”。新增 `verify_scratch_start.py`：A/B 各 128 case、完整原始序列（1024 token）× 六字段共 1,572,864 格，只有 256 个预期常数 VALUE 格不同，0 unexpected；scratch audit 与 re-export 证据已提交。报告统一 A/B、修正 r8=450/454 与 r16/末两轮=454/454。12 项测试、5 个 CLI help 通过；未重跑 GPU、未改 runner/选点/数据；新 state-reuse GPU 小验证尚未启动。
 
