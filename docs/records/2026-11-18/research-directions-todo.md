@@ -4,6 +4,8 @@
 依据：[设计草稿](loop-correction-design-draft.md)、[已有实验总览](../2026-11-16/project-status-overview.md)。
 本次核对 `reproduction / e06c85d`，没有新增远端实验结果。
 
+**首批推进更新（2026-11-18 12:56）**：用户要求选择两个方向并实现首步，现选择E2/E4+M1的已有C输入对齐诊断、W1/W2的离散A′/B合法重新赋值。见[实现](../../../tools/priority_pilots/README.md)及[执行验收](../../../ai-collab/handoff/2026-11-18-priority-pilots.md)。核心实现已交付，真实数据/模型执行待agent；不表示E2功能因果判据已完全建立，也不表示节点复用或C+训练已开始。下列大项保留未完成状态，结果回来再逐项回填。
+
 ## 0. 划分方法与使用规则
 
 按“要回答的问题”分六个方向，不再仅按B/C模型分工：
