@@ -167,3 +167,5 @@
 - 2026-11-19 22:20 [gpt] 用户批准C纠错三种子和UPDATE单种子50epoch的实现，并要求污染向量必须补未做纠错后训练原C接收的下游功能检验。新增tools/c_update独立入口、原数据/权重锁定、新可算位置5%有效batch×50%位置、反事实连续污染、第二层UPDATE联合监督、固定dev/test/噪声/持续/追加下游评估、原C功能probe、共同资格比较及串行执行。更新board和handoff/2026-11-19-c-correction-update.md：技术小验证后自行进入四次正式训练，性能一般不中止50epoch；不加普通续训或B新训练、不扩UPDATE种子。9项stdlib通过，torch项留服务器；未启动真实训练/评估。远端核对仍f7a48e5，无他人新提交。
 
 - 2026-11-19 22:22 [gpt] 实现提交 b6adfb7 已成功推送 origin/reproduction，本地/远端SHA一致、工作树干净。9项stdlib通过、1项torch测试明确跳过；全部CLI入口与语法检查通过。原C接收probe增加源端/接收端读出与下游值三层记录，同值fallback不并入不同来源控制。服务器尚未执行；执行agent按本轮handoff小验证后推进已授权四次50epoch。本日志作为交接补充提交并同步到reproduction。
+
+- 2026-11-19 22:26 [user/gpt] 用户要求将两agent分工推送：Agent C负责唯一plan、smoke、四次50epoch训练及自动阶段评估/原C功能探针；训练队列结束后交出plan/权重SHA、运行代码身份、曲线/剂量/异常，明确切换给Agent B。Agent B沿用同清单正式评估五个原权重+四份final，整理比较表/轨迹/结论边界，不重生成数据或重复阶段评估。GPT设计和审阅。同步board、handoff及README命令归属；仅文档调整，不改实验代码或启动服务器作业。本条随分工文档提交并推送reproduction。

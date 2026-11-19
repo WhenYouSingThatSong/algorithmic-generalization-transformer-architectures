@@ -104,6 +104,8 @@ D+4/D+16是固定预算名，不保证整图完成；记录起点是否全对，
 
 先确认共享树无人运行，再同步 `reproduction`。服务器选择空闲GPU；脚本不选卡、不kill、不pull、不修改别人的工作树。以下命令在仓库根目录、已有torch环境下运行：
 
+**分工（2026-11-19 22:26明确）：Agent C执行前三条命令，负责唯一清单、小验证、四次训练和自动阶段评估；训练队列结束后交给Agent B执行第四条正式评估命令并整理全部模型结果。** 交接包含plan路径/SHA、运行提交/代码hash、四份final路径/SHA、训练/阶段评估/异常记录，并在board/log注明负责人切换。Agent B不重生成清单、不重复阶段自动评估。共享树仍串行，不在C训练过程中pull或改代码。
+
 ```bash
 python tools/c_update/prepare.py --out-dir tmp/analysis/c-update-20261119/data
 python tools/c_update/execute.py --phase smoke --plan tmp/analysis/c-update-20261119/data/plan.json --out-dir tmp/analysis/c-update-20261119 --device cuda --num_threads 4
