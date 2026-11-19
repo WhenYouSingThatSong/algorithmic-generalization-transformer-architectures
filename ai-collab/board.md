@@ -5,6 +5,7 @@
 
 ## 当前授权：A/B连续赋值与死槽位复用；C恢复状态重新使用
 
+- [2026-11-19 15:02][gpt] **两批结果审阅至5d07e08**：[审阅记录](handoff/2026-11-19-state-reuse-review.md)。30个产物与11个可对应源码hash匹配，C十路/资格/损伤总表、AB干预176行changed/retention计数一致；未发现要求GPU重跑的新增运行缺陷，未重放服务器完整records。B死槽真值改变时30/30、29/29，A保留旧态0/30、0/29而clear成功；B重复赋值回原题仍有16个下游错误。C共同hold/noise2/lag2为原始27/31、三个后训练31/31；仅换q对末两轮VALUE无改善，整clean状态对照不能定位机制。报告公式、restore_u修回/净改善、原始clean分母、token位置示意标签及跨表同名字段已在审阅澄清。**Agent B/C本批关闭，空闲交接同步即可，不新增GPU/训练任务**；下一步扩大复用、C分块恢复等留用户讨论。
 - [2026-11-19 14:31][claude] **C-main 完成**：固定 `6ef63e3`，GPU2 串行 6/6；smoke 6/6 已按真实 tokenizer/连续反馈/十路状态重建/donor 时序接受（记录 `docs/records/2026-11-19/c-state-reuse/c-smoke-checks.md`）。四版本各 32 固定图 ×36 条件（3 时点×4 来源×3 lag）×H16，共 4,608 条 records；每版本 188,397 sample / 48,229,632 token forwards，main 约 513 s。q last-two 主口径为 VALUE，first4 单列；`input_qualified` 881/1138/1131/1127，`common_input_qualified` 870/1,152。可归因扰动的持续 q VALUE 损伤只出现在 noise2：early/noise2 unique 图 10/6/7/6，hold/noise2 initial 4 图而三个后训练版本 0；observed 下 keep/pre/solved 的 q VALUE 逐版本相同，clean receiver 修回 124/124，pre donor 对 VALUE 无增量；restore_u 仅 lag1 修回 10 条、同时改错 5 条。q 输入正确的损伤 initial 11 条全为 g16 late clean-path、noise 1 条为真实单条；没有可重复的“u/q 输入读数都对、q VALUE 仍错”。自动包 late/semantic/lag2 的 first4 3→29 是 VARIABLE 字段漂移，VALUE 29→29（initial 仅 12/32 input_qualified），不能当算术恢复。报告/小表/audit：`docs/records/2026-11-19/c-state-reuse/c-functional-reuse.md`，提交 `21a8c10`；原始 records/隐藏快照留 tmp。未训练、未扩图、未做层/头干预；四版本同源 seed2026，不是四种子，不作机制或最终测试结论。
 - [2026-11-19 13:39][claude] **AB-main 完成**：固定 `6ef63e3`，GPU0 串行 8/8；smoke 已按真实 tokenizer/独立真值/阶段继承/死槽位检查接受。repeat/reuse 各 32/32 图，两模型分别 576/128 条记录、576/128 个共同 case；H8/H16 是独立序列。H16 末两轮：A warm target 4/4/3/28（同输入）及 4/3/3/30/28（交替），B warm 32/32；A/B clear 与 scratch 均 32/32；reuse A warm 2/32、3/32，B warm 32/32，clear/scratch 32/32；H8 reuse scratch ep2 为 29/32。A/B 的 warm_pinned 与 warm 轨迹相同，本批未见 pinning 改善。报告 `docs/records/2026-11-19/ab-state-reuse.md` + 小表/audit，提交 `5e8fff1`；原始 records/回执留 tmp。未训练、未扩图，不作机制或通用槽位结论；C lane 未动。
 - [2026-11-19 12:22][user/gpt] 用户要求多完成执行准备再交agent。已增加[串行队列与结果包](handoff/2026-11-19-execution-bundles.md)：batch.py分别生成AB/C的小验证及main计划、固定源码、每任务日志/完成回执、跳过已完成任务；deliver.py自动关键表/说明/完整案例。新增3项CPU检查及CLI检查通过，未运行GPU。**Agent B/C现在按此入口直接执行**，完成原交接真实检查后自行记录accept-smoke并进入原定32候选main，不再等待重复用户批准；零资格/协议错误须报告。共享树仍串行，失败半成品不覆盖。模型/数据/预算/实验条件未扩张。
@@ -13,7 +14,7 @@
 - [x] [gpt] 独立目录实现A/B连续重新赋值（同输入/交替输入、回到原题）、两个死输出槽先重写再消费、六分支H8/H16；C三时点×四来源×三检查延迟、3×3接收状态/历史q操作加sham；实际输入输出、独立真值、资格交集、图均权、配对效果/稳定段/旧值残留导出。9项针对性CPU检查已通过；真实GPU/权重尚未运行。
 - [x] [执行agent B] 先完成下方上一批CPU补交，再同步固定版本，按新交接做前两候选H4小验证，之后A/B各固定32候选repeat与reuse，H8/H16独立序列，串行执行；不按成功补样。交接口diff、版本/资源成本、共同分母、阶段结果及新增适配代码。**已完成，见上方 13:39 条。**
 - [x] [执行agent C] 先完成下方联合统计/导出代码补交，再做前两图H4小验证；通过后前32图、C原始/保持/噪声/语义四版本、H16。固定延迟全保留，资格不按治疗输出筛；交十路结果、donor校准、实际输入/输出案例与共同分母。无自然失错也应报告，不擅自延长/换权重。**已完成，见上方 14:31 条。**
-- [ ] [gpt] 两agent回传后审阅新代码、协议验收、计数与案例，按结果决定扩大复用或冻结C后训练评估。服务器共享树仍串行交接，运行中不pull；此前CPU待办保留，不覆盖历史数据。
+- [x] [gpt] 两agent回传后的新代码、协议记录、计数与案例审阅完成（见15:02条）；下一阶段方案仍待讨论。服务器共享树仍串行交接，运行中不pull；此前CPU待办保留，不覆盖历史数据。
 
 ## 审阅完成至ad0315e：结果保留，CPU补交与统一命名
 
