@@ -5,6 +5,7 @@
 
 ## 当前授权：ABC共同任务、复杂长计算、边界诊断（前三步）
 
+- [2026-11-19 19:55][claude] **B verifier CPU 补交完成**：按 17:52 审阅要求，提交 `tools/abc_workspace/checks/verify_ab_records.py` 和小结果 `docs/records/2026-11-19/ab-workspace/ab-verifier.json`（提交 `8ce841e`）。脚本只读 records/manifest，不加载模型/不跑 GPU；在主批上 0 errors，核对 9,080 条记录、290,560 个节点真值、4,800 条 reference 记录、5,400 条 conditional 记录、600 个 probe。代码和报告明确分开 reference 程序真值与 actual-input conditional 真值，两者不要求一致；同时补充 terminal 宽度、520 执行/结构祖先操作措辞和 A probe 的 assignment 188/0、program 228/25 分列。AB 结果未重跑，C 结果未改。
 - [2026-11-19 19:17][claude] **C workspace smoke+main 完成，ABC 合并表已生成**：使用 B 生成的同一 `tasks.json` b13f87df…（80 任务）/`models.json` 73e99dcb…（5 权重）；C smoke 7/7（660 条，独立检查 0 错，GPU0），C main 7/7（GPU0）。C main 13,520 条：三种子 assignment 各 1,940；program 2,575/2,585/2,540（carry 非数值提交使诊断减少，失败/无效记录保留分母）。独立 verifier 重建 13,520 条，0 errors。common24：C_s2026/C_s42/C_s1234 的 assignment scratch 四阶段均 24/24；carry 从 23/13/19 降到 4/7/4，reset_results 从 6/9/11 降到 0/0/0；all80 回原题 scratch 80/80/76，carry 11/11/9，reset 0/1/0。20 窗口 526 逻辑节点/520 祖先操作 program 最终成功：C_s2026 scratch 36/40、reset 17/40、carry 1/40；C_s42 33/7/0；C_s1234 29/2/0；carry invalid records 198/90/278，final-stage nonnumeric 1/1/0。AB 结果见 17:31 条；合并 ABC 小表/报告 `docs/records/2026-11-19/abc-workspace.md` + `abc-workspace/`，提交 `399038e`。未训练、未扩图/种子、未做第四步；C 三 seed 分列，不作机制或通用容量结论。
 
 - [2026-11-19 17:52][gpt] **AB交付审阅至d92915a，C待交**：[审阅](handoff/2026-11-19-ab-workspace-review.md)。运行代码未改，15源码/config hash与6CSV源hash一致，1460组及240程序首次失败/最终成功交叉核对通过，未重放原始records。A/B carry 1/40、39/40；外部reset/scratch均40/40。B唯一失败窗口11，12–20 conditional全对但原程序仍错。纠正terminal随w=2/4/6变化，单父链属复制控制。**Agent B仅CPU补交既有verify_ab_smoke.py及小检查结果，区分reference与actual-input核验；无需GPU重跑。Agent C继续同清单三种子既有任务，无新批准等待；仓库当前尚无本轮C结果。**不增AB矩阵或第四步训练。
@@ -12,6 +13,7 @@
 - [2026-11-19 16:01][user/gpt] 用户批准前三步实施，第四步训练/新结构暂缓。[交接](handoff/2026-11-19-abc-workspace.md)和[代码/命令](../tools/abc_workspace/README.md)已完成：共同新任务、ABC合法重新赋值、固定32位置长程序、固定阶段诊断、串行队列与共同汇总。范围更新此前“本批关闭、不新增GPU”的限制。A/B沿用s42主权重；C为s42/s1234/s2026三个原始e143权重。赋值每形状16图，程序每形状8图、20窗口；5形状均保留失败，无补样。**长程序有模型实际数值的离散提交边界，C标为混合接口，不声称始终连续或原生526节点整图能力。**只有题面更新任务保留C其余hidden、不全局离散重嵌入。
 - [x] [gpt] 新目录`tools/abc_workspace/`实现任务生成、真实tokenizer接口、连续/离散运行、无真值回填的跨窗口提交、独立原程序/actual-input评分、固定成功失败共同诊断、最终/末两轮分列、失败分母、配对修回/改坏、共同起点汇总。6项针对性CPU检查及CLI/编译通过；本地未加载权重/跑GPU。
 - [x] [执行agent B] 空闲交接同步后生成唯一共享tasks/models清单，按README运行AB smoke，核对交接的实际写入/独立真值/错误提交/分叉预算，然后自行进入AB main。完成交结果、代码适配和验收记录；不训练、不修改运行中的共享树。**完成，见 17:31 条。**
+- [x] [执行agent B] 按 17:52 审阅提交独立复核脚本和小型结果，分别说明 reference 程序与 actual-input conditional 的核验方式；只做 CPU 补交，不重跑 GPU。**完成，见 19:55 条。**
 - [x] [执行agent C] 使用B生成的完全相同清单；共享树串行交接后运行C三个种子smoke，重点检查局部题面embedding写入、其他hidden不变、C整行reset与离散VALUE reset区别、程序离散提交接口。通过后自行进入C main。模型失败是结果，不因成功少改题或补图；接口/代码错误先修并回报。**完成，见 19:17 条。**
 - [x] [最后交接agent] 两lane完成后`merge_lanes.py`生成ABC共同表；同输入条件正确率与原程序正确率分列，不能把各lane自己的common当ABC common。交固定案例、程序首次失败/最终成功/全阶段成功、累计长度/祖先计算/预算和配对诊断，不写统一机制结论。**完成，见 19:17 条。**
 - [ ] [gpt] 审阅执行适配与结果，围绕能力边界决定下一步；第四步后训练、UPDATE门控/定位结构、纯连续跨窗口方案均未启动。
