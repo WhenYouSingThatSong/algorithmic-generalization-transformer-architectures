@@ -270,7 +270,7 @@ def main():
     with (a.out_dir / 'c-conditions.csv').open('w', newline='') as f:
         w = csv.writer(f)
         w.writerow(['arm', 'timing', 'mode', 'lag', 'candidate_records', 'input_qualified',
-                    'common_input_qualified', *CTX_FIELDS, 'clean_pre_last_two_correct',
+                    'common_input_qualified', *CTX_FIELDS, 'clean_pre_last_two_first4',
                     'damage', 'cleanpath', 'perturb_damage', 'qinput_ok_damage',
                     'qinput_bad_damage', 'pre_fix', 'ru_fix', 'cp_fix', 'solved_fix',
                     *branch_cols, *ar_cols])

@@ -56,7 +56,7 @@ python tools/state_reuse/batch.py run \
 - **VALUE**：q 输出第 4 字段（实际算术值）。本报告的主口径，和既有 C 报告一致。
 - **first4**：q 输出四字段全部正确。它额外要求 VARIABLE/OPERATION 字段正确，因此会检测到长轮次身份字段漂移；不能把它等同于 VALUE 恢复。
 
-`clean_pre_last_two_correct` 按 first4 统计；`c-arm-summary.csv` 同时给 VALUE 与 first4。
+原 summary / `c-qualification.csv` 的 `clean_pre_last_two_correct` 是 **VALUE**；`c-conditions.csv` 的 `clean_pre_last_two_first4` 是**四属性**。两者不是同一字段，不能跨表拼接；正文的 clean_pre 成功数按 VALUE 与 first4 分别写，`c-arm-summary.csv` 同时给两者。
 
 ### 2.2 资格分母
 
@@ -96,7 +96,7 @@ python tools/state_reuse/batch.py run \
 
 读法：
 
-- **q VALUE**：observed 下 keep/pre/solved 三列完全相等（每版本）；restore_u 只多 4/3/2/1 条；clean 下三列都等于该版本资格数（initial 869，其余 1,138/1,131/1,127）。`sham` 与 observed/keep 相同。
+- **q VALUE**：observed 下 keep/pre/solved 三列完全相等（每版本）；`restore_u` 相对 `observed_pre` 的修回数为 4/3/2/1，改坏数为 0/2/2/1，净增加为 +4/+1/0/0；clean 下三列计数为 initial 869/881（12 条同图 clean-path 未过），其余版本 1,138/1,131/1,127（等于各自资格数）。`sham` 与 observed/keep 相同。
 - **q first4**：observed 下 pre/solved 明显高于 keep（initial 468→815/728；其余版本 1074–1100→1104–1114），说明 q 自己的历史向量可以修正身份字段；但 VALUE 不变。
 - clean 下 `pre` 的 first4 最好（initial 869 vs clean_keep 492；其余版本全部 1,138/1,131/1,127），`solved` 反而较低（initial 777）。这是 H16 末两轮的格式/身份现象，不是 VALUE 计算结论。
 - `clean_pre` 的 VALUE 与 `clean_keep` 在 4,608/4,608 条记录上相同；clean receiver 无需 pre donor 就已恢复所有可归因的 q VALUE 错误。
@@ -201,6 +201,8 @@ python tools/state_reuse/batch.py run \
 ## 7. 固定案例（不是独立测试）
 
 固定排序：版本 `initial<hold<noise<semantic`；时点 `early<hold<late`；来源 `natural<same<semantic<noise2`；lag `1<2<4`；再按 graph_id。每个类别取第一条满足条件的 `input_qualified` 记录；一条记录可能同时满足多个类别时，按下列操作定义互斥选取。完整字段与分支值见 `c-examples.csv`。
+
+下面的 `x146`、`x160` 等是 exporter 用 token 位置构造的**示意标签**，不是真实 VARIABLE 字段的变量名；输入/输出里出现的 `24` 等是解码 token ID（例如此处 EMPTY），不是模 23 的数值；模 23 真值范围是 0–22。
 
 ### A. 故障接收状态：q 两个父，keep/pre/restore_u 都错
 initial / early / noise2 / lag1 / graph6：u=146，q=160。  
