@@ -234,7 +234,7 @@ keep 与 clean_keep 的 q 输出在 post16 为 `[0,123,1,19]`，真值为 `[0,75
 - `restore_u` 只修回 10/124 条，全部 lag=1；同时改错 5 条原本正确的 q VALUE。它不是稳定修复。
 - q VALUE 错误几乎都伴随 q 本轮解码输入 VALUE 错误；`u VALUE 正确 + q 输入正确 + q VALUE 错` 只有 1 条真实扰动记录（noise g27/late/noise2/lag1），其余 initial 11 条是 g16 late clean-path。**没有可重复的“输入读数都对、q 算术仍错”证据。**
 - `clean_pre` 在 clean 中的 q VALUE 成功率 4,596/4,608（12 条 g16 late clean-path）；first4 也是 4,596/4,608，并修回 692 条 clean_keep 的 first4 失败，未出现 first4 1→0。按本批定义，pre 操作本身可用；但它对 VALUE 的“成功”并不高于 clean_keep。
-- 正确节点损伤集中在 initial late g8/g16：clean_pre 的 VALUE 只损伤 1 个 unique 后代节点（g8/n136，8 个重复测量）；restore_u 额外损伤 3 个 q 节点和 6 个下游节点；outside VALUE 无损伤。early/hold 与后训练版本的 clean_pre 没有 VALUE 正确节点损伤。
+- 正确节点损伤集中在 initial late g8/g16：`clean_keep→clean_pre` 的 VALUE 只损伤 1 个 unique 后代节点（g8/n136，8 个重复测量）；`restore_u` 额外损伤 3 个 q 节点和 6 个下游节点；outside VALUE 无损伤。early/hold 与后训练版本的 clean_pre 没有 VALUE 正确节点损伤。
 
 **不能从本批区分的：**
 
