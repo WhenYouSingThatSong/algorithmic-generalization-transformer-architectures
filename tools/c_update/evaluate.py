@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parent))
 import protocol as P
+from summarize import summarize_file
 
 def observation(rt,h,g,y,raw=None):
     pred=(raw if raw is not None else rt.decode(h))[0].tolist();truth=y.tolist()
@@ -125,7 +126,10 @@ def append_compute(rt,x,y,g,h,u):
     xx=padrow.repeat(1,length,1);xx[:,:x.shape[1]]=x;xx[0,end:end+len(new)]=new
     hh=rt.init(xx);hh[:,:h.shape[1]]=h
     fresh=rt.init(xx[:,end:end+len(new)]);hh[:,end:end+len(new)]=fresh
-    pos=end+5;yy=xx[0].clone();yy[:len(y)]=y
+    pos=end+5;yy=xx[0].clone()
+    # y is the full padded label tensor; only copy the original prefix, otherwise
+    # the appended equation rows would be overwritten by PAD labels.
+    yy[:end]=y[:end]
     yy[pos,3]=(y[u,3]+y[leaf,3])%23
     gg=dict(g);gg['nodes']=g['nodes']+[pos];gg['parents']=dict(g['parents'])
     gg['parents'][pos]=[u,leaf];gg['depths']=dict(g['depths']);gg['depths'][pos]=g['depths'][u]+1
@@ -240,7 +244,6 @@ def main():
             for gid,g in enumerate(gs[:2] if a.smoke else gs):
                 run_graph(rt,x[gid:gid+1].to(rt.device),y[gid].to(rt.device),g,split,gid,ss['targets'][gid],emit)
                 print(f'{a.model} {a.arm or "original"} {split} graph={gid+1}/{len(gs)}',flush=True)
-    from summarize import summarize_file
     summarize_file(a.out_dir/'records.jsonl',a.out_dir/'summary.json')
     if rt.continuous:
         from functional_probe import run_probe
