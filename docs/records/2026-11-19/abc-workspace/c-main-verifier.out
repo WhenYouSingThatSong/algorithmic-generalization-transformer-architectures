@@ -1,0 +1,2 @@
+[tokenizers] tokenizer_n_vars not set; legacy fallback n_vars=128 (VARIABLE vocab=129). Set tokenizer_n_vars explicitly for full-pool-renamed data.
+{"common_initial_first4": 24, "errors": 0, "records": {"C_s1234/assignment": 1940, "C_s1234/program": 2540, "C_s2026/assignment": 1940, "C_s2026/program": 2575, "C_s42/assignment": 1940, "C_s42/program": 2585}, "status": "ok", "tokenizer_n_vars": 128, "tokens_mod": 23}

@@ -1,0 +1,11 @@
+mode,model,candidates,initial_first4_qualified,common_initial_first4,compare_models
+assignment,A_s42,80,80,24,A_s42|B_s42|C_s2026|C_s42|C_s1234
+assignment,B_s42,80,80,24,A_s42|B_s42|C_s2026|C_s42|C_s1234
+program,A_s42,40,,,A_s42|B_s42|C_s2026|C_s42|C_s1234
+program,B_s42,40,,,A_s42|B_s42|C_s2026|C_s42|C_s1234
+assignment,C_s2026,80,56,24,A_s42|B_s42|C_s2026|C_s42|C_s1234
+assignment,C_s42,80,61,24,A_s42|B_s42|C_s2026|C_s42|C_s1234
+assignment,C_s1234,80,25,24,A_s42|B_s42|C_s2026|C_s42|C_s1234
+program,C_s2026,40,,,A_s42|B_s42|C_s2026|C_s42|C_s1234
+program,C_s42,40,,,A_s42|B_s42|C_s2026|C_s42|C_s1234
+program,C_s1234,40,,,A_s42|B_s42|C_s2026|C_s42|C_s1234
