@@ -24,7 +24,7 @@
 
 ## 2. assignment：合法更新与回到原题
 
-表中为 **最终轮 macro**（先节点/任务内比例，再形状等权）；`terminal` 是两个输出槽，`nodes` 是 32 个节点。末两轮 macro 与最终轮在本批相同，完整分列见 `ab-summary.csv` 的 `*_final_*` 与 `*_macro` 列。
+表中为 **最终轮 macro**（先节点/任务内比例，再形状等权）；`terminal` 随形状为 w=2、4 或6个输出槽，`nodes` 是32个节点。末两轮 macro 与最终轮在本批相同，完整分列见 `ab-summary.csv` 的 `*_final_*` 与 `*_macro` 列。
 
 | model | stage | carry terminal/nodes | reset_results terminal/nodes | scratch terminal/nodes |
 |---|---:|---:|---:|---:|
@@ -65,6 +65,8 @@
 - 这些是固定起点的配对交集，不是总体修复率；它们只说明该批中被选中状态下“清空/重解”与“继续”的差异，不能单独证明检测、定位或选择性清空机制。完整逐 probe 行见 `ab-probe-pairs.csv`。
 
 ## 5. 证据与限制
+
+2026-11-19审阅补充：w4_f1内部节点为单父复制，保留为控制，不等同于多操作数加法难度。520为执行/结构祖先节点数，不代表不可简化的最小计算量。B唯一失败程序在窗口11首次提交错误，窗口12–20给定实际输入的conditional终端均正确，但原程序仍错。A probe总416/25分为assignment188/0、program228/25，不能把跨任务总数直接当局部修复率。详见[审阅与CPU补交](../../../ai-collab/handoff/2026-11-19-ab-workspace-review.md)。
 
 - 小表：`ab-summary.csv`（1,460 组）、`ab-coverage.csv`、`ab-programs.csv`（240 条轨迹）、`ab-probe-pairs.csv`（480 行）、`ab-events.csv`、`ab-examples.jsonl`、`ab-summary-meta.json`。示例按程序成功/失败类别固定选取，不是流行率样本。
 - 运行验收：`ab-main-checks.md`；完整 records、snapshot、日志和回执仍在 `tmp/analysis/abc-workspace-20261119/AB-main/`。
