@@ -1,13 +1,14 @@
 # 工作看板
 
-> 最近更新：2026-11-19 · [gpt]
+> 最近更新：2026-11-19 17:31 CST · [claude]
 > 活看板：任务可以移动；状态变化在 `log.md` 记一行。条目格式 `[YYYY-MM-DD HH:MM][author]`。
 
 ## 当前授权：ABC共同任务、复杂长计算、边界诊断（前三步）
 
+- [2026-11-19 17:31][claude] **AB workspace 主批完成**：共享 80 任务清单，GPU7 串行 5/5；两模型 assignment 各 1,940 条、program 各 2,600 条，共 9,080 条记录，独立复核 0 处不一致。A/B 原题基线均 80/80 四属性合格；assignment 的 A carry 终轮 terminal macro 0.220/0.134/0.138，回到原题为 1.000 但 node 0.989；B carry 为 1.000/1.000/0.988/0.997；reset_results/scratch 两模型四个阶段均 1.000。20 窗口 program 最终成功：A carry 1/40、B carry 39/40，reset_results/scratch 均 40/40；A carry 39 个首次失败在第 2 窗口，B 的 1 个在第 11 窗口；无自然 invalid commit。固定 probe 中 A 的 reset/scratch/refresh-and-reset 各修回 416、改坏 25 个节点-事件，refresh-task 为 0/0；B 各 probe 均 0/0。报告 `docs/records/2026-11-19/ab-workspace.md` + 小表和检查，提交 `839c93b`；队列实际 HEAD 为 `3c360ec`（C 文档/导出器提交），AB 源码 hash 未变。未训练、未改结构；C lane 未运行，不作机制结论。
 - [2026-11-19 16:01][user/gpt] 用户批准前三步实施，第四步训练/新结构暂缓。[交接](handoff/2026-11-19-abc-workspace.md)和[代码/命令](../tools/abc_workspace/README.md)已完成：共同新任务、ABC合法重新赋值、固定32位置长程序、固定阶段诊断、串行队列与共同汇总。范围更新此前“本批关闭、不新增GPU”的限制。A/B沿用s42主权重；C为s42/s1234/s2026三个原始e143权重。赋值每形状16图，程序每形状8图、20窗口；5形状均保留失败，无补样。**长程序有模型实际数值的离散提交边界，C标为混合接口，不声称始终连续或原生526节点整图能力。**只有题面更新任务保留C其余hidden、不全局离散重嵌入。
 - [x] [gpt] 新目录`tools/abc_workspace/`实现任务生成、真实tokenizer接口、连续/离散运行、无真值回填的跨窗口提交、独立原程序/actual-input评分、固定成功失败共同诊断、最终/末两轮分列、失败分母、配对修回/改坏、共同起点汇总。6项针对性CPU检查及CLI/编译通过；本地未加载权重/跑GPU。
-- [ ] [执行agent B] 空闲交接同步后生成唯一共享tasks/models清单，按README运行AB smoke，核对交接的实际写入/独立真值/错误提交/分叉预算，然后自行进入AB main。完成交结果、代码适配和验收记录；不训练、不修改运行中的共享树。
+- [x] [执行agent B] 空闲交接同步后生成唯一共享tasks/models清单，按README运行AB smoke，核对交接的实际写入/独立真值/错误提交/分叉预算，然后自行进入AB main。完成交结果、代码适配和验收记录；不训练、不修改运行中的共享树。**完成，见 17:31 条。**
 - [ ] [执行agent C] 使用B生成的完全相同清单；共享树串行交接后运行C三个种子smoke，重点检查局部题面embedding写入、其他hidden不变、C整行reset与离散VALUE reset区别、程序离散提交接口。通过后自行进入C main。模型失败是结果，不因成功少改题或补图；接口/代码错误先修并回报。
 - [ ] [最后交接agent] 两lane完成后`merge_lanes.py`生成ABC共同表；同输入条件正确率与原程序正确率分列，不能把各lane自己的common当ABC common。交固定案例、程序首次失败/最终成功/全阶段成功、累计长度/祖先计算/预算和配对诊断，不写统一机制结论。
 - [ ] [gpt] 审阅执行适配与结果，围绕能力边界决定下一步；第四步后训练、UPDATE门控/定位结构、纯连续跨窗口方案均未启动。
