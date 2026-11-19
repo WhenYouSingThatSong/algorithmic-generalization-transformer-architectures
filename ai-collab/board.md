@@ -1,9 +1,12 @@
 # 工作看板
 
-> 最近更新：2026-11-19 19:17 CST · [claude]
+> 最近更新：2026-11-19 20:13 CST · [gpt]
 > 活看板：任务可以移动；状态变化在 `log.md` 记一行。条目格式 `[YYYY-MM-DD HH:MM][author]`。
 
 ## 当前授权：ABC共同任务、复杂长计算、边界诊断（前三步）
+
+- [2026-11-19 20:13][gpt] **ABC main 审阅至6bf760e**：[审阅记录](handoff/2026-11-19-abc-workspace-review.md)。本批前三步已完成；11产物/9源码hash匹配，重聚合程序600条与共同24图阶段结果。C program carry/reset/scratch最终成功s2026=1/17/36、s42=0/7/33、s1234=0/2/29（各/40）。报告更正s1234 scratch首阶段23/24、主分支后续输入可能不同；补入不改题s4仍正确15/19/9与改题4/7/4、同输入probe条件正确率。未重放服务器权重/records，无需GPU重跑；第四步仍不启动。
+- [ ] [执行agent C] 空闲交接仅补交既有 `verify_c_smoke.py` main适配版和 `check_hidden_rows.py` 源码/说明，供审阅现有核验依据；不新增GPU、小验证矩阵或训练。B本批补交关闭。
 
 - [2026-11-19 19:55][claude] **B verifier CPU 补交完成**：按 17:52 审阅要求，提交 `tools/abc_workspace/checks/verify_ab_records.py` 和小结果 `docs/records/2026-11-19/ab-workspace/ab-verifier.json`（提交 `8ce841e`）。脚本只读 records/manifest，不加载模型/不跑 GPU；在主批上 0 errors，核对 9,080 条记录、290,560 个节点真值、4,800 条 reference 记录、5,400 条 conditional 记录、600 个 probe。代码和报告明确分开 reference 程序真值与 actual-input conditional 真值，两者不要求一致；同时补充 terminal 宽度、520 执行/结构祖先操作措辞和 A probe 的 assignment 188/0、program 228/25 分列。AB 结果未重跑，C 结果未改。
 - [2026-11-19 19:17][claude] **C workspace smoke+main 完成，ABC 合并表已生成**：使用 B 生成的同一 `tasks.json` b13f87df…（80 任务）/`models.json` 73e99dcb…（5 权重）；C smoke 7/7（660 条，独立检查 0 错，GPU0），C main 7/7（GPU0）。C main 13,520 条：三种子 assignment 各 1,940；program 2,575/2,585/2,540（carry 非数值提交使诊断减少，失败/无效记录保留分母）。独立 verifier 重建 13,520 条，0 errors。common24：C_s2026/C_s42/C_s1234 的 assignment scratch 四阶段均 24/24；carry 从 23/13/19 降到 4/7/4，reset_results 从 6/9/11 降到 0/0/0；all80 回原题 scratch 80/80/76，carry 11/11/9，reset 0/1/0。20 窗口 526 逻辑节点/520 祖先操作 program 最终成功：C_s2026 scratch 36/40、reset 17/40、carry 1/40；C_s42 33/7/0；C_s1234 29/2/0；carry invalid records 198/90/278，final-stage nonnumeric 1/1/0。AB 结果见 17:31 条；合并 ABC 小表/报告 `docs/records/2026-11-19/abc-workspace.md` + `abc-workspace/`，提交 `399038e`。未训练、未扩图/种子、未做第四步；C 三 seed 分列，不作机制或通用容量结论。
@@ -16,7 +19,7 @@
 - [x] [执行agent B] 按 17:52 审阅提交独立复核脚本和小型结果，分别说明 reference 程序与 actual-input conditional 的核验方式；只做 CPU 补交，不重跑 GPU。**完成，见 19:55 条。**
 - [x] [执行agent C] 使用B生成的完全相同清单；共享树串行交接后运行C三个种子smoke，重点检查局部题面embedding写入、其他hidden不变、C整行reset与离散VALUE reset区别、程序离散提交接口。通过后自行进入C main。模型失败是结果，不因成功少改题或补图；接口/代码错误先修并回报。**完成，见 19:17 条。**
 - [x] [最后交接agent] 两lane完成后`merge_lanes.py`生成ABC共同表；同输入条件正确率与原程序正确率分列，不能把各lane自己的common当ABC common。交固定案例、程序首次失败/最终成功/全阶段成功、累计长度/祖先计算/预算和配对诊断，不写统一机制结论。**完成，见 19:17 条。**
-- [ ] [gpt] 审阅执行适配与结果，围绕能力边界决定下一步；第四步后训练、UPDATE门控/定位结构、纯连续跨窗口方案均未启动。
+- [x] [gpt] 审阅执行适配与结果（见20:13记录）；围绕能力边界的下一步留用户讨论，第四步后训练、UPDATE门控/定位结构、纯连续跨窗口方案均未启动。
 
 ## 已完成：A/B连续赋值与死槽位复用；C恢复状态重新使用
 
