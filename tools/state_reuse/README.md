@@ -13,6 +13,7 @@
 | `run_discrete.py` | 从已审阅A/B起跑快照出发；repeat或reuse，6分支，实际输入/输出全记录 |
 | `run_c_function.py` | C四训练版本，3时点×4扰动来源×3固定检查延迟，10分支历史状态诊断 |
 | `summarize.py` | 两路线分别汇总；逐图等权与计数、共同分母、配对差异、完整资格、稳定段 |
+| `export_c_report_tables.py` | CPU 复导 C 报告小表：q 十路/条件资格与恢复/节点损伤/固定案例；只读 records，不加载权重 |
 
 运行器不训练、不调用现有运行目录的写操作、不修改原始数据。
 所有输出目录必须不存在；大记录/快照留`tmp/`，小表/来源hash/报告进git。
@@ -59,6 +60,16 @@ python tools/state_reuse/summarize.py \
 
 可按`--arms initial/hold/noise/semantic`逐版本串行写不同目录，再给summarize多个`--run-dir`；数据、窗口、源码必须一致。共同资格按传入版本集合计算，正式四版本表须全部传入。
 当前上下文是s2026原始权重及其三份小试后训练权重，**不是四种子**。
+
+C main 完成后，报告小表由 CPU 重新导出（只读 records，不加载模型）：
+
+```bash
+python tools/state_reuse/export_c_report_tables.py \
+  --bundle tmp/analysis/state-reuse-exec-20261119/C-main \
+  --out-dir docs/records/2026-11-19/c-state-reuse
+```
+
+输出十路 q 表、每条件资格/恢复、节点 region 计数、unique 损伤节点、固定案例和 audit。VALUE 为主口径，first4 单列；自动结果包的 all_recorded/first4 小表需与本导出并读。
 
 ## 输出口径
 

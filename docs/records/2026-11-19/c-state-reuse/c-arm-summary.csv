@@ -1,0 +1,5 @@
+arm,records,input_qualified,common_input_qualified,damage,damage_graphs,cleanpath,cleanpath_graphs,perturb_damage,perturb_graphs,qinput_ok_damage,qinput_bad_damage,pre_fix,pre_fix_graphs,ru_fix,ru_fix_graphs,cp_fix,cp_fix_graphs,solved_fix,keep_correct,pre_correct,solved_correct,ru_pre_correct,clean_keep_correct,clean_pre_correct,clean_solved_correct,first4_keep_correct,first4_pre_correct,first4_clean_keep_correct,first4_clean_pre_correct
+initial,1152,881,870,64,15,12,1,52,15,11,53,0,0,4,4,52,15,0,817,817,817,821,869,869,869,468,815,492,869
+hold,1152,1138,870,24,8,0,0,24,8,0,24,0,0,3,3,24,8,0,1114,1114,1114,1115,1138,1138,1138,1100,1114,1122,1138
+noise,1152,1131,870,27,8,0,0,27,8,1,26,0,0,2,2,27,8,0,1104,1104,1104,1104,1131,1131,1131,1074,1104,1100,1131
+semantic,1152,1127,870,21,7,0,0,21,7,0,21,0,0,1,1,21,7,0,1106,1106,1106,1106,1127,1127,1127,1091,1106,1112,1127

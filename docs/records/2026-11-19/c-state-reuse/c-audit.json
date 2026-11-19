@@ -1,0 +1,1315 @@
+{
+  "date": "2026-11-19",
+  "protocol": "C_function_probe_v1",
+  "bundle": "tmp/analysis/state-reuse-exec-20261119/C-main",
+  "summary_meta_sha256": "b607e5cf19836c23833d501865e500bca6f08585cc2a553cc0a9ad6d09b3f58e",
+  "plan_sha256": "f375a8a162318b6f21b504e9dc846c9ba6aa54fd8d98e28d7eb7c20562281c9e",
+  "base_commit": "6ef63e36f51113fa5c60f95d6d107c8521df4482",
+  "complete": {
+    "plan_sha256": "f375a8a162318b6f21b504e9dc846c9ba6aa54fd8d98e28d7eb7c20562281c9e",
+    "jobs": 6,
+    "completed_at": 1795064064.0193884
+  },
+  "summary_meta": {
+    "status": "complete",
+    "protocol": "state_reuse_summary_v1",
+    "sources": [
+      {
+        "path": "/workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/analysis/state-reuse-exec-20261119/C-main/C-initial",
+        "meta_sha256": "fa606d29ff0bc546f96dd3ba642609ef3c28d94bd98dd70443b5dc68dc069f45",
+        "meta": {
+          "status": "complete",
+          "protocol": "C_function_probe_v1",
+          "models": [
+            {
+              "arm": "initial",
+              "path": "/workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/runs/oldC0-newseed-150ep/checkpoints/Nodes32-ADD - L4H16D384_DeBERTa-seed-2026 - 2026-11-14-10:12:43/epoch=143-val_loss=0.0000.ckpt",
+              "sha256": "40babb206b1393d0892b047202b9d6469cd140c82f3ba82c96a466fa3c76e780"
+            }
+          ],
+          "display_names": {
+            "initial": "C（原始）",
+            "hold": "C（保持后训练）",
+            "noise": "C（噪声后训练）",
+            "semantic": "C（语义后训练）"
+          },
+          "candidate_ids": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31
+          ],
+          "horizon": 16,
+          "grid": [
+            [
+              "early",
+              "natural",
+              1
+            ],
+            [
+              "early",
+              "natural",
+              2
+            ],
+            [
+              "early",
+              "natural",
+              4
+            ],
+            [
+              "early",
+              "same",
+              1
+            ],
+            [
+              "early",
+              "same",
+              2
+            ],
+            [
+              "early",
+              "same",
+              4
+            ],
+            [
+              "early",
+              "semantic",
+              1
+            ],
+            [
+              "early",
+              "semantic",
+              2
+            ],
+            [
+              "early",
+              "semantic",
+              4
+            ],
+            [
+              "early",
+              "noise2",
+              1
+            ],
+            [
+              "early",
+              "noise2",
+              2
+            ],
+            [
+              "early",
+              "noise2",
+              4
+            ],
+            [
+              "hold",
+              "natural",
+              1
+            ],
+            [
+              "hold",
+              "natural",
+              2
+            ],
+            [
+              "hold",
+              "natural",
+              4
+            ],
+            [
+              "hold",
+              "same",
+              1
+            ],
+            [
+              "hold",
+              "same",
+              2
+            ],
+            [
+              "hold",
+              "same",
+              4
+            ],
+            [
+              "hold",
+              "semantic",
+              1
+            ],
+            [
+              "hold",
+              "semantic",
+              2
+            ],
+            [
+              "hold",
+              "semantic",
+              4
+            ],
+            [
+              "hold",
+              "noise2",
+              1
+            ],
+            [
+              "hold",
+              "noise2",
+              2
+            ],
+            [
+              "hold",
+              "noise2",
+              4
+            ],
+            [
+              "late",
+              "natural",
+              1
+            ],
+            [
+              "late",
+              "natural",
+              2
+            ],
+            [
+              "late",
+              "natural",
+              4
+            ],
+            [
+              "late",
+              "same",
+              1
+            ],
+            [
+              "late",
+              "same",
+              2
+            ],
+            [
+              "late",
+              "same",
+              4
+            ],
+            [
+              "late",
+              "semantic",
+              1
+            ],
+            [
+              "late",
+              "semantic",
+              2
+            ],
+            [
+              "late",
+              "semantic",
+              4
+            ],
+            [
+              "late",
+              "noise2",
+              1
+            ],
+            [
+              "late",
+              "noise2",
+              2
+            ],
+            [
+              "late",
+              "noise2",
+              4
+            ]
+          ],
+          "branches": [
+            "observed_keep",
+            "observed_pre",
+            "observed_solved",
+            "restore_u_keep",
+            "restore_u_pre",
+            "restore_u_solved",
+            "clean_keep",
+            "clean_pre",
+            "clean_solved",
+            "sham"
+          ],
+          "data_sha256": "676aabd2173d007b9c70c1e044ed69b7afe26d1f88e6bfcfd842778af3bcf66f",
+          "plan_sha256": "1971a635f0c572abbcb88de440fc844c593ab9f8199e82fe331299f938e8c24f",
+          "source_data": "/workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/analysis/c-long-pilot-20261115/data/val.pt",
+          "source_plan": "/workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/analysis/c-corruption-pilot-20261115/plan/val.jsonl",
+          "code_hashes": {
+            "tools/state_reuse/run_c_function.py": "7dd2de1c8baea73125efdd772d3e2a34b0004051315db72ed10bb871d91c308f",
+            "tools/state_reuse/core.py": "ea400f81f34fe9f3c9cb0f85c4d464ec7ec920f294b74cf1a2883957bb22132b",
+            "tools/c_evaluation_suite/suite_core.py": "5bb3244666ebc4c042a1a57749724c815685bfa55f741cf644d5efa6b7e69b8b",
+            "tools/priority_pilots/io_utils.py": "402b2c6b8b40c3f5cd67fda49bdbf2c5f7ffa3e852a48543ee68b86c34c25ed0",
+            "experiments/tokenizers.py": "611e9964cf326c2bf03ab1287993908a172f0a9fa221bc0f4f6bdb811dbdca53"
+          },
+          "dependencies": {
+            "tools/c_corruption_pilot/pilot_core.py": "a86cc1713b806c924edf8aae51abfdb2bc9f28c8447ce48d625a1c1f92e3cdd8",
+            "tools/counterfactual_control/design.py": "9af2555e0cf110b8df8166611cf67f76f6a3dc8c9e9c91c3eb40d466fbc4a489",
+            "tools/c_long_pilot/protocol.py": "49040c1d11a7fac0ab8308a85e50860779246f9f3801c5e8059dcdd78276224b",
+            "experiments/model.py": "dccaeaf24619c2e685e7e3146a700b42fc565abbffcbdc9d1f0f6eda53fb07dc",
+            "tools/c_capability/run_capability.py": "7b17a44c2d0e0df97fd88edbf7622f444ad46fcfa5457e16f5fe78ac0ff3d692"
+          },
+          "num_threads": 4,
+          "matmul_precision": "medium",
+          "snapshot_graphs": 2,
+          "note": "Same seed2026 model variants; development data. Fixed lags, no successful-recovery selection; no decoded feedback.",
+          "records": 1152,
+          "sample_forwards": 188397,
+          "token_forwards": 48229632,
+          "records_sha256": "e7894862319658fa3f68fa91f0f59a3f1394e8966cf9ec0d042d7a9057117748",
+          "coverage_sha256": "7f26f5d7029828ee339427ae2cd3de3e1460b7d93208035acdffe09f186926b5"
+        }
+      },
+      {
+        "path": "/workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/analysis/state-reuse-exec-20261119/C-main/C-hold",
+        "meta_sha256": "5220562282a84078d693cca66506d6a45b34180d8010bb2559512b39e8d37312",
+        "meta": {
+          "status": "complete",
+          "protocol": "C_function_probe_v1",
+          "models": [
+            {
+              "arm": "hold",
+              "path": "tmp/analysis/c-corruption-pilot-20261115/hold/final.ckpt",
+              "sha256": "24f6b0715cb5d76775a9c93fd4a466b75b69d5c7e949f8d681d9062d79dc3aee"
+            }
+          ],
+          "display_names": {
+            "initial": "C（原始）",
+            "hold": "C（保持后训练）",
+            "noise": "C（噪声后训练）",
+            "semantic": "C（语义后训练）"
+          },
+          "candidate_ids": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31
+          ],
+          "horizon": 16,
+          "grid": [
+            [
+              "early",
+              "natural",
+              1
+            ],
+            [
+              "early",
+              "natural",
+              2
+            ],
+            [
+              "early",
+              "natural",
+              4
+            ],
+            [
+              "early",
+              "same",
+              1
+            ],
+            [
+              "early",
+              "same",
+              2
+            ],
+            [
+              "early",
+              "same",
+              4
+            ],
+            [
+              "early",
+              "semantic",
+              1
+            ],
+            [
+              "early",
+              "semantic",
+              2
+            ],
+            [
+              "early",
+              "semantic",
+              4
+            ],
+            [
+              "early",
+              "noise2",
+              1
+            ],
+            [
+              "early",
+              "noise2",
+              2
+            ],
+            [
+              "early",
+              "noise2",
+              4
+            ],
+            [
+              "hold",
+              "natural",
+              1
+            ],
+            [
+              "hold",
+              "natural",
+              2
+            ],
+            [
+              "hold",
+              "natural",
+              4
+            ],
+            [
+              "hold",
+              "same",
+              1
+            ],
+            [
+              "hold",
+              "same",
+              2
+            ],
+            [
+              "hold",
+              "same",
+              4
+            ],
+            [
+              "hold",
+              "semantic",
+              1
+            ],
+            [
+              "hold",
+              "semantic",
+              2
+            ],
+            [
+              "hold",
+              "semantic",
+              4
+            ],
+            [
+              "hold",
+              "noise2",
+              1
+            ],
+            [
+              "hold",
+              "noise2",
+              2
+            ],
+            [
+              "hold",
+              "noise2",
+              4
+            ],
+            [
+              "late",
+              "natural",
+              1
+            ],
+            [
+              "late",
+              "natural",
+              2
+            ],
+            [
+              "late",
+              "natural",
+              4
+            ],
+            [
+              "late",
+              "same",
+              1
+            ],
+            [
+              "late",
+              "same",
+              2
+            ],
+            [
+              "late",
+              "same",
+              4
+            ],
+            [
+              "late",
+              "semantic",
+              1
+            ],
+            [
+              "late",
+              "semantic",
+              2
+            ],
+            [
+              "late",
+              "semantic",
+              4
+            ],
+            [
+              "late",
+              "noise2",
+              1
+            ],
+            [
+              "late",
+              "noise2",
+              2
+            ],
+            [
+              "late",
+              "noise2",
+              4
+            ]
+          ],
+          "branches": [
+            "observed_keep",
+            "observed_pre",
+            "observed_solved",
+            "restore_u_keep",
+            "restore_u_pre",
+            "restore_u_solved",
+            "clean_keep",
+            "clean_pre",
+            "clean_solved",
+            "sham"
+          ],
+          "data_sha256": "676aabd2173d007b9c70c1e044ed69b7afe26d1f88e6bfcfd842778af3bcf66f",
+          "plan_sha256": "1971a635f0c572abbcb88de440fc844c593ab9f8199e82fe331299f938e8c24f",
+          "source_data": "/workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/analysis/c-long-pilot-20261115/data/val.pt",
+          "source_plan": "/workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/analysis/c-corruption-pilot-20261115/plan/val.jsonl",
+          "code_hashes": {
+            "tools/state_reuse/run_c_function.py": "7dd2de1c8baea73125efdd772d3e2a34b0004051315db72ed10bb871d91c308f",
+            "tools/state_reuse/core.py": "ea400f81f34fe9f3c9cb0f85c4d464ec7ec920f294b74cf1a2883957bb22132b",
+            "tools/c_evaluation_suite/suite_core.py": "5bb3244666ebc4c042a1a57749724c815685bfa55f741cf644d5efa6b7e69b8b",
+            "tools/priority_pilots/io_utils.py": "402b2c6b8b40c3f5cd67fda49bdbf2c5f7ffa3e852a48543ee68b86c34c25ed0",
+            "experiments/tokenizers.py": "611e9964cf326c2bf03ab1287993908a172f0a9fa221bc0f4f6bdb811dbdca53"
+          },
+          "dependencies": {
+            "tools/c_corruption_pilot/pilot_core.py": "a86cc1713b806c924edf8aae51abfdb2bc9f28c8447ce48d625a1c1f92e3cdd8",
+            "tools/counterfactual_control/design.py": "9af2555e0cf110b8df8166611cf67f76f6a3dc8c9e9c91c3eb40d466fbc4a489",
+            "tools/c_long_pilot/protocol.py": "49040c1d11a7fac0ab8308a85e50860779246f9f3801c5e8059dcdd78276224b",
+            "experiments/model.py": "dccaeaf24619c2e685e7e3146a700b42fc565abbffcbdc9d1f0f6eda53fb07dc",
+            "tools/c_capability/run_capability.py": "7b17a44c2d0e0df97fd88edbf7622f444ad46fcfa5457e16f5fe78ac0ff3d692"
+          },
+          "num_threads": 4,
+          "matmul_precision": "medium",
+          "snapshot_graphs": 2,
+          "note": "Same seed2026 model variants; development data. Fixed lags, no successful-recovery selection; no decoded feedback.",
+          "records": 1152,
+          "sample_forwards": 188397,
+          "token_forwards": 48229632,
+          "records_sha256": "2aa7e6242bd148cbd9fb6319f088c9c6ea89de8e13916348d985ace4528278f0",
+          "coverage_sha256": "6ec4a73d1522f3f381aa6b29d85ead990c9be551653149bb6d64057b2bdc153c"
+        }
+      },
+      {
+        "path": "/workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/analysis/state-reuse-exec-20261119/C-main/C-noise",
+        "meta_sha256": "51dcaf2ff55369efda1a14a9b95f80ef35ced6708c79965369e9df74414702d4",
+        "meta": {
+          "status": "complete",
+          "protocol": "C_function_probe_v1",
+          "models": [
+            {
+              "arm": "noise",
+              "path": "tmp/analysis/c-corruption-pilot-20261115/noise/final.ckpt",
+              "sha256": "cdf398a7ff407a60fc9a7548cc651df1b420daf3a3626871cc9c14616da4cf9a"
+            }
+          ],
+          "display_names": {
+            "initial": "C（原始）",
+            "hold": "C（保持后训练）",
+            "noise": "C（噪声后训练）",
+            "semantic": "C（语义后训练）"
+          },
+          "candidate_ids": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31
+          ],
+          "horizon": 16,
+          "grid": [
+            [
+              "early",
+              "natural",
+              1
+            ],
+            [
+              "early",
+              "natural",
+              2
+            ],
+            [
+              "early",
+              "natural",
+              4
+            ],
+            [
+              "early",
+              "same",
+              1
+            ],
+            [
+              "early",
+              "same",
+              2
+            ],
+            [
+              "early",
+              "same",
+              4
+            ],
+            [
+              "early",
+              "semantic",
+              1
+            ],
+            [
+              "early",
+              "semantic",
+              2
+            ],
+            [
+              "early",
+              "semantic",
+              4
+            ],
+            [
+              "early",
+              "noise2",
+              1
+            ],
+            [
+              "early",
+              "noise2",
+              2
+            ],
+            [
+              "early",
+              "noise2",
+              4
+            ],
+            [
+              "hold",
+              "natural",
+              1
+            ],
+            [
+              "hold",
+              "natural",
+              2
+            ],
+            [
+              "hold",
+              "natural",
+              4
+            ],
+            [
+              "hold",
+              "same",
+              1
+            ],
+            [
+              "hold",
+              "same",
+              2
+            ],
+            [
+              "hold",
+              "same",
+              4
+            ],
+            [
+              "hold",
+              "semantic",
+              1
+            ],
+            [
+              "hold",
+              "semantic",
+              2
+            ],
+            [
+              "hold",
+              "semantic",
+              4
+            ],
+            [
+              "hold",
+              "noise2",
+              1
+            ],
+            [
+              "hold",
+              "noise2",
+              2
+            ],
+            [
+              "hold",
+              "noise2",
+              4
+            ],
+            [
+              "late",
+              "natural",
+              1
+            ],
+            [
+              "late",
+              "natural",
+              2
+            ],
+            [
+              "late",
+              "natural",
+              4
+            ],
+            [
+              "late",
+              "same",
+              1
+            ],
+            [
+              "late",
+              "same",
+              2
+            ],
+            [
+              "late",
+              "same",
+              4
+            ],
+            [
+              "late",
+              "semantic",
+              1
+            ],
+            [
+              "late",
+              "semantic",
+              2
+            ],
+            [
+              "late",
+              "semantic",
+              4
+            ],
+            [
+              "late",
+              "noise2",
+              1
+            ],
+            [
+              "late",
+              "noise2",
+              2
+            ],
+            [
+              "late",
+              "noise2",
+              4
+            ]
+          ],
+          "branches": [
+            "observed_keep",
+            "observed_pre",
+            "observed_solved",
+            "restore_u_keep",
+            "restore_u_pre",
+            "restore_u_solved",
+            "clean_keep",
+            "clean_pre",
+            "clean_solved",
+            "sham"
+          ],
+          "data_sha256": "676aabd2173d007b9c70c1e044ed69b7afe26d1f88e6bfcfd842778af3bcf66f",
+          "plan_sha256": "1971a635f0c572abbcb88de440fc844c593ab9f8199e82fe331299f938e8c24f",
+          "source_data": "/workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/analysis/c-long-pilot-20261115/data/val.pt",
+          "source_plan": "/workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/analysis/c-corruption-pilot-20261115/plan/val.jsonl",
+          "code_hashes": {
+            "tools/state_reuse/run_c_function.py": "7dd2de1c8baea73125efdd772d3e2a34b0004051315db72ed10bb871d91c308f",
+            "tools/state_reuse/core.py": "ea400f81f34fe9f3c9cb0f85c4d464ec7ec920f294b74cf1a2883957bb22132b",
+            "tools/c_evaluation_suite/suite_core.py": "5bb3244666ebc4c042a1a57749724c815685bfa55f741cf644d5efa6b7e69b8b",
+            "tools/priority_pilots/io_utils.py": "402b2c6b8b40c3f5cd67fda49bdbf2c5f7ffa3e852a48543ee68b86c34c25ed0",
+            "experiments/tokenizers.py": "611e9964cf326c2bf03ab1287993908a172f0a9fa221bc0f4f6bdb811dbdca53"
+          },
+          "dependencies": {
+            "tools/c_corruption_pilot/pilot_core.py": "a86cc1713b806c924edf8aae51abfdb2bc9f28c8447ce48d625a1c1f92e3cdd8",
+            "tools/counterfactual_control/design.py": "9af2555e0cf110b8df8166611cf67f76f6a3dc8c9e9c91c3eb40d466fbc4a489",
+            "tools/c_long_pilot/protocol.py": "49040c1d11a7fac0ab8308a85e50860779246f9f3801c5e8059dcdd78276224b",
+            "experiments/model.py": "dccaeaf24619c2e685e7e3146a700b42fc565abbffcbdc9d1f0f6eda53fb07dc",
+            "tools/c_capability/run_capability.py": "7b17a44c2d0e0df97fd88edbf7622f444ad46fcfa5457e16f5fe78ac0ff3d692"
+          },
+          "num_threads": 4,
+          "matmul_precision": "medium",
+          "snapshot_graphs": 2,
+          "note": "Same seed2026 model variants; development data. Fixed lags, no successful-recovery selection; no decoded feedback.",
+          "records": 1152,
+          "sample_forwards": 188397,
+          "token_forwards": 48229632,
+          "records_sha256": "95598a1ab685d1531d851bf5c62559316af52c4dc35c24a80ed45c8d7564cf27",
+          "coverage_sha256": "e7bcd14c9f7861701f8488f5f1dfdd7bbf5049002f71adff1ba9c82c00e0fa93"
+        }
+      },
+      {
+        "path": "/workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/analysis/state-reuse-exec-20261119/C-main/C-semantic",
+        "meta_sha256": "88bd1225001c03e7476e11d10ec2d78dc843a79e44762b27537fdf86d2da4862",
+        "meta": {
+          "status": "complete",
+          "protocol": "C_function_probe_v1",
+          "models": [
+            {
+              "arm": "semantic",
+              "path": "tmp/analysis/c-corruption-pilot-20261115/semantic/final.ckpt",
+              "sha256": "559fed2b0665164671e0176ee5b7ec1fde5682b328741d73fe78d8aa758fd9be"
+            }
+          ],
+          "display_names": {
+            "initial": "C（原始）",
+            "hold": "C（保持后训练）",
+            "noise": "C（噪声后训练）",
+            "semantic": "C（语义后训练）"
+          },
+          "candidate_ids": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31
+          ],
+          "horizon": 16,
+          "grid": [
+            [
+              "early",
+              "natural",
+              1
+            ],
+            [
+              "early",
+              "natural",
+              2
+            ],
+            [
+              "early",
+              "natural",
+              4
+            ],
+            [
+              "early",
+              "same",
+              1
+            ],
+            [
+              "early",
+              "same",
+              2
+            ],
+            [
+              "early",
+              "same",
+              4
+            ],
+            [
+              "early",
+              "semantic",
+              1
+            ],
+            [
+              "early",
+              "semantic",
+              2
+            ],
+            [
+              "early",
+              "semantic",
+              4
+            ],
+            [
+              "early",
+              "noise2",
+              1
+            ],
+            [
+              "early",
+              "noise2",
+              2
+            ],
+            [
+              "early",
+              "noise2",
+              4
+            ],
+            [
+              "hold",
+              "natural",
+              1
+            ],
+            [
+              "hold",
+              "natural",
+              2
+            ],
+            [
+              "hold",
+              "natural",
+              4
+            ],
+            [
+              "hold",
+              "same",
+              1
+            ],
+            [
+              "hold",
+              "same",
+              2
+            ],
+            [
+              "hold",
+              "same",
+              4
+            ],
+            [
+              "hold",
+              "semantic",
+              1
+            ],
+            [
+              "hold",
+              "semantic",
+              2
+            ],
+            [
+              "hold",
+              "semantic",
+              4
+            ],
+            [
+              "hold",
+              "noise2",
+              1
+            ],
+            [
+              "hold",
+              "noise2",
+              2
+            ],
+            [
+              "hold",
+              "noise2",
+              4
+            ],
+            [
+              "late",
+              "natural",
+              1
+            ],
+            [
+              "late",
+              "natural",
+              2
+            ],
+            [
+              "late",
+              "natural",
+              4
+            ],
+            [
+              "late",
+              "same",
+              1
+            ],
+            [
+              "late",
+              "same",
+              2
+            ],
+            [
+              "late",
+              "same",
+              4
+            ],
+            [
+              "late",
+              "semantic",
+              1
+            ],
+            [
+              "late",
+              "semantic",
+              2
+            ],
+            [
+              "late",
+              "semantic",
+              4
+            ],
+            [
+              "late",
+              "noise2",
+              1
+            ],
+            [
+              "late",
+              "noise2",
+              2
+            ],
+            [
+              "late",
+              "noise2",
+              4
+            ]
+          ],
+          "branches": [
+            "observed_keep",
+            "observed_pre",
+            "observed_solved",
+            "restore_u_keep",
+            "restore_u_pre",
+            "restore_u_solved",
+            "clean_keep",
+            "clean_pre",
+            "clean_solved",
+            "sham"
+          ],
+          "data_sha256": "676aabd2173d007b9c70c1e044ed69b7afe26d1f88e6bfcfd842778af3bcf66f",
+          "plan_sha256": "1971a635f0c572abbcb88de440fc844c593ab9f8199e82fe331299f938e8c24f",
+          "source_data": "/workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/analysis/c-long-pilot-20261115/data/val.pt",
+          "source_plan": "/workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/analysis/c-corruption-pilot-20261115/plan/val.jsonl",
+          "code_hashes": {
+            "tools/state_reuse/run_c_function.py": "7dd2de1c8baea73125efdd772d3e2a34b0004051315db72ed10bb871d91c308f",
+            "tools/state_reuse/core.py": "ea400f81f34fe9f3c9cb0f85c4d464ec7ec920f294b74cf1a2883957bb22132b",
+            "tools/c_evaluation_suite/suite_core.py": "5bb3244666ebc4c042a1a57749724c815685bfa55f741cf644d5efa6b7e69b8b",
+            "tools/priority_pilots/io_utils.py": "402b2c6b8b40c3f5cd67fda49bdbf2c5f7ffa3e852a48543ee68b86c34c25ed0",
+            "experiments/tokenizers.py": "611e9964cf326c2bf03ab1287993908a172f0a9fa221bc0f4f6bdb811dbdca53"
+          },
+          "dependencies": {
+            "tools/c_corruption_pilot/pilot_core.py": "a86cc1713b806c924edf8aae51abfdb2bc9f28c8447ce48d625a1c1f92e3cdd8",
+            "tools/counterfactual_control/design.py": "9af2555e0cf110b8df8166611cf67f76f6a3dc8c9e9c91c3eb40d466fbc4a489",
+            "tools/c_long_pilot/protocol.py": "49040c1d11a7fac0ab8308a85e50860779246f9f3801c5e8059dcdd78276224b",
+            "experiments/model.py": "dccaeaf24619c2e685e7e3146a700b42fc565abbffcbdc9d1f0f6eda53fb07dc",
+            "tools/c_capability/run_capability.py": "7b17a44c2d0e0df97fd88edbf7622f444ad46fcfa5457e16f5fe78ac0ff3d692"
+          },
+          "num_threads": 4,
+          "matmul_precision": "medium",
+          "snapshot_graphs": 2,
+          "note": "Same seed2026 model variants; development data. Fixed lags, no successful-recovery selection; no decoded feedback.",
+          "records": 1152,
+          "sample_forwards": 188397,
+          "token_forwards": 48229632,
+          "records_sha256": "6831a66f28505fb68d61219e1ab6fc63f2bde8390804fa43ce0f55df7a4c5a5d",
+          "coverage_sha256": "ea53354d7c923285063334d5b06fb189578666b5794e1032e5c1409d83548618"
+        }
+      }
+    ],
+    "records": 4608,
+    "common_cases": 1152,
+    "common_input_qualified": 870,
+    "code_hashes": {
+      "summarize.py": "d9830ea09798c66975ff2bad272c044f0d7050dd31939a0eac392aa17d26e97b",
+      "core.py": "ea400f81f34fe9f3c9cb0f85c4d464ec7ec920f294b74cf1a2883957bb22132b"
+    },
+    "note": "C common_recorded is shared structural cases; common_input_qualified intersects input checks across supplied arms. Report own and common coverage. No pooling across timing/dose/episode."
+  },
+  "sources": {
+    "initial": {
+      "path": "tmp/analysis/state-reuse-exec-20261119/C-main/C-initial",
+      "meta_sha256": "fa606d29ff0bc546f96dd3ba642609ef3c28d94bd98dd70443b5dc68dc069f45",
+      "records_sha256": "e7894862319658fa3f68fa91f0f59a3f1394e8966cf9ec0d042d7a9057117748",
+      "coverage_sha256": "7f26f5d7029828ee339427ae2cd3de3e1460b7d93208035acdffe09f186926b5",
+      "models": [
+        {
+          "arm": "initial",
+          "path": "/workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/runs/oldC0-newseed-150ep/checkpoints/Nodes32-ADD - L4H16D384_DeBERTa-seed-2026 - 2026-11-14-10:12:43/epoch=143-val_loss=0.0000.ckpt",
+          "sha256": "40babb206b1393d0892b047202b9d6469cd140c82f3ba82c96a466fa3c76e780"
+        }
+      ],
+      "code_hashes": {
+        "tools/state_reuse/run_c_function.py": "7dd2de1c8baea73125efdd772d3e2a34b0004051315db72ed10bb871d91c308f",
+        "tools/state_reuse/core.py": "ea400f81f34fe9f3c9cb0f85c4d464ec7ec920f294b74cf1a2883957bb22132b",
+        "tools/c_evaluation_suite/suite_core.py": "5bb3244666ebc4c042a1a57749724c815685bfa55f741cf644d5efa6b7e69b8b",
+        "tools/priority_pilots/io_utils.py": "402b2c6b8b40c3f5cd67fda49bdbf2c5f7ffa3e852a48543ee68b86c34c25ed0",
+        "experiments/tokenizers.py": "611e9964cf326c2bf03ab1287993908a172f0a9fa221bc0f4f6bdb811dbdca53"
+      },
+      "data_sha256": "676aabd2173d007b9c70c1e044ed69b7afe26d1f88e6bfcfd842778af3bcf66f",
+      "plan_sha256": "1971a635f0c572abbcb88de440fc844c593ab9f8199e82fe331299f938e8c24f"
+    },
+    "hold": {
+      "path": "tmp/analysis/state-reuse-exec-20261119/C-main/C-hold",
+      "meta_sha256": "5220562282a84078d693cca66506d6a45b34180d8010bb2559512b39e8d37312",
+      "records_sha256": "2aa7e6242bd148cbd9fb6319f088c9c6ea89de8e13916348d985ace4528278f0",
+      "coverage_sha256": "6ec4a73d1522f3f381aa6b29d85ead990c9be551653149bb6d64057b2bdc153c",
+      "models": [
+        {
+          "arm": "hold",
+          "path": "tmp/analysis/c-corruption-pilot-20261115/hold/final.ckpt",
+          "sha256": "24f6b0715cb5d76775a9c93fd4a466b75b69d5c7e949f8d681d9062d79dc3aee"
+        }
+      ],
+      "code_hashes": {
+        "tools/state_reuse/run_c_function.py": "7dd2de1c8baea73125efdd772d3e2a34b0004051315db72ed10bb871d91c308f",
+        "tools/state_reuse/core.py": "ea400f81f34fe9f3c9cb0f85c4d464ec7ec920f294b74cf1a2883957bb22132b",
+        "tools/c_evaluation_suite/suite_core.py": "5bb3244666ebc4c042a1a57749724c815685bfa55f741cf644d5efa6b7e69b8b",
+        "tools/priority_pilots/io_utils.py": "402b2c6b8b40c3f5cd67fda49bdbf2c5f7ffa3e852a48543ee68b86c34c25ed0",
+        "experiments/tokenizers.py": "611e9964cf326c2bf03ab1287993908a172f0a9fa221bc0f4f6bdb811dbdca53"
+      },
+      "data_sha256": "676aabd2173d007b9c70c1e044ed69b7afe26d1f88e6bfcfd842778af3bcf66f",
+      "plan_sha256": "1971a635f0c572abbcb88de440fc844c593ab9f8199e82fe331299f938e8c24f"
+    },
+    "noise": {
+      "path": "tmp/analysis/state-reuse-exec-20261119/C-main/C-noise",
+      "meta_sha256": "51dcaf2ff55369efda1a14a9b95f80ef35ced6708c79965369e9df74414702d4",
+      "records_sha256": "95598a1ab685d1531d851bf5c62559316af52c4dc35c24a80ed45c8d7564cf27",
+      "coverage_sha256": "e7bcd14c9f7861701f8488f5f1dfdd7bbf5049002f71adff1ba9c82c00e0fa93",
+      "models": [
+        {
+          "arm": "noise",
+          "path": "tmp/analysis/c-corruption-pilot-20261115/noise/final.ckpt",
+          "sha256": "cdf398a7ff407a60fc9a7548cc651df1b420daf3a3626871cc9c14616da4cf9a"
+        }
+      ],
+      "code_hashes": {
+        "tools/state_reuse/run_c_function.py": "7dd2de1c8baea73125efdd772d3e2a34b0004051315db72ed10bb871d91c308f",
+        "tools/state_reuse/core.py": "ea400f81f34fe9f3c9cb0f85c4d464ec7ec920f294b74cf1a2883957bb22132b",
+        "tools/c_evaluation_suite/suite_core.py": "5bb3244666ebc4c042a1a57749724c815685bfa55f741cf644d5efa6b7e69b8b",
+        "tools/priority_pilots/io_utils.py": "402b2c6b8b40c3f5cd67fda49bdbf2c5f7ffa3e852a48543ee68b86c34c25ed0",
+        "experiments/tokenizers.py": "611e9964cf326c2bf03ab1287993908a172f0a9fa221bc0f4f6bdb811dbdca53"
+      },
+      "data_sha256": "676aabd2173d007b9c70c1e044ed69b7afe26d1f88e6bfcfd842778af3bcf66f",
+      "plan_sha256": "1971a635f0c572abbcb88de440fc844c593ab9f8199e82fe331299f938e8c24f"
+    },
+    "semantic": {
+      "path": "tmp/analysis/state-reuse-exec-20261119/C-main/C-semantic",
+      "meta_sha256": "88bd1225001c03e7476e11d10ec2d78dc843a79e44762b27537fdf86d2da4862",
+      "records_sha256": "6831a66f28505fb68d61219e1ab6fc63f2bde8390804fa43ce0f55df7a4c5a5d",
+      "coverage_sha256": "ea53354d7c923285063334d5b06fb189578666b5794e1032e5c1409d83548618",
+      "models": [
+        {
+          "arm": "semantic",
+          "path": "tmp/analysis/c-corruption-pilot-20261115/semantic/final.ckpt",
+          "sha256": "559fed2b0665164671e0176ee5b7ec1fde5682b328741d73fe78d8aa758fd9be"
+        }
+      ],
+      "code_hashes": {
+        "tools/state_reuse/run_c_function.py": "7dd2de1c8baea73125efdd772d3e2a34b0004051315db72ed10bb871d91c308f",
+        "tools/state_reuse/core.py": "ea400f81f34fe9f3c9cb0f85c4d464ec7ec920f294b74cf1a2883957bb22132b",
+        "tools/c_evaluation_suite/suite_core.py": "5bb3244666ebc4c042a1a57749724c815685bfa55f741cf644d5efa6b7e69b8b",
+        "tools/priority_pilots/io_utils.py": "402b2c6b8b40c3f5cd67fda49bdbf2c5f7ffa3e852a48543ee68b86c34c25ed0",
+        "experiments/tokenizers.py": "611e9964cf326c2bf03ab1287993908a172f0a9fa221bc0f4f6bdb811dbdca53"
+      },
+      "data_sha256": "676aabd2173d007b9c70c1e044ed69b7afe26d1f88e6bfcfd842778af3bcf66f",
+      "plan_sha256": "1971a635f0c572abbcb88de440fc844c593ab9f8199e82fe331299f938e8c24f"
+    }
+  },
+  "denominators": {
+    "records": 4608,
+    "input_qualified": 4277,
+    "common_input_qualified": 870,
+    "per_arm": {
+      "initial": {
+        "records": 1152,
+        "input_qualified": 881,
+        "damage": 64,
+        "cleanpath": 12,
+        "perturb_damage": 52,
+        "qinput_ok_damage": 11,
+        "qinput_bad_damage": 53,
+        "pre_fix": 0,
+        "ru_fix": 4,
+        "cp_fix": 52,
+        "solved_fix": 0
+      },
+      "hold": {
+        "records": 1152,
+        "input_qualified": 1138,
+        "damage": 24,
+        "cleanpath": 0,
+        "perturb_damage": 24,
+        "qinput_ok_damage": 0,
+        "qinput_bad_damage": 24,
+        "pre_fix": 0,
+        "ru_fix": 3,
+        "cp_fix": 24,
+        "solved_fix": 0
+      },
+      "noise": {
+        "records": 1152,
+        "input_qualified": 1131,
+        "damage": 27,
+        "cleanpath": 0,
+        "perturb_damage": 27,
+        "qinput_ok_damage": 1,
+        "qinput_bad_damage": 26,
+        "pre_fix": 0,
+        "ru_fix": 2,
+        "cp_fix": 27,
+        "solved_fix": 0
+      },
+      "semantic": {
+        "records": 1152,
+        "input_qualified": 1127,
+        "damage": 21,
+        "cleanpath": 0,
+        "perturb_damage": 21,
+        "qinput_ok_damage": 0,
+        "qinput_bad_damage": 21,
+        "pre_fix": 0,
+        "ru_fix": 1,
+        "cp_fix": 21,
+        "solved_fix": 0
+      }
+    }
+  },
+  "checks": {
+    "records": 4608,
+    "sham_equals_observed_keep": 4608,
+    "clean_pre_value_eq_clean_keep": 4608,
+    "clean_pre_first4_eq_clean_keep": 3916,
+    "damage_records": 136,
+    "cleanpath_records": 12,
+    "cleanpath_graphs": 1,
+    "perturb_damage_records": 124,
+    "common_input_qualified": 870,
+    "unique_node_damage": 44
+  },
+  "examples": {
+    "rule": "arms initial<hold<noise<semantic; timing early<hold<late; mode natural<same<semantic<noise2; lag 1<2<4; graph_id ascending; first qualified record matching each category",
+    "categories": [
+      "A_observed_receiver",
+      "B_restore_u_lag1",
+      "C_late_clean_drift",
+      "D_format_only"
+    ]
+  },
+  "files": {
+    "c-q-tenway.csv": "bdb90700265881652a2e4c3e356aeda248f511e4265bb0aea2cb72c24cb1ccd3",
+    "c-conditions.csv": "a2c5c028b7241643a19c9d1d29888fdcb89560cc96510a51f4fc550e080f458d",
+    "c-condition-recovery.csv": "bc6aba2c8a03c1acd5c2c81ac484caf3ec9d1e33422f99195c6d0fda8439cd9c",
+    "c-node-region-counts.csv": "68d3a55651a142c8eb1b3dda104b593428bcc6f3eacad74d3e5ef0eb0abdf7ee",
+    "c-unique-damage.csv": "b04bd56d362959f3cd8d1e44a4b5cf3364c4d627856a8225ec4f6875f5164284",
+    "c-examples.csv": "bca7cbbd44ee180657340bcf594ef2a52dacbcb41492a7000b528353816b4b20",
+    "c-arm-summary.csv": "34478dc0a279366827f3225ce09b10005630a823d6b2df1ed2c4158d32377f5e"
+  },
+  "note": "VALUE is the primary arithmetic field; first4 is the stricter four-field readout. The automatic C delivery uses all_recorded and first4; its late/semantic/lag2 contrast is mostly variable-field drift, not VALUE recovery. Regions in c-node-region-counts overlap (other_children is also inside descendants_excl_q); use c-unique-damage for unique arm/graph/node counts. Repeated lag measurements are not independent graphs."
+}
