@@ -3,7 +3,9 @@
 Design: `docs/records/2026-11-14/b-mechanism-design.md`
 Deferred control: `docs/records/2026-11-14/b-local-self-consistent-deferred.md`
 
-Status: **draft; smoke-tested on 4 heldout graphs** (selection, early own/teacher,
+Status update (2026-11-19): 后续已交 [M1 early阶段结果](../../docs/records/2026-11-14/b-main-m1-report.md) 和 [M2 complete阶段结果](../../docs/records/2026-11-14/b-main-m2-report.md)；本段下面的4图smoke说明是初始开发状态，不是当前完整进度。当前任务见[看板](../../ai-collab/board.md)。
+
+Initial development status: **draft; smoke-tested on 4 heldout graphs** (selection, early own/teacher,
 late all first-batch conditions, sustained/switch controls) and one training
 batch for the corruption audit.  Not a full experiment; no mechanism result is
 claimed here.

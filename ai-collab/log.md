@@ -169,3 +169,5 @@
 - 2026-11-19 22:22 [gpt] 实现提交 b6adfb7 已成功推送 origin/reproduction，本地/远端SHA一致、工作树干净。9项stdlib通过、1项torch测试明确跳过；全部CLI入口与语法检查通过。原C接收probe增加源端/接收端读出与下游值三层记录，同值fallback不并入不同来源控制。服务器尚未执行；执行agent按本轮handoff小验证后推进已授权四次50epoch。本日志作为交接补充提交并同步到reproduction。
 
 - 2026-11-19 22:26 [user/gpt] 用户要求将两agent分工推送：Agent C负责唯一plan、smoke、四次50epoch训练及自动阶段评估/原C功能探针；训练队列结束后交出plan/权重SHA、运行代码身份、曲线/剂量/异常，明确切换给Agent B。Agent B沿用同清单正式评估五个原权重+四份final，整理比较表/轨迹/结论边界，不重生成数据或重复阶段评估。GPT设计和审阅。同步board、handoff及README命令归属；仅文档调整，不改实验代码或启动服务器作业。本条随分工文档提交并推送reproduction。
+
+- 2026-11-19 22:50 [user/gpt] 用户授权清理旧分支并检查仓库。fetch核对后，repro(52dd950)、review/b-mechanism-5137014(6823fb6)、review/b-mechanism-e27cc6b(dc61d12)相对reproduction独有提交均0；远端删除成功，本地用branch -d删除，保留main/reproduction/project_page。基于f9e10e4盘点495个追踪文件/11组tools/历史资产，发现工具索引及B/C部分README状态过时。新增docs/repository-map.md，补根入口、tools全索引、C新版本命名、历史状态说明；保留原demo checkpoint和历史交付包，未删数据/改运行代码。无新的执行agent结果提交；服务器实际运行状态未访问。文档整理与分支清理记录提交推送reproduction，执行agent空闲交接时同步，不影响当前任务。

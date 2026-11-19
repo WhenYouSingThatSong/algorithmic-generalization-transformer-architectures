@@ -42,3 +42,7 @@ ai-collab/
 - 已确认约定：`consensus.md`（职责分工与协作分支；指标和评估仍见看板待讨论项）
 - 最近发生了什么：`log.md` 末尾
 - 长报告：`handoff/`
+
+## 分支清理补记（2026-11-19）
+
+用户授权清理后，已删除`repro`及两个`review/b-mechanism-*`旧分支引用；删除前确认其提交都在`reproduction`中，历史仍保留。此条更新第10条有关旧审阅分支的保留方式。工作分支仍统一`reproduction`；`main`旧基线及`project_page`网页分支保留。仓库入口见[内容导航](../docs/repository-map.md)。

@@ -1,3 +1,5 @@
+> **复现工作入口（`reproduction` 分支）**：[仓库内容与状态](docs/repository-map.md) · [当前任务看板](ai-collab/board.md) · [实验工具索引](tools/README.md) · [A/B/C 命名](docs/model-names.md)。本分支包含原论文代码及后续复现实验；下方保留原论文介绍。GitHub 默认分支目前仍为旧 `main`。
+
 <div align="center">
 
 # Unlocking Out-of-Distribution Generalization in Transformers via Recursive Latent Space Reasoning
