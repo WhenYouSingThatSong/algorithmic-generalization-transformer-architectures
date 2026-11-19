@@ -1,9 +1,18 @@
 # 工作看板
 
-> 最近更新：2026-11-19 14:31 CST · [claude]
+> 最近更新：2026-11-19 · [gpt]
 > 活看板：任务可以移动；状态变化在 `log.md` 记一行。条目格式 `[YYYY-MM-DD HH:MM][author]`。
 
-## 当前授权：A/B连续赋值与死槽位复用；C恢复状态重新使用
+## 当前授权：ABC共同任务、复杂长计算、边界诊断（前三步）
+
+- [2026-11-19 16:01][user/gpt] 用户批准前三步实施，第四步训练/新结构暂缓。[交接](handoff/2026-11-19-abc-workspace.md)和[代码/命令](../tools/abc_workspace/README.md)已完成：共同新任务、ABC合法重新赋值、固定32位置长程序、固定阶段诊断、串行队列与共同汇总。范围更新此前“本批关闭、不新增GPU”的限制。A/B沿用s42主权重；C为s42/s1234/s2026三个原始e143权重。赋值每形状16图，程序每形状8图、20窗口；5形状均保留失败，无补样。**长程序有模型实际数值的离散提交边界，C标为混合接口，不声称始终连续或原生526节点整图能力。**只有题面更新任务保留C其余hidden、不全局离散重嵌入。
+- [x] [gpt] 新目录`tools/abc_workspace/`实现任务生成、真实tokenizer接口、连续/离散运行、无真值回填的跨窗口提交、独立原程序/actual-input评分、固定成功失败共同诊断、最终/末两轮分列、失败分母、配对修回/改坏、共同起点汇总。6项针对性CPU检查及CLI/编译通过；本地未加载权重/跑GPU。
+- [ ] [执行agent B] 空闲交接同步后生成唯一共享tasks/models清单，按README运行AB smoke，核对交接的实际写入/独立真值/错误提交/分叉预算，然后自行进入AB main。完成交结果、代码适配和验收记录；不训练、不修改运行中的共享树。
+- [ ] [执行agent C] 使用B生成的完全相同清单；共享树串行交接后运行C三个种子smoke，重点检查局部题面embedding写入、其他hidden不变、C整行reset与离散VALUE reset区别、程序离散提交接口。通过后自行进入C main。模型失败是结果，不因成功少改题或补图；接口/代码错误先修并回报。
+- [ ] [最后交接agent] 两lane完成后`merge_lanes.py`生成ABC共同表；同输入条件正确率与原程序正确率分列，不能把各lane自己的common当ABC common。交固定案例、程序首次失败/最终成功/全阶段成功、累计长度/祖先计算/预算和配对诊断，不写统一机制结论。
+- [ ] [gpt] 审阅执行适配与结果，围绕能力边界决定下一步；第四步后训练、UPDATE门控/定位结构、纯连续跨窗口方案均未启动。
+
+## 已完成：A/B连续赋值与死槽位复用；C恢复状态重新使用
 
 - [2026-11-19 15:02][gpt] **两批结果审阅至5d07e08**：[审阅记录](handoff/2026-11-19-state-reuse-review.md)。30个产物与11个可对应源码hash匹配，C十路/资格/损伤总表、AB干预176行changed/retention计数一致；未发现要求GPU重跑的新增运行缺陷，未重放服务器完整records。B死槽真值改变时30/30、29/29，A保留旧态0/30、0/29而clear成功；B重复赋值回原题仍有16个下游错误。C共同hold/noise2/lag2为原始27/31、三个后训练31/31；仅换q对末两轮VALUE无改善，整clean状态对照不能定位机制。报告公式、restore_u修回/净改善、原始clean分母、token位置示意标签及跨表同名字段已在审阅澄清。**Agent B/C本批关闭，空闲交接同步即可，不新增GPU/训练任务**；下一步扩大复用、C分块恢复等留用户讨论。
 - [2026-11-19 14:31][claude] **C-main 完成**：固定 `6ef63e3`，GPU2 串行 6/6；smoke 6/6 已按真实 tokenizer/连续反馈/十路状态重建/donor 时序接受（记录 `docs/records/2026-11-19/c-state-reuse/c-smoke-checks.md`）。四版本各 32 固定图 ×36 条件（3 时点×4 来源×3 lag）×H16，共 4,608 条 records；每版本 188,397 sample / 48,229,632 token forwards，main 约 513 s。q last-two 主口径为 VALUE，first4 单列；`input_qualified` 881/1138/1131/1127，`common_input_qualified` 870/1,152。可归因扰动的持续 q VALUE 损伤只出现在 noise2：early/noise2 unique 图 10/6/7/6，hold/noise2 initial 4 图而三个后训练版本 0；observed 下 keep/pre/solved 的 q VALUE 逐版本相同，clean receiver 修回 124/124，pre donor 对 VALUE 无增量；restore_u 仅 lag1 修回 10 条、同时改错 5 条。q 输入正确的损伤 initial 11 条全为 g16 late clean-path、noise 1 条为真实单条；没有可重复的“u/q 输入读数都对、q VALUE 仍错”。自动包 late/semantic/lag2 的 first4 3→29 是 VARIABLE 字段漂移，VALUE 29→29（initial 仅 12/32 input_qualified），不能当算术恢复。报告/小表/audit：`docs/records/2026-11-19/c-state-reuse/c-functional-reuse.md`，提交 `21a8c10`；原始 records/隐藏快照留 tmp。未训练、未扩图、未做层/头干预；四版本同源 seed2026，不是四种子，不作机制或最终测试结论。
