@@ -10,7 +10,7 @@
 - `tasks.json`：`b13f87df400c4d2596dd43284b6f906b3ae5eda6a2ae44441404cb05358690d8`；80 个新生成开发任务，5 形状 ×16，seed 2026111903。
 - `models.json`：`73e99dcbc603f419962e93bce46021b84ed1d9737936ec325dd9ac372d1bfd19`；A/B 使用 s42 主权重；五个登记权重的 hash 均复核。
 - assignment：每形状 16 图，共 80；每模型 1,940 条记录（含固定前两图/形状的 2 个诊断阶段）。4 次更新。
-- program：每形状前 8 图，共 40；每模型 2,600 条记录；20 窗口，32 物理变量位置/256 padded tokens，末尾累计 526 逻辑节点、520 算术操作。诊断固定在第 1/4/10/20 窗口，且只用前两图/形状。
+- program：每形状前 8 图，共 40；每模型 2,600 条记录；20 窗口，32 物理变量位置/256 padded tokens，末尾累计 526 逻辑节点、520 执行/结构祖先操作（不是不可简化的最小计算量）。诊断固定在第 1/4/10/20 窗口，且只用前两图/形状。
 - smoke 5 形状各 1 图、program 2 窗口，已独立检查；主批没有按成功补图、换权重或改预算。所有程序分支记录均为 `complete`，本次没有自然非数值提交。
 
 | run | 记录 | forwards | 秒 |
@@ -61,7 +61,7 @@
 ## 4. 固定诊断分叉
 
 - 同一 carry 状态、同一额外 D+8 预算，5 个分叉；成功与失败起点都保留。`probe_continue` 从主轨迹末态继续，另外四路分别刷新题面、重置结果、同时刷新/重置、同实际输入从空白重解。
-- A：`probe_refresh_task` 的修回/改坏为 0/0；`probe_reset_results`、`probe_refresh_and_reset`、`probe_scratch_same_input` 各为 416/25（节点-事件求和，60 个固定 probe）。B：五种分叉均为 0/0，因为其 carry 在这些固定起点大多已经正确。
+- A：`probe_refresh_task` 的修回/改坏为 0/0；`probe_reset_results`、`probe_refresh_and_reset`、`probe_scratch_same_input` 各为 assignment 188/0、program 228/25（节点-事件求和；两模式合计 60 个固定 probe，不能把跨任务总数当局部修复率）。B：五种分叉均为 0/0，因为其 carry 在这些固定起点大多已经正确。
 - 这些是固定起点的配对交集，不是总体修复率；它们只说明该批中被选中状态下“清空/重解”与“继续”的差异，不能单独证明检测、定位或选择性清空机制。完整逐 probe 行见 `ab-probe-pairs.csv`。
 
 ## 5. 证据与限制
@@ -74,7 +74,18 @@
 - C lane 未在本报告合并；C 的主结果、接口检查和三 seed 需要由 C 执行并在共同汇总中单独列出。不能把各 lane 自己的 common 分母拼成 ABC common。
 - 尚未区分：A carry 的早期失败是题面写入、旧答案保留、下游传播还是读出/寻址；reset/scratch 的高分也可能来自清空范围本身。当前只报告可复核的行为边界，不作统一机制结论。
 
-## 6. 文件 SHA-256
+## 6. 独立复核：reference 程序与 actual-input conditional
+
+- 复核代码已纳入 `tools/abc_workspace/checks/verify_ab_records.py`；它只读 manifest/records，不加载模型、不跑 GPU。主批命令：
+  `python tools/abc_workspace/checks/verify_ab_records.py --bundle tmp/analysis/abc-workspace-20261119/AB-main --report docs/records/2026-11-19/ab-workspace/ab-verifier.json`
+- 结果：`ab-verifier.json`，0 errors；9,080 条记录、290,560 个节点真值；4,800 条带 reference 程序的记录；5,400 条带 conditional metrics 的记录；600 个 probe；1,460 个 summary 组、240 条 program 轨迹、480 行 probe 交并。
+- 两类真值在代码里分开：
+  1. **reference 程序真值**：对每条 program 记录，`truth4` 的节点值必须等于 `protocol.reference_program(case,20)[stage-1]['truth']`，`reference` 字段必须与独立重算的参考程序一致；原程序指标用这份真值重算。
+  2. **actual-input conditional 真值**：把该记录的实际 `boundary_inputs`（模型实际提交 + 固定外生常数）送进 `protocol.evaluate`，得到该窗口的条件真值；`conditional_metrics` 用这份真值单独重算。
+- 两者不要求相等：B 的 `w4_f3:007` 在窗口 11 首次提交错误，窗口 12–20 的 conditional 终端可以全对，而原程序终端仍错；A 的 `w2_f2:000` 窗口 2 是旧值残留案例。复核将“给定实际输入后的局部求解”和“原程序累计提交是否正确”分别计数，不把前者替代后者。assignment 的 probe 使用规定输入，因此其 conditional 与 full truth 相同，代码仍走单独字段检查。
+- 报告 `ab-main-checks.md` 中的 summary/record 计数与本 JSON 一致；JSON 不含 raw records，只记录小结果和来源 hash。
+
+## 7. 文件 SHA-256
 
 | 文件 | SHA-256 |
 |---|---|
@@ -83,6 +94,8 @@
 | `ab-programs.csv` | `811370aafb827bda573914fde93f7c3d2a92a768acec654628906016cae4646b` |
 | `ab-probe-pairs.csv` | `1d59d164130037ef334040ca87a2c3dc2316e558ad4197c79b54ca2d6e70b951` |
 | `ab-summary-meta.json` | `9967eb0cfa4f5e3d7bbcfb87f6b03d54844cb7888254076daeeae943ecabf3ad` |
-| `ab-main-checks.md` | `ddd5459c77565426722560581003b9d7aa0e71de54076d8cf7e7c1201bf4367b` |
+| `ab-main-checks.md` | `374f55f1d0925fa4a30aea1c731332ea853656e23cf600d978bca18a0bc3f073` |
+| `ab-verifier.json` | `ad3ee721510dbe2eba00360cc0ae443fa9c00879ef617bf35b26de329f925e78` |
+| `tools/abc_workspace/checks/verify_ab_records.py` | `29a44655bfd640d11e7aea354722553df522074290df26b48cef9a181729c788` |
 
 `ab-main-checks.md` 中的 summary hash 指 tmp 原始文件；本目录的 CSV 副本已统一为 LF 换行，因此上表 hash 与 tmp 原文件不同，但内容字段一致。

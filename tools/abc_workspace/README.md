@@ -39,6 +39,17 @@ python tools/abc_workspace/merge_lanes.py \
   --out-dir tmp/analysis/abc-workspace-20261119/ABC-summary
 ```
 
+独立记录复核（CPU；不加载模型、不跑GPU）：
+
+```bash
+python tools/abc_workspace/checks/verify_ab_records.py \
+  --bundle tmp/analysis/abc-workspace-20261119/AB-main \
+  --report docs/records/2026-11-19/ab-workspace/ab-verifier.json
+```
+
+该脚本分别核对 reference 程序真值与 actual-input conditional 真值；两者不要求相等。
+它同时重建 summary、coverage、program 轨迹和 probe 交并。
+
 ## 必须随结果保留的边界
 
 - C重新赋值只在指定题面位置写入新token的embedding，其余hidden继续传递；无每轮解码回灌。

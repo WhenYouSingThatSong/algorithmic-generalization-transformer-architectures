@@ -6,9 +6,10 @@
 - Queue-plan HEAD: `3c360ece3e6fe41dcf9f4ba07c977f489efda1a7`
 - GPU: 7 (AB serial; GPU 0–5 not used)
 - Queue: 5/5 tasks exited 0; `complete.json` written.
-- Independent verifier: `tmp/analysis/abc-workspace-20261119/checks/verify_ab_smoke.py`
+- Independent verifier: `tools/abc_workspace/checks/verify_ab_records.py`
   invoked with `--bundle tmp/analysis/abc-workspace-20261119/AB-main`; result
-  `{"status":"ok","errors":0}` after rebuilding all records and four summary tables.
+  `{"status":"ok","errors":0}`, small result `ab-verifier.json`, after rebuilding
+  all records and four summary tables. It does not load a model or run GPU.
 
 ## Provenance note
 
