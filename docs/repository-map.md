@@ -4,6 +4,8 @@
 
 ## 从哪里开始
 
+2026-11-20补充：最新实现为[C多时点局部纠错＋过程监督UPDATE](../tools/c_multitime/README.md)，设计/身份分析见[记录](records/2026-11-20/c-identity-and-multitime-design.md)；旧批已交[dev小测](records/2026-11-20/c-update-small-test.md)。下方11月19日盘点数字与状态保留为历史快照，当前执行看板为准。
+
 1. 当前要执行什么：[看板](../ai-collab/board.md)。
 2. 最新训练方案/命令：[C纠错与UPDATE](../tools/c_update/README.md)。
 3. 实验代码分类：[工具索引](../tools/README.md)。

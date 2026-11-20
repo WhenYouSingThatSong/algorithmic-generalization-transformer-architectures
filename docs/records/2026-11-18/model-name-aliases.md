@@ -17,6 +17,9 @@
 | vocab33事故配置、已取消运行 | 无效/已取消历史运行 | 不能映射成可用C权重 |
 | A-M5、A-L4、A-L4fast（D256）、L2corr等 | 历史离散配置（注明结构/训练） | 不自动改叫当前A/B；层数、宽度、fast/slow配方不同 |
 | F、W（旧优先任务标签） | C：输入对齐诊断；A/B：合法重新赋值 | 属实验任务，不是新增模型 |
+| C（纠错后训练）、c_update arm=correction | C（前沿污染纠错） | 2026-11-19批次；没有第二层过程监督，不泛指所有后训练 |
+| C（UPDATE后训练）、C（前沿污染＋UPDATE）、c_update arm=update | C（前沿污染＋过程监督UPDATE） | 明确第二层中间监督；不表示硬门控，不是新的多时点版本 |
+| 讨论中的C（多时点局部纠错＋UPDATE） | C（多时点局部纠错＋过程监督UPDATE） | 2026-11-20新实现，recipe_id=c_multitime_process_update_v1；未经服务器验证前不称已有训练权重 |
 | C报告中的情况A/B/C；CSV字段A_outfix_inwrong/B_allu_qinwrong_ctrl/C_allreadouts_qwrong_ctrl | 现象①/②/③ | 原CSV列保留以匹配hash；新文档不用模型字母给现象编号 |
 
 本轮重新赋值源身份：A为A-L4D384fast s42/e86，B为本组B-M6 s42/e92。完整源hash见priority-reassignment-audit.json。

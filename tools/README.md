@@ -14,9 +14,10 @@
 | [priority_pilots](priority_pilots/README.md) | C输入读出与下游计算对齐分析、A/B合法重新赋值 |
 | [state_reuse](state_reuse/README.md) | A/B重复赋值与死槽位复用、C状态恢复后继续使用 |
 | [abc_workspace](abc_workspace/README.md) | ABC共同赋值任务、固定32位置的20窗口长程序及边界诊断 |
-| [c_update](c_update/README.md) | 最新：三个C纠错后训练＋一个第二层UPDATE监督版，各50epoch，固定评估与原C接收功能检验 |
+| [c_update](c_update/README.md) | 11月19日：C前沿污染纠错三个种子＋过程监督UPDATE一个种子，各50epoch |
+| [c_multitime](c_multitime/README.md) | 11月20日：C多时点局部纠错＋过程监督UPDATE，GPU批量标签、默认batch32，独立训练/验收/评估 |
 
-最新`c_update`：代码和分工已交付，仓库截至2026-11-19 22:48尚无执行agent的新训练结果提交。Agent C先训练和阶段评估，交接后Agent B正式评估全部模型；使用同一清单，串行交接。不要把早期pilot已有权重算成本批50epoch已经完成。
+`c_update`已交[开发集小测](../docs/records/2026-11-20/c-update-small-test.md)，正式统一评估仍待Agent B交付。`c_multitime`是新实现，不能当成已有训练结果。Agent C负责小验证/训练，Agent B负责正式评估；同一plan，串行交接，不打断旧任务。
 
 ## 文件放置
 
