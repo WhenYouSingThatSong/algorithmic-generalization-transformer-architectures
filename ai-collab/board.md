@@ -1,9 +1,15 @@
 # 工作看板
 
-> 最近更新：2026-11-20 17:51 CST · [claude]
+> 最近更新：2026-11-20 18:35 CST · [gpt]
 > 活看板：任务可以移动；状态变化在 `log.md` 记一行。条目格式 `[YYYY-MM-DD HH:MM][author]`。
 
 ## 当前：旧批评估交付 + 新多时点局部纠错/过程监督UPDATE
+
+- [2026-11-20 18:35][user/gpt] **用户批准隔离工作树并行，要求将全面评估分工推送。** [执行要求](handoff/2026-11-20-parallel-evaluation.md)。此条更新旧“所有任务一律串行等待”的限制；运行树不pull/改源码、输入只读、输出唯一写入者仍有效。用户转述新smoke已过、GPU5新训练已启动、GPU4旧A评估已开始；服务器receipt尚待提交，不重复smoke、不把口头汇报当已核查产物。
+- [ ] [Agent B，评估调度唯一负责人] 保留当前A任务；先排除原execute总队列自动重复领取，再用单模型evaluate分三条互斥队列：GPU4 A/B；GPU6 s2026原始/correction/update；GPU7 s42原始/correction、s1234原始/correction。同plan、标准模型输出目录，已完成项不重跑；全部完成后单进程compare。不得同时启动三份完整execute。卡号启动前复核，具体安全交接见执行要求。
+- [ ] [Agent B] 优先交同seed s2026三版对照、普通纠错三个种子对照；基础能力/纠错/定位执行/修复后使用四组结果，早晚/联合/持续/N32与N128分层。用已有dev先做CPU受扰汇总，不等九份test全完成；源通过/受损/恢复分母和VALUE/first4分开，完整清单见交接。
+- [ ] [Agent C] GPU5继续当前s2026新训练，不改batch/配方、不在同卡加任务；补交已完成smoke的receipt和代码身份（含外部占用OOM记录），不重复跑。分模式报告有效污染与EMPTY/错误/正确起点、定位/执行、显存、训练/保存/dev耗时，特别检查较晚污染是否大量源拒绝；低通过如实报告，不暗换规则。首epoch后更新ETA。
+- [ ] [两agent] 独立固定代码树/输出运行，读取本次文档不更新运行树；在管理工作树更新board/log并提交小表/证据身份。新版本仍只s2026，待阶段结果再讨论扩种子；本次不新增训练组或变量名干预。
 
 - [2026-11-20 17:51][claude] **旧 c_update 四份 final 完成并交接 Agent B**：`C_s2026 correction`、`C_s2026 update`、`C_s42 correction`、`C_s1234 correction` 均 50 epoch 完成；plan `tmp/analysis/c-update-20261119/data/plan.json` SHA `b3c4b1be…`，run 根目录 `tmp/analysis/c-update-20261119/run`。final SHA：s2026-correction `e78c8ac7…`、s2026-update `c6ba26a0…`、s42-correction `88430930…`、s1234-correction `b9ad22aa…`。四份 final/meta/audit/dev-50 的完整 hash、实际 dose 和 B 的精确 evaluate 命令见 `docs/records/2026-11-20/c-update-training-handoff.md`（提交 `40da6df`）；C_s2026 update dev 小测另见 `96bdde6`。B 现在可以按同一 plan 跑五个原权重+四 final 的正式 evaluate；C 尚未启动新 multitime smoke。未重跑旧训练、未改旧 c_update 源码。
 
