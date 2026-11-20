@@ -1,0 +1,104 @@
+{
+  "status": "passed",
+  "plan_sha256": "b3c4b1be9325dd37aefc2004dc19b6e5ee6d82c6ff097c25c072d3f39038bc24",
+  "code_hashes": {
+    "tools/c_update/runtime.py": "e2e4077972a71fde4580c757452bfaf7c0edc40bff5fdd5aa0a355795854d201",
+    "tools/c_update/train_model.py": "b1ffdd6833d08cccddc945b963279a8950c2456e7b3f06a825e5f49680bc04cf",
+    "tools/c_update/summarize_training.py": "38e359df64c2f4b80f6e90e7d8acf0bd353d1c786176ec3eaa9abaeb8370bc4a",
+    "tools/c_update/prepare.py": "f2fdd7ba256bb0daf9366cc883f95017d1d28d892f27a1be845cf1393bd87bb1",
+    "tools/c_update/protocol.py": "3a44dfb793ccb941ad23f385cc6a37bb82a7980e7e8fc20f2ebb6cdeaaa9d44b",
+    "tools/c_update/execute.py": "4443e18a29d7b1b49f6cca90d1fab4fa797fd4e08fdfe71f72d421e8ca76c909",
+    "tools/c_update/summarize.py": "8b549dfb8053cf8691579458fe66b8601ff08da0894cbafa80a6c23abdef715f",
+    "tools/c_update/evaluate.py": "089ba0bd4d1753d2220e0c180be3a1203d7430bae6e1863f16b02cb34419725c",
+    "tools/c_update/verify_server.py": "b3d7b2f6b5a052d20cc784b8d46abcfc4d379abeaf3ac188dd7000398449578c",
+    "tools/c_update/compare.py": "c732c4409c2a2d50b85d547364293c07ef604cded8e4681a270f5275e06ab42b",
+    "tools/c_update/losses.py": "da394d898380596992aaf0874fa88f922b4870f4fa68da25730aee52f3c97f36",
+    "tools/c_update/functional_probe.py": "cd855d5b8a6f5a27ce4ec406ac8b0b8d1b00b37e9068da6b9c29091c26327561",
+    "experiments/model.py": "dccaeaf24619c2e685e7e3146a700b42fc565abbffcbdc9d1f0f6eda53fb07dc",
+    "experiments/tokenizers.py": "611e9964cf326c2bf03ab1287993908a172f0a9fa221bc0f4f6bdb811dbdca53",
+    "Simtransformer/simtransformer/model_base.py": "f8e419b832232db3913227952d1c9ba48c2af5ad8b0666edc37aa021f18a3285",
+    "tools/b_mechanism/b_mechanism_common.py": "85af46c4c331eaa827ac4880c5879334d94b5c0c953eebe2c6df712074d33074",
+    "tools/b_mechanism/trajectory_io.py": "164f593c9ea0ac94f6fe81295c3b5551042919a63fb66851de864b30b3fa8322",
+    "tools/counterfactual_control/design.py": "9af2555e0cf110b8df8166611cf67f76f6a3dc8c9e9c91c3eb40d466fbc4a489",
+    "tools/c_capability/c_common.py": "f1d41a3edfe615045abbae91938c67fab0bda7eca4b7d4c0d37a79140ac423a9",
+    "experiments/generate_data.py": "0cf94fa24c9465e66b6f27e9e1b62453c001d88ef980fbc311cd69fd5f4d35ca",
+    "tools/c_multitime/multitime_core.py": "67cc8c9ee47615d716bafcba39f016069cc9c6022930df2c46470bd254cee2bc",
+    "tools/c_multitime/evaluate_new.py": "f30b3c6f9c1dd44d77df90756c19e3dd7d31c75832dd1bcbef9e48c4d539c33b",
+    "tools/c_multitime/verify.py": "b66ac591f1a68bd656d86da84f0f13c8cdeceeccdabb9d52c64d5a09ba3efc7c",
+    "tools/c_multitime/dose_report.py": "db62337c48381e234c73b288d6e489e094d5c41c4a28fee08feaa2c15765b224",
+    "tools/c_multitime/process_loss.py": "3c0e3629ef8a7f6a76f0a0ed2286ce63e402e359b73197b64d44597259865bbf",
+    "tools/c_multitime/execute.py": "20b955a30af88cd37bc7144c5b0a4d0e7ca34ccea876811ae5839230b0953d4e",
+    "tools/c_multitime/tensor_targets.py": "e03c024a3141cf82c150a3e5a37abb29c21a0c64013ddfdaaf3fb25626cda59c",
+    "tools/c_multitime/compare_new.py": "d3fa7f480589765d28dfad7b9402b070b304620e4cd92015185085461478088b",
+    "tools/c_multitime/train.py": "5a7c593fb685fa3c605e8e419d0f9eba280016672e048685fa1224ac204f1edd",
+    "tools/c_multitime/spec.py": "5cda4e92dbd8b9aa0c0f019e05987f6d4b3545b9c576b748aa15791838b630df"
+  },
+  "micro_batch": 32,
+  "donor_batch": 32,
+  "smoke_checkpoint_sha256": "e21642121e5ca72ca238b90e435de41e44b1bc220fbb6e313ae07aaddc51fef1",
+  "checks": [
+    "six_effective_batch32_steps",
+    "GPU_labels_equal",
+    "forward_unchanged",
+    "two_loop_BPTT",
+    "middle_head_gradient",
+    "reload_dev2_and_frozen_C_probe"
+  ],
+  "performance": [
+    {
+      "mode": "frontier",
+      "enabled": false,
+      "train_step_seconds": 0.6145127471536398,
+      "peak_allocated_bytes": 19561912832,
+      "attempts": 0,
+      "accepted": 0,
+      "actual_value_changed": 0
+    },
+    {
+      "mode": "frontier",
+      "enabled": true,
+      "train_step_seconds": 0.8412234336137772,
+      "peak_allocated_bytes": 19662856704,
+      "attempts": 498,
+      "accepted": 496,
+      "actual_value_changed": 483
+    },
+    {
+      "mode": "middle",
+      "enabled": false,
+      "train_step_seconds": 0.2577633187174797,
+      "peak_allocated_bytes": 26775831552,
+      "attempts": 0,
+      "accepted": 0,
+      "actual_value_changed": 0
+    },
+    {
+      "mode": "middle",
+      "enabled": true,
+      "train_step_seconds": 0.5011418648064137,
+      "peak_allocated_bytes": 26774951936,
+      "attempts": 241,
+      "accepted": 241,
+      "actual_value_changed": 241
+    },
+    {
+      "mode": "late_budget",
+      "enabled": false,
+      "train_step_seconds": 0.4414266552776098,
+      "peak_allocated_bytes": 45744649216,
+      "attempts": 0,
+      "accepted": 0,
+      "actual_value_changed": 0
+    },
+    {
+      "mode": "late_budget",
+      "enabled": true,
+      "train_step_seconds": 2.014802098274231,
+      "peak_allocated_bytes": 45743732224,
+      "attempts": 528,
+      "accepted": 528,
+      "actual_value_changed": 528
+    }
+  ],
+  "note": "Technical checks only; source rejection and model errors are reported, not filtered away."
+}

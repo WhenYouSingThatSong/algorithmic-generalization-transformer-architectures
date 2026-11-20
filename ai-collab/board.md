@@ -1,9 +1,11 @@
 # 工作看板
 
-> 最近更新：2026-11-20 18:35 CST · [gpt]
+> 最近更新：2026-11-20 19:05 CST · [claude]
 > 活看板：任务可以移动；状态变化在 `log.md` 记一行。条目格式 `[YYYY-MM-DD HH:MM][author]`。
 
 ## 当前：旧批评估交付 + 新多时点局部纠错/过程监督UPDATE
+
+- [2026-11-20 19:05][claude] **C multitime smoke 已通过，训练在 GPU5 运行**：先 GPU3 因外部 74.50 GiB 占用 OOM，换空闲 GPU4 以同一 micro32/donor32 通过；六步 max-depth 验收、GPU 标签、forward、两轮 BPTT、UPDATE 梯度、reload/dev2/冻结原 C probe 全部通过。smoke 分模式：frontier 496 accepted/483 changed、middle 241/241（237 个注入前已正确，证明无接收正确性过滤）、late_budget 528/528；late smoke batch 全部已完成，不能外推到主批。证据/身份/耗时/显存：`docs/records/2026-11-20/c-multitime-smoke.md` + `.json`/acceptance/audit/timings（本提交）。正式 s2026 训练在 GPU5，当前约 epoch4/50、step5,959；peak_allocated 45.8GB（交接转述的~73GB未在本次分配峰值重现），约 7–8h ETA；GPU5 独占，GPU4 B 的 A 评估继续，GPU6/7 留给 B。
 
 - [2026-11-20 18:35][user/gpt] **用户批准隔离工作树并行，要求将全面评估分工推送。** [执行要求](handoff/2026-11-20-parallel-evaluation.md)。此条更新旧“所有任务一律串行等待”的限制；运行树不pull/改源码、输入只读、输出唯一写入者仍有效。用户转述新smoke已过、GPU5新训练已启动、GPU4旧A评估已开始；服务器receipt尚待提交，不重复smoke、不把口头汇报当已核查产物。
 - [ ] [Agent B，评估调度唯一负责人] 保留当前A任务；先排除原execute总队列自动重复领取，再用单模型evaluate分三条互斥队列：GPU4 A/B；GPU6 s2026原始/correction/update；GPU7 s42原始/correction、s1234原始/correction。同plan、标准模型输出目录，已完成项不重跑；全部完成后单进程compare。不得同时启动三份完整execute。卡号启动前复核，具体安全交接见执行要求。
@@ -15,7 +17,7 @@
 
 - [2026-11-20 13:57][user/gpt] 用户确认不按接收模型先正确筛选注错，要求记录命名/身份漂移分析并实现优化版。[设计记录](../docs/records/2026-11-20/c-identity-and-multitime-design.md)、[代码与验收](../tools/c_multitime/README.md)、[交接](handoff/2026-11-20-c-multitime.md)。统一新名**C（多时点局部纠错＋过程监督UPDATE）**；先原C s2026/e143、50epoch上限，旧任务不迁移、不打断。新入口独立，旧c_update源码未改。
 - [x] [gpt] 新核心：三时点结构候选、无接收正确性过滤、同步局部GPU标签、第二层定位/末层正确性与对齐、全BPTT、默认micro32/供体32、训练/保存/dev分项计时、严格身份断点、同plan评估与三种同seed C对比。普通teacher标签另提供向量化等价实现，未切换旧训练。命名和历史别名已记录。
-- [ ] [Agent C] 先交接/保留旧四次训练与阶段评估，不在运行树pull；空闲后按新README执行六步最大深度smoke和verify。交GPU标签/loss梯度等价、两轮BPTT、加载、源质量与实际注入、显存和耗时；技术检查不是能力结果。默认32，OOM才以新目录测16/8并记录；不静默改精度/损失/概率。
+- [x] [Agent C] 先交接/保留旧四次训练与阶段评估，不在运行树pull；空闲后按新README执行六步最大深度smoke和verify。交GPU标签/loss梯度等价、两轮BPTT、加载、源质量与实际注入、显存和耗时；技术检查不是能力结果。默认32，OOM才以新目录测16/8并记录；不静默改精度/损失/概率。**smoke完成，见 19:05 条；GPU3 OOM为外部占用，GPU4重试通过。**
 - [ ] [Agent C] 验收后按单seed50epoch范围执行；原50k/原e143/旧plan不变，main不从smoke或旧UPDATE final续训。新模式等概率、5%batch×50%结构候选，late固定D+4不保证完成；注错前状态只作记录。交每模式实际剂量/成本/训练曲线、dev、final/hash；未批准自动扩种子或新增消融。
 - [ ] [Agent B] **旧批任务保留优先交付**：从已有dev JSON/JSONL先补普通C前沿污染纠错的目标恢复、下游损伤、再错及UPDATE受扰条件定位表；提交小表/原始汇总JSON与来源hash，不能只报clean准确率。完成旧五原权重+四final正式评估，不重复已有阶段GPU评估。
 - [ ] [Agent B] 后续接收新final，用同plan的evaluate_new和compare_new比较s2026原C/前沿污染纠错/前沿污染＋过程监督UPDATE；VALUE/first4分开，clean/受扰定位分开，共同资格只用于评估分层而非训练筛选。固定预算与实际完成区别明确。

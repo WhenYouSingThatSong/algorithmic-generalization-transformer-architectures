@@ -1,0 +1,9 @@
+{"phase": "checkpoint", "seconds": 0.09339484758675098, "step": 1, "name": "last"}
+{"phase": "checkpoint", "seconds": 0.08125461265444756, "step": 2, "name": "last"}
+{"phase": "checkpoint", "seconds": 0.0890535656362772, "step": 3, "name": "last"}
+{"phase": "checkpoint", "seconds": 0.08085840567946434, "step": 4, "name": "last"}
+{"phase": "checkpoint", "seconds": 0.08111451007425785, "step": 5, "name": "last"}
+{"phase": "checkpoint", "seconds": 0.08336233720183372, "step": 6, "name": "last"}
+{"phase": "train_epoch_segment", "seconds": 5.208061968907714, "step": 6, "epoch": 1, "resumed_from_batch": 0}
+{"phase": "checkpoint", "seconds": 0.08977176062762737, "step": 6, "name": "last"}
+{"phase": "checkpoint", "seconds": 0.09158351086080074, "step": 6, "name": "smoke-final"}
