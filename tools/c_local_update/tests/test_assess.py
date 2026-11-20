@@ -5,7 +5,7 @@ from pathlib import Path
 import torch
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
-from assess import focused
+from checks.minimal_dev import measure
 from local_protocol import P
 
 
@@ -32,7 +32,8 @@ class FocusedTests(unittest.TestCase):
                 logits=[torch.nn.functional.one_hot(out[...,i],n).float() for i,n in enumerate((7,129,2,25,2,2))]
                 mid=torch.nn.functional.one_hot(torch.tensor([ref]).long(),2).float()
                 return out,logits,mid
-        r=list(focused(RT(),x,y,g,"dev",9,dict(u=4,q=6,delta=1)))
+        clean,r=measure(RT(),x,y,g,dict(gid=9,target=dict(u=4,q=6,delta=1)))
+        self.assertEqual(clean,dict(gid=9,rounds=4,nodes=6,value_correct=6,first4_correct=6))
         by={(v["timing"],v["condition"]):v for v in r}
         self.assertEqual(by["actual_complete","clean"]["start"],3)
         for cond in ("empty_only","wrong","empty_and_wrong","parent_child_consistent_wrong"):

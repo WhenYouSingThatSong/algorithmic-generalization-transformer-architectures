@@ -1,6 +1,6 @@
 # 节点再赋值、C 的正常求解窗口后训练和正式评测
 
-[2026-11-20][user/gpt] Agent B 先做原始 A/B/C 再赋值小测，随后评测三个新 C。Agent C 冻结清单并训练。两条任务独立；按现有并行约定在隔离代码快照、可用 GPU 和独立输出目录执行。旧运行继续使用旧版本。服务器保存大产物，回传摘要、版本、哈希、覆盖数及失败原因。
+[2026-11-20][user/gpt] Agent B 先做原始 A/B/C 再赋值小测，随后评测三个新 C。Agent C 冻结清单并训练。本批依次交接 A/B/C 再赋值、C 最小验证集评测、三个种子正式训练、三份 final 的全面评估。三个种子在训练阶段可并行。旧运行继续使用旧版本。服务器保存大产物，回传摘要、版本、哈希、覆盖数及失败原因。
 
 ## 1. Agent B · 一张题里允许反复赋值
 
@@ -29,11 +29,16 @@ python tools/c_local_update/rebinding.py --plan "$abc_plan" --out-dir "$local_ru
 
 ```bash
 python tools/c_local_update/local_protocol.py --plan "$abc_plan" --output "$local_manifest"
+python tools/c_local_update/checks/minimal_dev.py --plan "$abc_plan" --manifest "$local_manifest" --model C_s2026 --output "$local_run/minimal-dev-s2026-e0.json"
 python tools/c_local_update/train.py --plan "$abc_plan" --manifest "$local_manifest" --model C_s2026 --out-root "$local_run/train" --smoke
 python tools/c_local_update/train.py --plan "$abc_plan" --manifest "$local_manifest" --model C_s42 --out-root "$local_run/train"
 python tools/c_local_update/train.py --plan "$abc_plan" --manifest "$local_manifest" --model C_s1234 --out-root "$local_run/train"
 python tools/c_local_update/train.py --plan "$abc_plan" --manifest "$local_manifest" --model C_s2026 --out-root "$local_run/train"
 ```
+
+**服务器执行顺序**：B 先提交五份原权重的再赋值结果或其路径与身份，并在看板交接。C 冻结清单，用 s2026 在预定的 8 张 dev 图上运行最小评测，交 VALUE、四字段正确率及分类 UPDATE/下游结果，并保留不可注入、未完成等实际分母。此时第二层读出头刚初始化，UPDATE 分数仅用于检验评测链路。再做最大深度三模式反传 smoke。两者可正常出数后立即启动三种子；少样本低准确率或零合格的单个条件照实记录，不是停止条件。若同一清单已有产物或训练已启动，复用已有结果，训练保持运行，缺的 8 图小测单独补。
+
+每个种子 epoch 1 会自动在 128 张 dev 图做基础评测、在其中固定 32 图做分类。此时才报告学过的 UPDATE 结果；B 可在训练继续时整理新算/直接错/健康三组和同图混合，不等 50 epoch。若需同一批 8 图的前后对照，用上述 minimal_dev 命令加 --checkpoint 对应的 epoch-01.ckpt，写独立输出。正式测试由 B 对 epoch 50 评估。
 
 最后三条可交给三块空闲 GPU 上的独立进程，每个进程单独设 CUDA_VISIBLE_DEVICES。默认 micro/donor 32，资源不足可试16/8，以新运行记录实际设置。smoke 用最大深度三模式验证反传，记录剂量；正式训练从原 C 起跑。中断按同身份加 --resume 从已完成 epoch 继续。训练中用 dev；记录阶段指标和用时，保留实际剂量低或性能一般的种子。
 
