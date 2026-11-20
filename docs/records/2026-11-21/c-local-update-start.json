@@ -1,0 +1,113 @@
+{
+ "date": "2026-11-21",
+ "protocol": "c_local_update_normal_window_v1",
+ "status": "minimal_dev_and_smoke_passed_training_running",
+ "code": {
+  "worktree": "/workspace/lab-xj/users/jinxi/code/yhy/management-20261120",
+  "commit": "8140ca8",
+  "main_training_tree": "/workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures",
+  "main_training_tree_commit": "0e65595",
+  "main_training_tree_pulled": false
+ },
+ "plan": {
+  "path": "tmp/analysis/c-update-20261119/data/plan.json",
+  "sha256": "b3c4b1be9325dd37aefc2004dc19b6e5ee6d82c6ff097c25c072d3f39038bc24"
+ },
+ "manifest": {
+  "path": "tmp/analysis/c-local-update-normal-v1/manifest.json",
+  "sha256": "a91fd53e2e13251ad02284b8e3262869066cf471128f7f68d0744d7fdedbfb1c"
+ },
+ "minimal_dev": {
+  "model": "C_s2026",
+  "path": "tmp/analysis/c-local-update-normal-v1/minimal-dev-s2026-e0.json",
+  "sha256": "c220889f36c713088326aea93ea63a06c1bef70e9b53e43a3963525f703df078",
+  "epoch": 0,
+  "initialized_update": true,
+  "graphs": 8,
+  "nodes": 256,
+  "value_correct": 256,
+  "value_accuracy": 1.0,
+  "first4_correct": 256,
+  "first4_accuracy": 1.0,
+  "records": 88,
+  "selected_pooled": [
+   {
+    "key": ["dev", "frontier", "clean", "consistent_correct", "all"],
+    "observed": 3673, "reference": 0, "planned": 1890, "tp": 0, "fp": 1890, "fn": 0,
+    "execute_correct": 3673, "changed": 0, "aligned": 1783, "jointly_correct": 1783,
+    "gold_correct": 3673, "cleared": 1418
+   },
+   {
+    "key": ["dev", "frontier", "clean", "new_calculation", "all"],
+    "observed": 175, "reference": 175, "planned": 73, "tp": 73, "fp": 0, "fn": 102,
+    "execute_correct": 175, "changed": 175, "aligned": 73, "jointly_correct": 73,
+    "gold_correct": 175, "cleared": 77
+   },
+   {
+    "key": ["dev", "middle", "wrong", "direct_conflict", "all"],
+    "observed": 92, "reference": 92, "planned": 44, "tp": 44, "fp": 0, "fn": 48,
+    "execute_correct": 68, "changed": 90, "aligned": 44, "jointly_correct": 31,
+    "gold_correct": 45, "cleared": 36
+   }
+  ],
+  "note": "Freshly initialized UPDATE head; counts validate the evaluation chain only."
+ },
+ "smoke": {
+  "model": "C_s2026",
+  "root": "tmp/analysis/c-local-update-normal-v1/train/C_s2026-smoke",
+  "meta_sha256": "ca7e86098e09be21e467f6a2cd17c7557bcbdbceb26bef52d4ce2868e11327d3",
+  "micro_batch": 32,
+  "donor_batch": 32,
+  "rounds": 8,
+  "modes": [
+   {"mode": "frontier", "events": 503, "accepted": 503, "changed": 494, "head_grad_norm": 553.802001953125},
+   {"mode": "middle", "events": 291, "accepted": 291, "changed": 291, "head_grad_norm": 574.97265625},
+   {"mode": "completed", "events": 510, "accepted": 328, "changed": 328, "head_grad_norm": 591.2322387695312}
+  ]
+ },
+ "training": {
+  "root": "tmp/analysis/c-local-update-normal-v1/train",
+  "started_at": "2026-11-21T00:29:00",
+  "epochs": 50,
+  "total_steps": 78200,
+  "effective_batch": 32,
+  "micro_batch": 32,
+  "donor_batch": 32,
+  "runs": [
+   {
+    "model": "C_s42", "physical_gpu": 1,
+    "source_sha256": "4a00d6a21a7ed6ec9730daccf27f6077af45d2f2d7ff7376386bf0aa8903a798",
+    "seed": 1296029488,
+    "meta": "tmp/analysis/c-local-update-normal-v1/train/C_s42/meta.json",
+    "log": "tmp/analysis/c-local-update-normal-v1/train-C_s42.log"
+   },
+   {
+    "model": "C_s1234", "physical_gpu": 2,
+    "source_sha256": "0bca3a2b91e82d70d5808859d3a907e0b8a32e0a852ba483c208f955d7d70475",
+    "seed": 2942770351,
+    "meta": "tmp/analysis/c-local-update-normal-v1/train/C_s1234/meta.json",
+    "log": "tmp/analysis/c-local-update-normal-v1/train-C_s1234.log"
+   },
+   {
+    "model": "C_s2026", "physical_gpu": 3,
+    "source_sha256": "40babb206b1393d0892b047202b9d6469cd140c82f3ba82c96a466fa3c76e780",
+    "seed": 900330519,
+    "meta": "tmp/analysis/c-local-update-normal-v1/train/C_s2026/meta.json",
+    "log": "tmp/analysis/c-local-update-normal-v1/train-C_s2026.log"
+   }
+  ]
+ },
+ "old_multitime": {
+  "root": "tmp/analysis/c-multitime-20261120-run/train",
+  "physical_gpu": 5,
+  "snapshot_epoch": 42,
+  "snapshot_step": 65132,
+  "untouched": true
+ },
+ "boundaries": [
+  "Minimal dev is a fixed-chain check, not an update-capability estimate.",
+  "Smoke gradients only show the backprop path and labels are usable.",
+  "Three trainings are still running; no effect conclusion.",
+  "B formal evaluation starts only after the three final checkpoints exist."
+ ]
+}
