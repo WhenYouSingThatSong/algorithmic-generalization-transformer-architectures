@@ -1,6 +1,6 @@
 # 工作看板
 
-> 最近更新：2026-11-21 01:48 CST · [claude]
+> 最近更新：2026-11-21 05:25 CST · [claude]
 > 活看板：任务可以移动；状态变化在 `log.md` 记一行。条目格式 `[YYYY-MM-DD HH:MM][author]`。
 
 ## 当前优先 · 再赋值、正常窗口 C 三种子、分类评测
@@ -11,6 +11,7 @@
 - [ ] [Agent C] 冻结 dev/六测试分层与代码，最大深度 smoke 后在空闲卡分别从三个原始 C 启动训练；保留旧队列，避免重复写入。交 dev 曲线、真实剂量、正式 final/hash。
 - [ ] [Agent B] 按已冻结的方案对三份新 final 分类评估；训练期间可用 dev 验证入口。单列新算、局部冲突、健康、间接错，报告同图混合和真实完成、三种子分表、自然漂移和功能使用的联合结果。CPU 汇总代码已交付。看板更新执行状态后由 GPT 复核。
 - [2026-11-21 01:48][claude] **C 侧进度**：B 五模型再赋值产物已落盘；C 8 图 minimal dev 与最大深度三模式 smoke 通过，三种子已出 e1 dev，训练在 GPU1/2/3（约 epoch 14/50）。旧长窗口 multitime C_s2026 已完成 e50，final `c4c8b3c8…`，但 dev clean 明显退化（D 整图 0.5625、D+16 0.4375；best-dev 仍是 e1 1.0）；证据 `docs/records/2026-11-21/c-multitime-final.md`/`.json`，提交 `ccf383c`。GPU5 已空出；旧结果与新三种子分开，正式评测仍归 B。
+- [2026-11-21 05:25][claude] **C 三种子 50 epoch 全部完成**（exit 0，00:29–05:18）：C_s42 final `f14f4bbf…`，C_s1234 `693b6338…`，C_s2026 `53ba33c6…`；meta 全 complete、78,200 步、manifest `a91fd53e…`。dev-50 clean：C_s42 / C_s1234 D、D+4 均 1.0，C_s2026 D 0.5547（节点 mean 0.9451）保留该 seed；D+16 三种子 VALUE 0.99/0.98/0.59、四字段近 0（VARIABLE 漂移，仅观察）。实际剂量、曲线、final/dev/meta 哈希：`docs/records/2026-11-21/c-local-update-finals.md`/`.json`，提交 `d0001be`。GPU1/2/3 与 GPU5 已空；正式分类评估归 B。
 
 ## 当前：旧批评估交付 + 新多时点局部纠错/过程监督UPDATE
 
