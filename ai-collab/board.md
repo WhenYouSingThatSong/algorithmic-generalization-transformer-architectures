@@ -1,9 +1,11 @@
 # 工作看板
 
-> 最近更新：2026-11-20 13:57 CST · [gpt]
+> 最近更新：2026-11-20 17:51 CST · [claude]
 > 活看板：任务可以移动；状态变化在 `log.md` 记一行。条目格式 `[YYYY-MM-DD HH:MM][author]`。
 
 ## 当前：旧批评估交付 + 新多时点局部纠错/过程监督UPDATE
+
+- [2026-11-20 17:51][claude] **旧 c_update 四份 final 完成并交接 Agent B**：`C_s2026 correction`、`C_s2026 update`、`C_s42 correction`、`C_s1234 correction` 均 50 epoch 完成；plan `tmp/analysis/c-update-20261119/data/plan.json` SHA `b3c4b1be…`，run 根目录 `tmp/analysis/c-update-20261119/run`。final SHA：s2026-correction `e78c8ac7…`、s2026-update `c6ba26a0…`、s42-correction `88430930…`、s1234-correction `b9ad22aa…`。四份 final/meta/audit/dev-50 的完整 hash、实际 dose 和 B 的精确 evaluate 命令见 `docs/records/2026-11-20/c-update-training-handoff.md`（提交 `40da6df`）；C_s2026 update dev 小测另见 `96bdde6`。B 现在可以按同一 plan 跑五个原权重+四 final 的正式 evaluate；C 尚未启动新 multitime smoke。未重跑旧训练、未改旧 c_update 源码。
 
 - [2026-11-20 13:57][user/gpt] 用户确认不按接收模型先正确筛选注错，要求记录命名/身份漂移分析并实现优化版。[设计记录](../docs/records/2026-11-20/c-identity-and-multitime-design.md)、[代码与验收](../tools/c_multitime/README.md)、[交接](handoff/2026-11-20-c-multitime.md)。统一新名**C（多时点局部纠错＋过程监督UPDATE）**；先原C s2026/e143、50epoch上限，旧任务不迁移、不打断。新入口独立，旧c_update源码未改。
 - [x] [gpt] 新核心：三时点结构候选、无接收正确性过滤、同步局部GPU标签、第二层定位/末层正确性与对齐、全BPTT、默认micro32/供体32、训练/保存/dev分项计时、严格身份断点、同plan评估与三种同seed C对比。普通teacher标签另提供向量化等价实现，未切换旧训练。命名和历史别名已记录。
@@ -20,10 +22,10 @@
 - [2026-11-19 22:20][user/gpt] 用户批准具体实现；新增要求“源向量读成错值还不够，要在未做纠错后训练的原C里检查是否真的让下游用错”。[执行交接](handoff/2026-11-19-c-correction-update.md)、[方案/代码/命令](../tools/c_update/README.md)。范围：原50k训练图，C纠错s42/s1234/s2026 + C UPDATE先s2026，各50epoch；不加普通续训对照，不重训A/B。此项更新下方历史“第四步训练暂缓”的限制，其余方向不自动扩展。
 - [x] [gpt] 新目录`tools/c_update/`：连续污染、原B剂量核对、第二层UPDATE读出、同步标签和正确性/对齐联合loss、固定评估、未做纠错训练原C接收功能检验、串行队列和共同资格汇总。9项stdlib针对性测试通过；torch/真实权重验证留执行agent。尚未在服务器运行，不能把实现完成当训练结果。
 - [2026-11-19 22:26][user/gpt] **两agent分工已定：Agent C负责训练阶段；Agent B负责训练交接后的全部模型正式评估和结果整理；GPT负责设计与审阅。** Agent名称不是模型范围：Agent B本轮评估原A/B/C及四份新C。共享服务器仍串行交接，任一时刻只有一位队列负责人；C训练期间B不改运行树、不启动另一套评估、不重生成数据。
-- [ ] [执行agent C，训练阶段队列负责人] 空闲交接同步reproduction，生成唯一plan，按README prepare→smoke。核对新可算位置/源年龄、teacher目标、无硬gate、BPTT与对齐梯度、新下游保持旧hidden。smoke和main分目录，main仍从原e143开始。
-- [ ] [执行agent C] 技术smoke通过后执行四次50epoch；原C功能探针64dev图先做，每检查点再做。epoch1/3/5/10/15/20…50小评测，性能一般仍继续到50，代码/数值故障停下记录。不得临时改源筛选或挑传播成功样本训练。
-- [ ] [执行agent C] 训练阶段交付四份final路径/SHA、唯一plan路径/SHA、运行提交及代码hash、训练曲线、实际污染剂量、自动阶段评估和原C功能探针、异常/恢复记录。完成后确认队列退出，在board/log写明交给Agent B；不重复启动正式evaluate。
-- [ ] [执行agent B，交接后评估阶段队列负责人] 接收C的同一plan和四份final，核对交接身份后运行README的`execute.py --phase evaluate`：五个原权重+四份final共同正式评估。整理节点VALUE/first4、更新定位与执行、各分母、共同资格端点、原C接收的特异错误传播与同值对照；给统一比较表和具体轨迹案例。读取现有阶段小评测，不重复运行训练中的自动评估。raw/权重留tmp；报告和小表进docs/records；更新board/log。发现影响实验含义的问题先交GPT讨论，不自行换协议。
+- [x] [执行agent C，训练阶段队列负责人] 空闲交接同步reproduction，生成唯一plan，按README prepare→smoke。核对新可算位置/源年龄、teacher目标、无硬gate、BPTT与对齐梯度、新下游保持旧hidden。smoke和main分目录，main仍从原e143开始。
+- [x] [执行agent C] 技术smoke通过后执行四次50epoch；原C功能探针64dev图先做，每检查点再做。epoch1/3/5/10/15/20…50小评测，性能一般仍继续到50，代码/数值故障停下记录。不得临时改源筛选或挑传播成功样本训练。
+- [x] [执行agent C] 训练阶段交付四份final路径/SHA、唯一plan路径/SHA、运行提交及代码hash、训练曲线、实际污染剂量、自动阶段评估和原C功能探针、异常/恢复记录。完成后确认队列退出，在board/log写明交给Agent B；不重复启动正式evaluate。**完成，见 17:51 条。**
+- [ ] [执行agent B，交接后评估阶段队列负责人，已可开始] 接收C的同一plan和四份final，核对交接身份后运行README的`execute.py --phase evaluate`：五个原权重+四份final共同正式评估。整理节点VALUE/first4、更新定位与执行、各分母、共同资格端点、原C接收的特异错误传播与同值对照；给统一比较表和具体轨迹案例。读取现有阶段小评测，不重复运行训练中的自动评估。raw/权重留tmp；报告和小表进docs/records；更新board/log。发现影响实验含义的问题先交GPT讨论，不自行换协议。
 - [ ] [gpt] 审阅服务器适配、小验证、功能探针和训练结果；随后与用户讨论UPDATE是否扩到另两个种子。当前不先假定注错有效或纠错获益。
 
 ## 已交付历史：ABC共同任务、复杂长计算、边界诊断（前三步）
