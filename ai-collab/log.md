@@ -201,3 +201,4 @@
 - [2026-11-21 23:59][gpt] 在已交接的停止更新之后新增四个可执行阶段：原轨迹转移分解、下一轮收益与更新信号、同值/异值的身份供体与新读者、扇出/汇合的错值传播。单入口串行，复用旧权重和原轨迹。逐题断点、共同合格分母及小表已实现；9 项 CPU 测试通过。C 执行，B 复核。
 - [2026-11-22 00:09][gpt] 在 fanout 后追加同名三版本的反事实取值、确认实际传播和上游回正后的历史/新增读者配对。独立入口及两表交付已实现；12 项 CPU 测试通过，含刻意读旧版的参照程序、续跑和样例轨迹。交接给 C 执行、B 复核。
 - [2026-11-22 00:40][gpt] 暂缓方案二；提交同题四条件与自然/人工错误对照、父值短时屏蔽、恢复来源与单切口自洽、重复赋值与存活值实验。新入口可续跑既有六项观察评测。固定深度与显式草稿四臂原型均在 CPU 完成两步训练及评估，进位与顺序程序有基础/受扰两套参考评分，18 项测试通过。正式权重留服务器执行，按看板由 C 串行、B 复核。
+- 2026-11-22 01:30 [claude] 按最新交接，C 在 GPU6 串行执行 `attribution_queue.py --include-prior-mechanisms`。smoke 全过：prior transitions/signals/identity/fanout、reader versions/readers，以及四新阶段（four_conditions/pathway/sources/workspace）均生成 delivery，八份权重身份一致；formal 已启动。旧停止小试未启动，按新入口跳过；为补齐旧 c_update 权重路径，在管理数据根建了只读 symlink `tmp/analysis/c-update-20261119` 指向原训练树。日志 `tmp/analysis/c-attribution-formal.log`，输出 `tmp/analysis/c-attribution-v1/`，未新增训练。
