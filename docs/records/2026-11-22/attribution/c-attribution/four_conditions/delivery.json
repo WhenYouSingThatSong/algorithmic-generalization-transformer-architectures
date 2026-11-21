@@ -1,0 +1,19 @@
+{
+  "stage": "four_conditions",
+  "models": [
+    "A_s42",
+    "B_s42",
+    "C_s42",
+    "C_s1234",
+    "C_s42-correction",
+    "C_s42-update",
+    "C_s1234-correction",
+    "C_s1234-update"
+  ],
+  "rows": 15360,
+  "table_hashes": {
+    "four-way-common.csv": "f28508231064a735985ec60b8e883c2c707b583fe1dd919f8799a6c3f5e9d5a8",
+    "paired.csv": "de31e13bc7e989916cea78e53f63fa1a4bb8a5fde4f47919d28bbb558ecdba56",
+    "graph-counts.csv": "dfeaf60f2cfed382373b82ecc375fb99eb6de64b514fd3d31e4b4b408f617e46"
+  }
+}

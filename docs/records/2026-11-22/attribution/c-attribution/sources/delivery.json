@@ -1,0 +1,19 @@
+{
+  "stage": "sources",
+  "models": [
+    "A_s42",
+    "B_s42",
+    "C_s42",
+    "C_s1234",
+    "C_s42-correction",
+    "C_s42-update",
+    "C_s1234-correction",
+    "C_s1234-update"
+  ],
+  "rows": 51200,
+  "table_hashes": {
+    "four-way-common.csv": "cf9a0707cc16613b2f81419bc107704cfe0aa9c9135568aaaa74815ff731305f",
+    "paired.csv": "5cda92208a93237c84d2cdb976ecb45009675f411de318f0f5d5f3b86b76d057",
+    "graph-counts.csv": "e611675be78e69215c4cf489b649198b03a0e1ef8e980a1603b6611700ceb2f2"
+  }
+}

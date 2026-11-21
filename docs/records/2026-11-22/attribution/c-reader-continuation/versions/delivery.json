@@ -1,0 +1,10 @@
+{
+  "stage": "versions",
+  "cases_per_model": 64,
+  "models": [
+    "C_s42",
+    "C_s1234"
+  ],
+  "smoke": false,
+  "summary_sha256": "a040bfe136a8822f5a1eac0a480511b7935425b98b082ef783ad5d7a93b084d6"
+}

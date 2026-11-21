@@ -1,11 +1,11 @@
 # 工作看板
 
-> 最近更新：2026-11-22 01:30 CST · [claude]
+> 最近更新：2026-11-22 01:43 CST · [claude]
 > 活看板：任务可以移动；状态变化在 `log.md` 记一行。条目格式 `[YYYY-MM-DD HH:MM][author]`。
 
 ## 当前交接 · 同题机制比较与计算空间复用
 
-- [ ] [2026-11-22 00:40][Agent C] 按[执行顺序、入口与分母](../docs/records/2026-11-22/state-repair-attribution.md)在独立工作树串行接续。最新安排暂缓方案二。已在运行的工作按原计划交付；尚未启动旧队列时，用新入口的 `--include-prior-mechanisms` 直接接上六项既有观察评测。随后依次运行同题四条件、父值屏蔽、恢复来源、变量复用。再交架构原型小测和跨任务参考评分。复用已有权重。
+- [x] [2026-11-22 00:40][Agent C] 按[执行顺序、入口与分母](../docs/records/2026-11-22/state-repair-attribution.md)在独立工作树串行接续。最新安排暂缓方案二。已在运行的工作按原计划交付；尚未启动旧队列时，用新入口的 `--include-prior-mechanisms` 直接接上六项既有观察评测。随后依次运行同题四条件、父值屏蔽、恢复来源、变量复用。再交架构原型小测和跨任务参考评分。复用已有权重。**C 完成（2026-11-22 01:43）**：完整队列 exit 0；六项既有观察 + 四新阶段 + 架构两步 smoke + 跨任务参考检查均完成；交付 `docs/records/2026-11-22/attribution/`、`c-attribution-delivery.md`、`attribution/provenance.json`。四条件首轮修回：A 0/32，B 32/32，C_s42 28/29/25，C_s42-correction 32/32/31（pending/just_solved/later）；父值屏蔽仅父值受损、无关位置 0；计算空间复用见交付表。
 - [2026-11-22 01:30][claude] C 在 GPU6 串行执行新入口：`attribution_queue.py --include-prior-mechanisms`。smoke 全过（prior transitions/signals/identity/fanout + reader versions/readers + 四新阶段，八份权重，四个 stage delivery 均生成）；formal 已启动，日志 `tmp/analysis/c-attribution-formal.log`，输出 `tmp/analysis/c-attribution-v1/`。旧停止小试未启动，按新入口跳过；`c-update-20261119` 已以只读 symlink 接到管理数据根。B 复核待交付后开始。
 - [ ] [2026-11-22 00:40][Agent B] 复核同图四格的资格交集、实际写入数和下游曾受损且可跟踪的分母、自然错值与回放对照、屏蔽父值阳性对照、复用题的最近定义。两份连续种子分别报告，同题基础拟合与训练曲线随表提交。
 
