@@ -1,0 +1,132 @@
+{
+  "date": "2026-11-21",
+  "scope": "C_s42 and C_s1234 only; C_s2026 retained for training/fit record but excluded from this formal evaluation",
+  "code_commit": "ad7be1d",
+  "plan_sha256": "b3c4b1be9325dd37aefc2004dc19b6e5ee6d82c6ff097c25c072d3f39038bc24",
+  "manifest_sha256": "a91fd53e2e13251ad02284b8e3262869066cf471128f7f68d0744d7fdedbfb1c",
+  "models": {
+    "C_s42": {
+      "checkpoint": "f14f4bbfbfd0069eadcad56d61d46e78159a45cd92beb8540594cc848c55dd5a",
+      "eval_meta": "tmp/analysis/c-local-update-normal-v1/eval/C_s42/meta.json",
+      "eval_meta_sha256": "2f0297a7caa742cff45e5527130e371c34d52e64ce96412571a44ebe0a36cae4",
+      "splits": {
+        "N128_deep": {
+          "records": 352,
+          "ok": 334,
+          "selected_detail": 334
+        },
+        "N128_shallow": {
+          "records": 352,
+          "ok": 341,
+          "selected_detail": 341
+        },
+        "N32_deep": {
+          "records": 352,
+          "ok": 335,
+          "selected_detail": 335
+        },
+        "N32_shallow": {
+          "records": 352,
+          "ok": 341,
+          "selected_detail": 341
+        },
+        "N64_deep": {
+          "records": 352,
+          "ok": 335,
+          "selected_detail": 335
+        },
+        "N64_shallow": {
+          "records": 352,
+          "ok": 340,
+          "selected_detail": 340
+        }
+      }
+    },
+    "C_s1234": {
+      "checkpoint": "693b6338ac69281cf766e070b36530d1fdf61a2601068779aab7f780ccebb104",
+      "eval_meta": "tmp/analysis/c-local-update-normal-v1/eval/C_s1234/meta.json",
+      "eval_meta_sha256": "f789230f2ec7f53afd371504c1d1d44754ccacb318801335a945d98196807fe3",
+      "splits": {
+        "N128_deep": {
+          "records": 352,
+          "ok": 334,
+          "selected_detail": 334
+        },
+        "N128_shallow": {
+          "records": 352,
+          "ok": 339,
+          "selected_detail": 339
+        },
+        "N32_deep": {
+          "records": 352,
+          "ok": 335,
+          "selected_detail": 335
+        },
+        "N32_shallow": {
+          "records": 352,
+          "ok": 341,
+          "selected_detail": 341
+        },
+        "N64_deep": {
+          "records": 352,
+          "ok": 335,
+          "selected_detail": 335
+        },
+        "N64_shallow": {
+          "records": 352,
+          "ok": 340,
+          "selected_detail": 340
+        }
+      }
+    }
+  },
+  "commands": [
+    "CUDA_VISIBLE_DEVICES=0 python tools/c_selected_eval.py assess --model C_s42 --plan /workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/analysis/c-update-20261119/data/plan.json --manifest tmp/analysis/c-local-update-normal-v1/manifest.json --checkpoint tmp/analysis/c-local-update-normal-v1/train/C_s42/final.ckpt --out-dir tmp/analysis/c-local-update-normal-v1/eval/C_s42 --device cuda",
+    "CUDA_VISIBLE_DEVICES=1 python tools/c_selected_eval.py assess --model C_s1234 --plan /workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/analysis/c-update-20261119/data/plan.json --manifest tmp/analysis/c-local-update-normal-v1/manifest.json --checkpoint tmp/analysis/c-local-update-normal-v1/train/C_s1234/final.ckpt --out-dir tmp/analysis/c-local-update-normal-v1/eval/C_s1234 --device cuda",
+    "python tools/c_selected_eval.py combine --results tmp/analysis/c-local-update-normal-v1/eval/C_s42 tmp/analysis/c-local-update-normal-v1/eval/C_s1234 --output tmp/analysis/c-local-update-normal-v1/selected-eval.json",
+    "python tools/c_selected_eval.py report --results tmp/analysis/c-local-update-normal-v1/eval/C_s42 tmp/analysis/c-local-update-normal-v1/eval/C_s1234 --out-dir tmp/analysis/c-local-update-normal-v1/selected-tables"
+  ],
+  "selected_eval_json": {
+    "path": "tmp/analysis/c-local-update-normal-v1/selected-eval.json",
+    "sha256": "9e4e7291788a8c394bb15ae88b8c0286819019eabaaf56fbbb612c17b6cabafe",
+    "bytes": 6494984
+  },
+  "tables": {
+    "01-基础拟合与干净轨迹.csv": {
+      "path": "docs/records/2026-11-21/selected-tables/01-基础拟合与干净轨迹.csv",
+      "sha256": "6f55ec918aed11890129980e2a40052fde8f218722704a941d9e2193b87ca56e",
+      "rows": 12052
+    },
+    "02-第二层更新定位.csv": {
+      "path": "docs/records/2026-11-21/selected-tables/02-第二层更新定位.csv",
+      "sha256": "5c3fc949a41a7c9eb9dab4784409033296b12ba2afc7a8e72d49488ab7d18b6d",
+      "rows": 4818
+    },
+    "03-末层执行与任务后果.csv": {
+      "path": "docs/records/2026-11-21/selected-tables/03-末层执行与任务后果.csv",
+      "sha256": "dec1ecd83a30e21f810ed2129e95be5c6459323fc039be1d26901310c1001417",
+      "rows": 7645
+    },
+    "04-恢复与传播.csv": {
+      "path": "docs/records/2026-11-21/selected-tables/04-恢复与传播.csv",
+      "sha256": "ce09e4d9be12a8a8b408ce9544c94dda52c8a31b964d8952c66b5b70b1f892b1",
+      "rows": 12517
+    },
+    "05-同图混合.csv": {
+      "path": "docs/records/2026-11-21/selected-tables/05-同图混合.csv",
+      "sha256": "07cafb93dff431d066bca8cf41f441f14142ca1a11f2bf16a0c53c3caf134f37",
+      "rows": 444
+    },
+    "06-修回后的使用.csv": {
+      "path": "docs/records/2026-11-21/selected-tables/06-修回后的使用.csv",
+      "sha256": "2915065cd009250f2c7ee87a30ed2affd658c4b373dd8715ab1cb50ee9b79cb9",
+      "rows": 776
+    }
+  },
+  "notes": [
+    "All six splits per seed have selected_detail on every ok class record; no focused supplement was needed.",
+    "C_s2026 was not evaluated in this batch; only its training and fit-history records remain.",
+    "The six CSV tables are descriptive; architecture attribution and mechanism claims require separate controls.",
+    "Raw eval directories and selected-eval.json remain under tmp/analysis/c-local-update-normal-v1/."
+  ]
+}

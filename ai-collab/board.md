@@ -1,13 +1,13 @@
 # 工作看板
 
-> 最近更新：2026-11-21 21:38 CST · [claude]
+> 最近更新：2026-11-21 22:28 CST · [claude]
 > 活看板：任务可以移动；状态变化在 `log.md` 记一行。条目格式 `[YYYY-MM-DD HH:MM][author]`。
 
 ## 当前交接 · 正常窗口后训练 C 正式评测仅选 42 和 1234
 
-- [ ] [Agent B] 六表生成已实现。按[执行文档末节](../docs/records/2026-11-21/c-selected-evaluation.md)运行 `report`，提交六份 CSV 及来源身份。旧版重点分档缺新字段时用 `focused` 单独补采该档，已完成的标准评测直接复用。CPU 合成轨迹已验证交叉计数、四臂分母与旧产物补充路径，实测数以服务器输出为准。
+- [x] [Agent B] 六表生成已实现。按[执行文档末节](../docs/records/2026-11-21/c-selected-evaluation.md)运行 `report`，提交六份 CSV 及来源身份。旧版重点分档缺新字段时用 `focused` 单独补采该档，已完成的标准评测直接复用。CPU 合成轨迹已验证交叉计数、四臂分母与旧产物补充路径，实测数以服务器输出为准。**C 代执行完成（2026-11-21 22:28）**：两 seed assess 均 complete，六档 `selected_detail` 全覆盖，无需 focused 补采；六份 CSV 在 `docs/records/2026-11-21/selected-tables/`，来源身份/哈希在 `selected-eval-provenance.json`，汇总见 `c-selected-eval-results.md`。
 
-- [ ] [2026-11-21 21:23][Agent B] 本批范围取代下方历史三种子正式评估安排。盘点现有结果，按[两种子执行与六表交付](../docs/records/2026-11-21/c-selected-evaluation.md)领取 42、1234。保留 2026 拟合记录。交各模型各档分母、单图混合及局部／全局成功分表。Agent C 本轮无需新增训练。
+- [x] [2026-11-21 21:23][Agent B] 本批范围取代下方历史三种子正式评估安排。盘点现有结果，按[两种子执行与六表交付](../docs/records/2026-11-21/c-selected-evaluation.md)领取 42、1234。保留 2026 拟合记录。交各模型各档分母、单图混合及局部／全局成功分表。Agent C 本轮无需新增训练。**C 代执行完成（2026-11-21 22:28）**：只评 42、1234，各档分母在六表内；C_s2026 未进入本批六表。
 - [2026-11-21 21:38][claude] 按用户指示，C 已接管本轮两 seed 的 assess：C_s42 在 GPU0、C_s1234 在 GPU1，输出 `tmp/analysis/c-local-update-normal-v1/eval/{C_s42,C_s1234}`；完成后由 C 运行 `combine` 和 `report`，交六份 CSV、来源身份和分母。B 请勿重复启动同一两目录；如已有部分产物请告知路径，优先合并。GPU2/3 仍为外部占用。
 - [ ] [研究储备] [24 项研究问题和方案二](../docs/records/2026-11-21/research-checklist.md)。方案二待讨论，另行安排。
 

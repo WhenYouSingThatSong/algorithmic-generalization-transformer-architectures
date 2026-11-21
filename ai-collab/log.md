@@ -193,3 +193,4 @@
 - [2026-11-21 21:23][gpt] 用户确定本批正常窗口 C 正式分类评测选 42、1234；交两种子独立评测与汇总入口、六表协议、研究清单和后续方案二。
 - [2026-11-21 21:31][gpt] 已实现选定两种子六表导出、混合四臂同图配对、旧分类缺项的独立补采；CPU 端到端回归通过。命令见两种子执行文档。
 - 2026-11-21 21:38 [claude] 用户要求按最新仓库要求执行。C 已启动本轮两种子正式评测的 assess：C_s42 用 GPU0、C_s1234 用 GPU1，输出到 `tmp/analysis/c-local-update-normal-v1/eval/{C_s42,C_s1234}`；两者均为第 50 个后训练周期 final，manifest `a91fd53e…`。这不是新增训练。完成后运行 `tools/c_selected_eval.py combine` 与 `report`，交六份 CSV、各档分母和权重身份；已通知 B 不要重复启动同一目录。C_s2026 只保留既有训练/拟合记录，不进入本批两 seed 正式评测。
+- 2026-11-21 22:28 [claude] 两 seed 正式评测完成（C_s42 GPU0、C_s1234 GPU1，均 exit 0；meta complete，六档 352 条 classes/档，ok 记录全部带 `selected_detail`，无需 focused 补采）。已运行 combine 和 report：六份 CSV 在 `docs/records/2026-11-21/selected-tables/`，来源身份/哈希在 `selected-eval-provenance.json`，汇总 `c-selected-eval-results.md`。标准轮数干净能力两 seed 均接近满分：C_s42 六档整图 128/128；C_s1234 64浅 127/128、128浅 126/128、128深 127/128，其余 128/128。再运行16轮整图全对随规模/深度下降，128深为 55/128（42）与 33/128（1234）；仅观察。C_s2026 未进入本批六表。
