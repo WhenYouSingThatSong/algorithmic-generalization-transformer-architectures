@@ -57,6 +57,9 @@ def detail(g, labels, trace, clean, target):
     mixed = all(k in roles for k in ("fill", "conflict", "healthy"))
     joint = all(v["gold_correct"] == v["observed"] for v in roles.values()) if mixed else None
     return dict(input_changes=changes, conflicts=[[*key, n] for key, n in sorted(cells.items())],
+                first_wrong_positions=[p for i, p in enumerate(nodes)
+                                       if first_row["output"][i][0] != labels[p][3]],
+                node_count=len(nodes),
                 first_round_roles=roles, mixed_all_gold_correct=joint)
 
 
@@ -79,6 +82,42 @@ def run(args):
     assess.metrics = extended
     previous = sys.argv
     try:
+        if args.command == "focused":
+            # Older completed runs only lack the per-event joint observations.
+            # Replay their fixed, small focused sample separately from standard evaluation.
+            from runtime import Runtime
+            plan = assess.S.validate(args.plan, args.manifest)
+            manifest = read(args.manifest)
+            meta = read(args.existing / "meta.json")
+            if (meta["status"] != "complete" or meta["checkpoint"] != model["final_ckpt"]["sha256"]
+                    or meta["source"]["model"] != args.model
+                    or meta["source"]["manifest"] != assess.P.sha(args.manifest)):
+                raise ValueError("existing evaluation does not match checkpoint and manifest")
+            src = next(m for m in plan["models"] if m["id"] == args.model)
+            rt = Runtime(dict(src, arm="update", path=str(args.checkpoint),
+                              sha256=meta["checkpoint"]), args.device)
+            args.out_dir.mkdir(parents=True, exist_ok=True)
+            for split in assess.P.STRATA:
+                old = args.existing / (split + "-classes.json")
+                def complete(path):
+                    return path.exists() and all("first_wrong_positions" in r.get("selected_detail", {})
+                        for r in read(path)["records"] if r["status"] == "ok")
+                dest = args.out_dir / old.name
+                if complete(old):
+                    continue
+                if dest.exists() and complete(dest) and read(dest).get("checkpoint") == meta["checkpoint"]:
+                    continue
+                if dest.exists():
+                    raise ValueError(f"unmatched supplemental file: {dest}")
+                import tempfile
+                with tempfile.TemporaryDirectory(dir=args.out_dir) as stage:
+                    temp = Path(stage) / old.name
+                    assess.focused_split(rt, plan, manifest, split, temp)
+                    payload = read(temp)
+                    payload.update(checkpoint=meta["checkpoint"], manifest=meta["source"]["manifest"])
+                    assess.P.write(temp, payload)
+                    temp.rename(dest)
+            return
         sys.argv = [str(FROZEN / "assess.py"), "--plan", str(args.plan),
                     "--manifest", str(args.manifest), "--checkpoint", str(args.checkpoint),
                     "--out-dir", str(args.out_dir), "--device", args.device]
@@ -125,17 +164,27 @@ def combine(paths):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
-    run_parser = commands.add_parser("assess")
-    run_parser.add_argument("--model", required=True, choices=MODELS)
-    for key in ("plan", "manifest", "checkpoint", "out-dir"):
-        run_parser.add_argument("--" + key, type=Path, required=True)
-    run_parser.add_argument("--device", default="cuda")
+    for name in ("assess", "focused"):
+        run_parser = commands.add_parser(name)
+        run_parser.add_argument("--model", required=True, choices=MODELS)
+        for key in ("plan", "manifest", "checkpoint", "out-dir"):
+            run_parser.add_argument("--" + key, type=Path, required=True)
+        run_parser.add_argument("--device", default="cuda")
+        if name == "focused":
+            run_parser.add_argument("--existing", type=Path, required=True)
     group = commands.add_parser("combine")
     group.add_argument("--results", type=Path, required=True, nargs=2)
     group.add_argument("--output", type=Path, required=True)
+    report = commands.add_parser("report", help="write six scored CSV tables")
+    report.add_argument("--results", type=Path, required=True, nargs=2)
+    report.add_argument("--supplements", type=Path, help="optional root with one directory per model ID")
+    report.add_argument("--out-dir", type=Path, required=True)
     args = parser.parse_args()
-    if args.command == "assess":
+    if args.command in ("assess", "focused"):
         run(args)
+    elif args.command == "report":
+        from c_selected_tables import write_report
+        write_report(args.results, args.out_dir, args.supplements)
     else:
         result = combine(args.results)
         with args.output.open("x", encoding="utf-8") as stream:

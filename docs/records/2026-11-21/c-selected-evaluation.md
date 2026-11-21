@@ -63,3 +63,24 @@ python tools/c_selected_eval.py combine --results "$root/eval/C_s42" "$root/eval
 ```
 
 命令中的循环适用于两个目录均尚未运行的情况。输出父目录需存在；合并输出使用新文件名。已完成的评测按原目录路径传给 combine。合并器核对两份终点和清单哈希，保留各档分母与覆盖。新增运行在每图 classes 的 selected_detail 保存实际发生变化的位置、直接冲突的联合计数和混合首轮的三类全局成功计数；旧产物的 detail_coverage 标明缺项。先按既有逐节点记录尽量补齐，确需补采时限制在缺失条件。新消费者只在 32 节点浅、深档各前 8 图有候选，按实际合格数报告。交六表、完整目录和权重身份，注明开发集选种及未覆盖条件。
+
+## 六张表的实际生成命令
+
+Agent B 完成两份权重的 assess 后，从仓库根目录执行下列 CPU 命令。保留原始逐图 standard.jsonl 和 classes.json。report 校验两份权重及清单，读取六档固定图，输出六份 UTF-8 CSV。输出目录必须为新目录，缺失或不匹配时不发布半成品。
+
+```bash
+root=tmp/analysis/c-local-update-normal-v1
+python tools/c_selected_eval.py report --results "$root/eval/C_s42" "$root/eval/C_s1234" --out-dir "$root/selected-tables"
+```
+
+若已有的旧版重点分类结果缺少首轮每个位置的对错或直接冲突联合计数，使用下面的补采路径。只对缺项权重运行 focused，它沿用冻结图和时点，跳过已含新版明细的数据档。每张图在同一个时点的四个条件共享起点，补采以完整重点分档为单位。标准能力、持续干扰、新消费者及训练全部复用原产物。
+
+```bash
+plan=tmp/analysis/c-update-20261119/data/plan.json
+for model in C_s42 C_s1234; do
+  python tools/c_selected_eval.py focused --model "$model" --checkpoint "$root/train/$model/final.ckpt" --plan "$plan" --manifest "$root/manifest.json" --existing "$root/eval/$model" --out-dir "$root/report-supplements/$model"
+done
+python tools/c_selected_eval.py report --results "$root/eval/C_s42" "$root/eval/C_s1234" --supplements "$root/report-supplements" --out-dir "$root/selected-tables"
+```
+
+交付 01 至 06 六份 CSV，各种子、各数据档单列。训练曲线行以周期为单位。定位分类同时报逐图等权与节点计数合并比例。第四表标准干预和自然轨迹的合并计数沿用冻结产物，逐图均值栏留空；自然轨迹的两个窗口共享标准求解后第 1 轮边界。第五表只在同图四臂齐全、目标和清空位置及起始轮一致时作比较，另报全部候选覆盖。第六表记录新增算式前目标的读出和新下游末两轮表现，另列冻结原始 C 接收向量的功能探针。无分母比率留空。未在该规模登记的新消费者实验明确标为未登记。架构归因、置信度和双使用时点的新实验仍按讨论稿独立安排。
