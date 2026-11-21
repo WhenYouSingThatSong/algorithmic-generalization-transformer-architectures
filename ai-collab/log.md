@@ -186,3 +186,5 @@
 - 2026-11-21 05:25 [claude] 正常窗口 C 三种子全部完成（exit 0，GPU1/2/3，00:29–05:18）：C_s42 final `f14f4bbfbfd0069eadcad56d61d46e78159a45cd92beb8540594cc848c55dd5a`、C_s1234 `693b6338ac69281cf766e070b36530d1fdf61a2601068779aab7f780ccebb104`、C_s2026 `53ba33c6a205e9e64e530398497cbb4e2cb0e1e1f22ec45c205b998cd9ec996c`；meta 全 complete、78,200 步、manifest `a91fd53e…`。dev-50 clean：C_s42/C_s1234 D、D+4 均 1.0；C_s2026 D 0.5547（节点 mean 0.9451）按协议保留。D+16 只作观察，三种子 VALUE 0.9922/0.9766/0.5938、四字段近 0，属 VARIABLE 漂移。实际剂量：3,852 enabled steps、1,674,541 attempts，accepted 分别为 1,424,539/1,485,817/1,297,768；证据 `docs/records/2026-11-21/c-local-update-finals.md`/`.json`，提交 `d0001be`。GPU1/2/3 与 GPU5 已空，B 可开始正式分类评估。
 
 - [2026-11-21 11:05][gpt] 核对 61d9321 的权重及开发集分母，更正三种子长窗口百分比概括。补充 docs/model-names.md 与 docs/records/2026-11-21/evaluation-and-attribution.md；测试分布和归因对照供讨论，正式队列沿用已冻结协议。
+
+- [2026-11-21 11:12][gpt] 核对节点深度和末端角色的实现与原始轨迹、两种 final 及 D6 的用法。将拟合比较和报告用语写入共识/看板，为 C 补已有训练日志的 CPU 导出入口；B/C 的确认与三种子损失表待回传。
