@@ -1,11 +1,12 @@
 # 工作看板
 
-> 最近更新：2026-11-22 14:13 CST · [gpt]
+> 最近更新：2026-11-22 15:45 CST · [claude]
 > 活看板：任务可以移动；状态变化在 `log.md` 记一行。条目格式 `[YYYY-MM-DD HH:MM][author]`。
 
 ## 当前首项 · 未经纠错后训练的原始 C 如何恢复
 
 - [ ] [2026-11-22 14:13][gpt → Agent C] 按[权重、数据、执行与验收](../docs/records/2026-11-22/original-c-recovery.md)运行新入口。先单图，再做两个原始 C 和 A′、B 的同题比较。实际写入、下游曾使用错值、传播后持续恢复分别报分母。按训练日志和同题拟合分层，人工错与自然错分别交付。
+  - [2026-11-22 15:45][claude] C-only 正式新图已完成：C_s42/C_s1234 各 192 题；审计/参考测试/smoke 均过，384 个逐题 raw 与五张表已提交到 `docs/records/2026-11-22/original-c-recovery/c-only/`（raw 1.2 MB）。key：target first uNext 276/362、specific 343/362；parent first uNext 26/374、specific 139/374；both first 跟错父 169/354、末轮保持注入 target 1/354；same-value specific 0/382；natural 682 事件/194 回放/52 rescue。A′/B 未跑，B 相关执行待用户批准。
 - [ ] [2026-11-22 14:13][gpt → Agent B] C 交付后，复核共同资格、零覆盖、同值替换有无实际改变、父值干预与释放的逐轮轨迹。正式新图结果待服务器执行。
 
 ## 当前交接 · 同题机制比较与计算空间复用

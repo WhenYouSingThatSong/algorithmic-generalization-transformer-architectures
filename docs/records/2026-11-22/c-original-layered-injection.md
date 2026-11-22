@@ -147,7 +147,7 @@
 
 ## 10. 文件与 SHA-256
 
-紧凑表在 `docs/records/2026-11-22/c-s2026-original-injection/`（脚本副本也在该目录，与 `tmp/analysis/c-original-injection/` 同 hash）；原始逐记录 JSON 在 `tmp/analysis/c-original-injection/`（未提交，约 23 MB 的 16 轮 canonical + 13 MB 的 8 轮归档）。
+紧凑表在 `docs/records/2026-11-22/c-s2026-original-injection/`（脚本副本也在该目录，与 `tmp/analysis/c-original-injection/` 同 hash）；原始逐记录 JSON 在 `tmp/analysis/c-original-injection/`，并已压缩为 `docs/records/2026-11-22/c-original-layered-injection/raw-layered-16round.tar.gz`（23 MB canonical，压缩后 417 KB）和 `raw-layered-r8.tar.gz`（13 MB 归档，压缩后 272 KB）提交，供直接检查。
 
 | 文件 | SHA-256 |
 |---|---|
@@ -172,4 +172,6 @@
 | `C_s2026-layered-r8.json`（8 轮归档） | `c47725b30e685eb558b873f62ad0a1e008f6325feb5f3fed3b1ed32da475494d` |
 | `C_s42-layered-r8.json` | `5d1baec22026530461f6abddeea06d8191ecd9e295f8897054a4a5a1a9095b42` |
 | `C_s1234-layered-r8.json` | `4a1c8b9a26bab1f158e5c0ed523d0ea7cde186b9297926052e50eecbbc1fd4cd` |
+| `raw-layered-16round.tar.gz` | `4cc1e1d8e544f87216759968efe1d02d17ae68722f0c0f3bc6972c67aeef806d` |
+| `raw-layered-r8.tar.gz` | `073791d26285b1ff7f15ff0185c524795c8d9e6766ee6718adcfc909a427e36c` |
 | `four-conditions-original-c.csv`（旧四条件摘要） | `cc992523a05b8a0e67b85a218dbf199ea920dc3e2ad67e714eede82bfa779328` |
