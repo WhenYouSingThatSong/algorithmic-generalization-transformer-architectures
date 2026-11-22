@@ -44,3 +44,13 @@ python tools/c_hard_graphs/original_c_recovery.py --data-root /path/to/training-
 ```
 
 Agent B 从逐图表复核权重、分母和两条实际轨迹，重点查核双改条件的三个候选数字、持续污染释放轮次，以及自然错值是否产生特异下游影响。新结果回填本记录。状态为旧表已复算、新实现已通过本地参考算例、正式新图待服务器执行。
+
+## C-only 中间交付（2026-11-22）
+
+- 两个原始 C 已按本计划的 192 题/模型跑完正式新图：C_s42/C_s1234，32/64/128 × 深度 4/10 × 32 gid；**A_s42/B_s42 未运行**（B 相关执行待用户批准），因此本批不是四模型同题结果。
+- 交付：`docs/records/2026-11-22/original-c-recovery/c-only/`，含五张聚合表、384 个逐题 `json.gz`（仅记录 r/u/q 轨迹、clean twin、inputs、natural followup；全节点轨迹另见分层注错归档）、`raw-manifest.sha256`，raw 实际 1.2 MB。生产入口未改，只加了一个 C-only scratch wrapper。
+- 基础拟合：D+4 整图 value 全对，128/4 为 C_s42 29/32、C_s1234 28/32；128/10 为 28/32、21/32。标准轮 D 对 128 节点不足（仅 3/32、2/32），D+16 first4 又明显漂移，所以 late 只读配对 twin。
+- 主要读数（`common` = 两 C 共同合格，internal，全 size/depth）：target first `uNext` 276/362、specific child 343/362、specific 后 joint 340/343；parent first `uNext` 26/374、specific 139/374；both first `uNext` 16/354、第一步跟错父 169/354、末轮保持注入 target 1/354；held_parent specific 355/374、释放后 joint 347/355；same_value specific 0/382，但 hidden 实际变化 382/382。两 seed 差异明显：target `uNext` C_s42 167/188、C_s1234 118/185。
+- 自然错误：653,576 个节点-轮机会中 682 个自然错值事件、531 条子边、194 条可回放、52 条 specific rescue（C_s42 28/76，C_s1234 24/118）。可回放覆盖率仍低。
+- 边界：以上是人工 hidden 注错与回放，不是自然纠错率；readout 回正不等于下游未受损；specific 后的 joint 是条件在 specific 事件上的“冲掉/重算”读数；不能据此下检测或主动纠错结论。`paired.csv` 的 `all_eligible` 在本目录只表示两 C 共同，不是四模型共同。
+- 状态：C-only 正式新图已完成。用户已于 2026-11-22 16:16 批准 A′/B 同题执行；B 侧运行 A_s42/B_s42 三个 suite，C 侧只补 expanded 64 题（gid 400–431 × 深度 4/8），输出按模型目录分开，报告待四方齐备后生成。
