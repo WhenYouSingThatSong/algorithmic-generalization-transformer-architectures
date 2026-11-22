@@ -2,6 +2,7 @@
 
 - 日期：2026-11-22。
 - 状态：**仅复核 C 已交付记录；未加载权重、未重跑模型、未改 C 产物。**
+- C 已在 `fbad790` 按本复核补充 §2.1 下游分母分列和 §2.2 `natural_replay=0` 零覆盖；该提交只改 C 报告/board/log，未改任何表或权重，本复核指出的两个报告缺口已关闭。
 - 依据：`docs/records/2026-11-22/attribution/c-attribution-delivery.md`、`state-repair-attribution.md`、`docs/records/2026-11-22/attribution/`。
 - 代码/工作树：`management-20261120@b35ba8e`；plan SHA `b3c4b1be9325dd37aefc2004dc19b6e5ee6d82c6ff097c25c072d3f39038bc24`。
 
