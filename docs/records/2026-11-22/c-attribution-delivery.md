@@ -25,6 +25,47 @@
 - A_s42 在三个时点都不修回；B_s42 全部 32/32 立即修回；C_s42 原始为 25–29/32，C_s42-correction 为 31–32/32。
 - 这是固定权重、固定题面下的行为；四条件改变的是模型和训练历史，不能把差异单独归因于离散/连续反馈。
 - C_s1234 及其 correction/update 的逐图结果在 `four_conditions/graph-counts.csv` 与 `paired.csv`；它们不在四条件主表的四个共同臂内。
+- 补充：`four-way-common.csv` 的 192 行全部 `common=1`，它本身就是四臂共同合格子集；未合格行在 `graph-counts.csv`，不能反过来把 192 行当全体合格率。
+
+### 2.1 下游 specific / damage / stable（按 B 复核表补列）
+
+目标下一轮修回 **不等于** 下游未受损。下表分母是实际写入事件（每模型每时点 32 次；B 复核确认 target 实际写入均为 32/32），`specific`/`damage`/`stable` 的定义与表 1 一致；B 的完整表在 `attribution-b-review/four-conditions-downstream.csv`。
+
+| 模型 | 时点 | 目标修回 | specific | damage | stable |
+|---|---|---:|---:|---:|---:|
+| A_s42 | pending | 0 | 32 | 32 | 0 |
+| A_s42 | just_solved | 0 | 32 | 32 | 0 |
+| A_s42 | later | 0 | 0 | 0 | 0 |
+| B_s42 | pending | 32 | 0 | 0 | 0 |
+| B_s42 | just_solved | 32 | 10 | 10 | 10 |
+| B_s42 | later | 32 | 32 | 32 | 32 |
+| C_s42 | pending | 28 | 0 | 0 | 0 |
+| C_s42 | just_solved | 29 | 32 | 32 | 32 |
+| C_s42 | later | 25 | 12 | 12 | 12 |
+| C_s42-correction | pending | 32 | 0 | 0 | 0 |
+| C_s42-correction | just_solved | 32 | 32 | 32 | 32 |
+| C_s42-correction | later | 31 | 31 | 31 | 31 |
+| C_s42-update | pending | 31 | 0 | 0 | 0 |
+| C_s42-update | just_solved | 31 | 32 | 32 | 32 |
+| C_s42-update | later | 30 | 29 | 29 | 29 |
+| C_s1234 | pending | 17 | 0 | 0 | 0 |
+| C_s1234 | just_solved | 17 | 32 | 32 | 32 |
+| C_s1234 | later | 15 | 7 | 7 | 7 |
+| C_s1234-correction | pending | 32 | 0 | 0 | 0 |
+| C_s1234-correction | just_solved | 31 | 32 | 32 | 32 |
+| C_s1234-correction | later | 22 | 13 | 13 | 13 |
+| C_s1234-update | pending | 28 | 0 | 0 | 0 |
+| C_s1234-update | just_solved | 28 | 32 | 32 | 32 |
+| C_s1234-update | later | 19 | 24 | 24 | 24 |
+
+- 典型的“目标修回但下游已受损”：B_s42 just_solved 目标 32/32，specific/damage 只有 10/32；C_s42 later 目标 25/32，specific/damage 12/32；C_s42-update later 目标 30/32，specific/damage 29/32。
+- s1234 的目标修回整体低于 s42：s1234 为 15–17/32，correction 为 22–32/32，update 为 19–28/32。它们与 s42 的题号/事件相同，但仍不能把种子差异单独解释为训练版本效应。
+
+### 2.2 自然错误与回放零覆盖
+
+- `metric=natural` 的 `additional/due_at_input` 每模型 12,800 个节点观察：只有 **C_s1234 14 个 new_errors（25 个 numeric_errors）** 和 **C_s1234-update 15 个（42 个）**；其余六个权重均为 0。`within_standard/before_due` 的 3,168 个观察全部是非数值状态，`due_at_input` 的 4,288 个观察全正确。
+- **`metric=natural_replay` 行数为 0。** 本批没有产生“前一轮正确、后一轮数值错误”的可回放事件，因此不能评估自然错值与回放上一轮正确状态的对照。这是零分母/零覆盖，不是“自然错误不存在”；C_s1234/update 的 14/15 个 additional 自然错误是实际记录。
+- 该零覆盖已按 B 复核补记；B 的 `natural-errors.csv` 给出逐模型自然计数。没有新增 GPU 或重放。
 
 ## 3. 父值屏蔽与恢复来源
 
