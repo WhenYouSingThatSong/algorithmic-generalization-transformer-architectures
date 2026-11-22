@@ -539,6 +539,7 @@ B 试跑作为预算/现象参考保留，不能并入独立主实验冒充新�
 - 旧 C0 原始结果：`tmp/analysis/oldC0-resume-150ep/`；旧数据配方，不能直接与 B 的 heldout/matched-depth 样本混用。
 - B smoke：4 张 heldout 图 selection 4/4 common-complete；early 28 条、late 53 条、leaf 16 条、controls 7+7；audit 128 candidates + 692 次替换的 pre-corruption 全 EMPTY。**不是结果**。
 - 腐蚀审计初步信号：`last` 策略下 candidate 腐蚀前基本是 EMPTY，而非“已填值被改坏”；仅 1 个 batch，需全量确认。
+- [2026-11-22 14:55][claude] **原始 C 分层人工注错（补充探索，非最终）**：C_s2026/C_s42/C_s1234 三份原权重，32 图 × 22 条件 × 16 轮。自补丁/正确值预填/空值控制无额外错误；pending 目标预填正确值只让 q 提前算对（26/32/32），错误值才提前算错（25/32/32）。目标 readout 下一轮修回 31/28/17、31/29/17、28/25/15（pending/just/later），但 just/later 同轮下游已错。pending 注入父使目标 32/32 下一轮错；注入上游时目标第1轮仍对、第2轮才错（1/6/6 正确）；错误按依赖层一层一轮下传。C_s2026 8/16 轮额外错误全 0；C_s42/C_s1234 少数 late/组合条件最多残留 15 个（第8轮）/13 个（第16轮）节点-观察；16 轮 clean_later 自身有 5 个基线漂移观察。报告 `docs/records/2026-11-22/c-original-layered-injection.md`；未跑 correction/update 同协议对照，不作检测/纠错结论。
 
 ## 开放问题
 
