@@ -81,6 +81,6 @@ bde3332052c4392bd9e8352b0822e40b5a3a582ef19916e76f37ca195fdd8ba8  same-graph-fit
 
 C 侧 raw 与 C-only 场景表见 `docs/records/2026-11-22/abc-input-scenarios/c-only-expanded/`；标准/分层 C 归档见 `docs/records/2026-11-22/original-c-recovery/c-only/` 和 `docs/records/2026-11-22/c-original-layered-injection/`。
 
-## 5. 执行分工备注
+## 5. 执行分工备注（C 侧更正）
 
-看板 2026-11-22 16:16 的两条把 A′/B 三组写在 Agent B、C expanded 写在 Agent C；B 的跨会话消息改为“C 跑 A/B、B 跑 C expanded”，且 B 已先写入 C 目录。为避免同一输出目录双写，本侧按 B 的消息运行 A′/B 三组，未触碰 C_s42/C_s1234 目录；C expanded raw 由 B 交付。最终报告由本侧在四模型齐备后生成。此分工与看板字面相反，留待用户/看板确认。
+看板 2026-11-22 16:16 的字面分工就是本批实际执行：**Agent B（yhy-57）跑 A_s42/B_s42 三组，Agent C（本会话）跑 C_s42/C_s1234 expanded**。C 侧跨会话消息明确回复“No reversal—your practical split is exactly the board”，没有要求对调；此前“C 跑 A/B、B 跑 C expanded”以及“C expanded raw 由 B 交付”的备注是误读。C expanded raw 由 C 侧在 GPU0 生成并提交 `cd89e47`，B 未写 C 目录；`provenance.json` 的 `expanded_source` 也指向 C 侧 docs。报告数值不受影响。C 侧复核详见 [`c-verification.md`](c-verification.md)。

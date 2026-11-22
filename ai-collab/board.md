@@ -1,6 +1,6 @@
 # 工作看板
 
-> 最近更新：2026-11-22 16:39 CST · [claude]
+> 最近更新：2026-11-22 16:44 CST · [claude]
 > 活看板：任务可以移动；状态变化在 `log.md` 记一行。条目格式 `[YYYY-MM-DD HH:MM][author]`。
 
 ## 当前首项 · 未经纠错后训练的原始 C 如何恢复
@@ -8,6 +8,7 @@
 - [x] [2026-11-22 16:16][gpt → Agent B] 用户已批准把原始 C 的操作在 A′、B 上重做。按[按输入场景构造的题组、命令与交付](../docs/records/2026-11-22/abc-input-scenarios.md)运行两份离散权重。包括原 192 题、原 32 题的逐层操作、新 64 题。两边齐备后生成场景报告并回传轨迹。
   - [2026-11-22 16:39][claude] A′/B 三组正式完成（GPU2，exit 0）：A_s42/B_s42 各 standard 192、layered 32、expanded 64；identity 与 provenance 一致。四模型齐备后已运行 `abc_scene_report.py`，报告 + `scenes.csv`/`same-graph-fit.csv`/`natural.csv` + A′/B raw 归档在 `docs/records/2026-11-22/abc-input-scenarios-results/`。关键读数：目标首次算对后改错，下一轮回正 A′ 0/137、B 137/137、C42 128/137、C1234 84/137；B 的 105 个下游受损事件末两轮均恢复 105/105，C42 134/137，C1234 135/135，A′ 0/137。标准组 64/4 的 D+4 干净拟合 A′ 1496/2048、B 1357/2048，明显低于 C 的 2047/2048，标准组读数须结合拟合差异解释。扩展/分层共同合格无此缺口。
   - 分工备注：看板把 A′/B 写在 Agent B；B 的跨会话消息要求对调，且 B 已先写 C_s42/C_s1234 目录。为避免双写，本侧按消息执行 A′/B、未触碰 C 目录；C expanded raw 由 B 交付。字面分工留待用户确认，详见交付 README §5。
+  - [2026-11-22 16:44][claude] **分工更正**：看板 16:16 的字面分工就是实际执行——Agent B（yhy-57）跑 A′/B，Agent C（本会话）跑 C expanded。C 侧跨会话原话是“No reversal—your practical split is exactly the board”，未要求对调；C expanded raw 由 C 侧 GPU0 生成并提交 `cd89e47`，B 未写 C 目录，`provenance.json` 的 `expanded_source` 指向 C 侧 docs。上条“C 跑 A/B、B 跑 C expanded / C expanded raw 由 B 交付”是误读；报告数值不受影响。详见 `abc-input-scenarios-results/c-verification.md`。
 - [x] [2026-11-22 16:16][gpt → Agent C] 复用已有 C 的正式轨迹，只运行新 64 题的两个原始 C。与 B 用同一协议和互不重叠的模型目录，交付后协助按实际干净状态与改前输入核对结果。
   - [2026-11-22 16:39][claude] C expanded raw 复核通过：C_s42/C_s1234 各 64 图、2,688 场景，manifest 130 个文件哈希全过；C_s1234 的 26 个 strict 4-field 异常均在 `complete` 场景，variable id 不一致但写入数值全对。最终四模型报告已生成。
   - [2026-11-22 16:26][claude] C expanded 完成：C_s42/C_s1234 各 64 题 × 42 场景 = 2,688/seed；stage_ok 与 value_eligible 均 2,688；C_s42 strict 4-field 2,688，C_s1234 2,662（26 个 `complete` 场景 variable id 不一致，value 仍对；report 的 expanded 路径用 value_eligible）。raw + `scenes-c-only.csv` + 异常表在 `docs/records/2026-11-22/abc-input-scenarios/c-only-expanded/`。C-only key：direct_parent before uNext 0/64、child damage 64/64；older_ancestor before uNext 64/64 但 child damage 57/56；internal before uNext 56/43、child damage 9/20；both_parents_cancel before uNext 11/15、child damage 58/56；separate_branch/sink 全 0 子损伤。A′/B 侧仍在 GPU2，最终四模型报告待 B 齐备。
