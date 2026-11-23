@@ -1,6 +1,7 @@
 # 第一批 · C 侧 original 交付（2026-11-23）
 
-- 状态：**仅 C 侧 original 阶段**：C_s42/C_s1234 的 natural/history/fanout，以及 A_s42/B_s42 的 fanout。后训练 C 的 trained 阶段由 yhy-57 运行；四模型 report 待 B 侧齐备后生成。
+- 状态：**仅 C 侧 original 阶段**：C_s42/C_s1234 的 natural/history/fanout，以及 A_s42/B_s42 的 fanout。后训练 C 的 trained 阶段由 yhy-57 运行；四模型 report 已由 B 侧生成。
+- B 侧四模型 report 已生成；C 侧对 report 的 CPU 复核见 [`verification.md`](verification.md)（五项数值均可复算；fanout 的 /64 为 attempts 分母、C_s1234 common 为 63/64 等口径已写明）。
 - 未训练、未改结构；固定权重评估。C 侧只写 `natural/history/fanout` 的模型目录，不写 trained 的 mark/standard/layered/expanded。
 - 命令：
 
