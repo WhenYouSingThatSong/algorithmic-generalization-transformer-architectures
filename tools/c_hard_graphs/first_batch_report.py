@@ -72,10 +72,10 @@ def summarize(out,name,records):
     write(out,name+"-counts",(dict(dict(k),**z) for k,z in counts.items()))
     paired=defaultdict(dict)
     for row in records:
-        if row["scope"]!="common" or not row["eligible"]:
+        if row["scope"]=="individual" or not row["eligible"]:
             continue
         key=tuple((k,row[k]) for k in ("suite","size","depth","gid","role","phase",
-                                      "condition","fanout","group") if k in row)
+                                      "condition","fanout","group","scope") if k in row)
         paired[key][row["model"]]=row
     effects=defaultdict(Counter)
     binary=("next_correct","target_next","specific","child_specific","child_damage","output_ever_wrong")
