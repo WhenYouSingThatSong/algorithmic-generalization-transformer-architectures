@@ -1,0 +1,89 @@
+{
+  "status": "trained smoke/formal exit 0; four-model first-batch report generated",
+  "date": "2026-11-23",
+  "code_commit": "f14c14b",
+  "code_note": "9c13113 plus first_batch_report paired-scope patch (common/common_clock/common_clock_fit)",
+  "data_root": "/workspace/lab-xj/users/jinxi/code/yhy/management-20261120",
+  "first_batch_out": "/workspace/lab-xj/users/jinxi/code/yhy/management-20261120/tmp/analysis/first-batch-20261123",
+  "run": {
+    "trained_smoke": "CUDA_VISIBLE_DEVICES=2 bash tools/c_hard_graphs/run_first_batch.sh trained smoke",
+    "trained_formal": "CUDA_VISIBLE_DEVICES=2 bash tools/c_hard_graphs/run_first_batch.sh trained formal",
+    "report": "python tools/c_hard_graphs/first_batch_report.py --out $FIRST_BATCH_OUT",
+    "log": "tmp/analysis/first-batch-b-trained-formal.log",
+    "exit_code": 0
+  },
+  "models": {
+    "C_s42-correction": {
+      "checkpoint_sha256": "88430930dac93c70363715c4217f4d611cee3e7c1ee14a061fe55f5868641b7e",
+      "standard": 192,
+      "layered": 32,
+      "expanded": 64,
+      "fanout": 64
+    },
+    "C_s1234-correction": {
+      "checkpoint_sha256": "b9ad22aa69b4ed0676dcbbbb0604f9a4c2f17b989f24afc1c28f98a4db2c459d",
+      "standard": 192,
+      "layered": 32,
+      "expanded": 64,
+      "fanout": 64
+    },
+    "C_s42-update": {
+      "checkpoint_sha256": "f14f4bbfbfd0069eadcad56d61d46e78159a45cd92beb8540594cc848c55dd5a",
+      "standard": 192,
+      "layered": 32,
+      "expanded": 64,
+      "fanout": 64,
+      "epoch10_sha256": "227cecf8ed40f8276087a813c4602238f4bc140baf65d40a27bc1857d1cc4c34",
+      "epoch30_sha256": "73334e8dcd081a15b351d997af44d13bec78a35a43bc107aa77be7931f18a1f0",
+      "mark_cases_per_epoch": 64
+    },
+    "C_s1234-update": {
+      "checkpoint_sha256": "693b6338ac69281cf766e070b36530d1fdf61a2601068779aab7f780ccebb104",
+      "standard": 192,
+      "layered": 32,
+      "expanded": 64,
+      "fanout": 64,
+      "epoch10_sha256": "3d9f102d549e5b06287285f42480723f515ec4c77bfb130e1271dd4799138eda",
+      "epoch30_sha256": "bbaa671835fa93863a202a8f1d9a3997999423e71e0d62f4328a3d96735ca79c",
+      "mark_cases_per_epoch": 64
+    }
+  },
+  "zero_coverage": {
+    "C_s1234_history_confirmed_read_opportunities": 0,
+    "note": "new reader first step always 24 (empty); structural zero coverage, not a wrong answer",
+    "fanout_C_s1234_depth8_complete_ineligible": "1/32; common denominator 63/64"
+  },
+  "raw_archive": {
+    "path": "first-batch-trained-raw.tar.gz",
+    "sha256": "1e9912a3c19b81fc289bb8ebb4fe1a518680f569b95b2116e9969fdebc6afb76",
+    "manifest": "first-batch-trained-raw-manifest.sha256",
+    "files": 1836
+  },
+  "outputs": {
+    "README.md": "09e7eb08b5bb0d9c3b14c16b8b19f81832188aa87beef2ae15a005110e3ae6a8",
+    "first-batch-trained-raw-archive.sha256": "14a1d3898c12bb42d63fc5e45200ed9c33641d615088b9dde7c79daf107c4030",
+    "first-batch-trained-raw-manifest.sha256": "e2f3a6bcae19b770725ba4b8593b4abb6be05a06cd807a4b436973b632aca167",
+    "first-batch-trained-raw.tar.gz": "1e9912a3c19b81fc289bb8ebb4fe1a518680f569b95b2116e9969fdebc6afb76",
+    "fit-sources/C_s1234-correction.json": "7cd3cd0e2356a15b2a77bb1b8fd0f0d729c52b617c92ab80b41e76bf1c1aa40f",
+    "fit-sources/C_s1234-update.json": "15af2b63c16c753d55009638e18d34bca89995a188633bcc0f08eb2c4cec4717",
+    "fit-sources/C_s42-correction.json": "3582b7b72fdd840e7c64d349907c102f4c07085109148e637251f91fb1b401ba",
+    "fit-sources/C_s42-update.json": "3225fec7cc92b1ae2585bdc1477990ef9d4104ba576996def35b447ffcdda505",
+    "tables/fanout-counts.csv": "b2cb9e05e078d941b32c1ea905d2bb56aa443705aa4587d16fd0136b921a80be",
+    "tables/fanout-graphs.csv.gz": "dad8557452fca6c9e9fb8d21db2ab32b93f2b590af5ce300de49a4f311625111",
+    "tables/fanout-paired.csv": "32a40f6cf4f1b224597378a7ef28b52761b96972bf89077ad396cd5cc473848c",
+    "tables/fanout-topology-pairs.csv": "2605c267f567d9a3f850d285c581ba25085e8f9446c400fc0bde9c5bd45fb67f",
+    "tables/mark-counts.csv": "7c14ffc9d4e883000c0be331e8c1b6359f8ac3ff28802fde6fb6bf5ba838a018",
+    "tables/mark-thresholds.csv.gz": "bca26f71f284a0846354cee7d218dc615df951ae1cae183f31775379afa5b932",
+    "tables/natural-counts.csv": "324c64575c3f69c79adcd627d44acabcb2ebec89b4ef27bda1102a04efe3a95f",
+    "tables/natural-coverage.csv": "1f993c663e904b2f5969b5f7c5744ba6ae8e8a5a03e55f1e8e225298e8724761",
+    "tables/natural-pairs.csv": "e5534c7f6f6ec6be77594670ceda1f35e5c9d6657c25dcc9668d3322a4f83ba3",
+    "tables/same-graph-fit.csv": "f71e823f96f429cfe45bc05d1b483770bf02560b26bc481e3c407dfa417312e1",
+    "tables/same-value-counts.csv": "b38380f98451f9386722688057c3db74c521419e0f549d7f6bf1b6822299887b",
+    "tables/same-value-new-reader.csv": "2911845ab5b17a029a1d178b320fd7619b30cf82f530b8e609c7f5ff851c39be",
+    "tables/scenes-counts.csv": "38e446d530670e76b81977b93b3b2ef0aecca2309d2379ea2d855150a6466e78",
+    "tables/scenes-graphs.csv.gz": "469d8737e10784a2819f314dd9cd6ef9190e042ac8efb949a9d4fa55500cca3a",
+    "tables/scenes-paired.csv": "663ec00a62d1ae1fe7d392fe040cc60b4ecf0ec51074039ae06e446d0e488dca",
+    "training/training-loss-epochs.csv": "2609165d301b984b6fa8647aa34ce330a745c5a4284efe4671da489c779750b7",
+    "training/validation-summary.csv": "ce7dde53b1a7c04abc6eb9185093c03d0b5d865d357ea0f51cca2e935ebd0871"
+  }
+}

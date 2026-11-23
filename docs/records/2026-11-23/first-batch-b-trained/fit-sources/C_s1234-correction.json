@@ -1,0 +1,32 @@
+{
+  "config": "C0-M4-Nodes32-ADD-L4H16D384-DeBERTa",
+  "checkpoint": "b9ad22aa69b4ed0676dcbbbb0604f9a4c2f17b989f24afc1c28f98a4db2c459d",
+  "path": "/workspace/lab-xj/users/jinxi/code/yhy/management-20261120/tmp/analysis/c-update-20261119/run/train/C_s1234-correction/final.ckpt",
+  "validation": [
+    {
+      "horizon": "D",
+      "mean_value": 1.0,
+      "mean_first4": 1.0,
+      "mean_variable": 1.0,
+      "graph_value_all": 1.0,
+      "graph_first4_all": 1.0
+    },
+    {
+      "horizon": "D+16",
+      "mean_value": 1.0,
+      "mean_first4": 0.994873046875,
+      "mean_variable": 0.994873046875,
+      "graph_value_all": 1.0,
+      "graph_first4_all": 0.8515625
+    },
+    {
+      "horizon": "D+4",
+      "mean_value": 1.0,
+      "mean_first4": 1.0,
+      "mean_variable": 1.0,
+      "graph_value_all": 1.0,
+      "graph_first4_all": 1.0
+    }
+  ],
+  "epochs": 50
+}
