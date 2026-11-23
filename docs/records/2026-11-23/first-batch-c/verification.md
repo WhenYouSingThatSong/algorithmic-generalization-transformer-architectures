@@ -2,7 +2,7 @@
 
 日期：2026-11-23。复核对象：`docs/records/2026-11-23/first-batch-b-trained/`（提交 `de5d2f4`，报告代码 `reproduction@f14c14b`）与生产 report 根 `tmp/analysis/first-batch-20261123/formal/tables/`。本复核只读，不启动训练、不占用 GPU，不改 B 的模型目录与 raw；不改 C 已交付的 natural/history/fanout raw。
 
-结论先行：**要求复核的五项数值均能复算，未发现算术错误。** 发现两处口径需要写清楚：`fanout-counts` 的 `/64` 是 attempts 分母（C_s1234 各臂 eligible 为 63）；`C_s1234 d8 complete 1/32` 是原始 C_s1234 的 individual 不合格，后训练两臂 individual 仍为 32/32，但它们的 group common 分母同样被原始 C 的该题拉成 63/64。这不改变 report 数值，只影响分母标签。
+结论先行：**要求复核的五项数值均能复算，未发现算术错误。** 发现两处口径需要写清楚：`fanout-counts` 的 `/64` 是 attempts 分母（C_s1234 各臂 eligible 为 63）；`C_s1234 d8 complete 1/32` 是原始 C_s1234 的 individual 不合格，后训练两臂 individual 仍为 32/32，但它们的 group common 分母同样被原始 C 的该题拉成 63/64。这不改变 report 数值，只影响分母标签。B 已在 `d67bfb2` 按本复核把 README 的 fanout 表改为 eligible 分母，并补明 A/B 的 `four_with_C1234` common 63/64；表与 raw 未变，provenance 只更新 README hash。
 
 ## 1. 交付一致性与身份
 
