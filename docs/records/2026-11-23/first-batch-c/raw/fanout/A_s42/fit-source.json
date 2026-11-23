@@ -1,0 +1,5 @@
+{
+  "config": "A-L4D384fast-Nodes32-ADD-L4H16D384-DeBERTa",
+  "checkpoint": "0b66e196990af8fb8dca3fdb75f4d211fd4a4c56a8496d2a200f765470c1106a",
+  "path": "/workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/runs/A-L4D384fast/checkpoints/Nodes32-ADD - L4H16D384_DeBERTa-seed-42 - 2026-11-09-15:42:45/epoch=86-val_loss=0.0000.ckpt"
+}

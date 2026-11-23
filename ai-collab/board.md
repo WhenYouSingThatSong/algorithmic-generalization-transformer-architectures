@@ -1,13 +1,14 @@
 # 工作看板
 
-> 最近更新：2026-11-23 14:01 CST · [gpt]
+> 最近更新：2026-11-23 14:12 CST · [claude]
 > 活看板：任务可以移动；状态变化在 `log.md` 记一行。条目格式 `[YYYY-MM-DD HH:MM][author]`。
 
 ## 当前执行 · 第一批原始 C、四模型和过程监督实验
 
 - [2026-11-23 14:01][gpt] 用户确认按[五条研究主线与第一批后的决策](../docs/records/2026-11-23/research-storylines.md)推进。当前先交第一批；候选五纳入逐位置测试时自适应计算，预算分叉和新架构另立批次。
 
-- [ ] [2026-11-23 13:28][gpt → Agent C] 按[第一批协议和入口](../docs/records/2026-11-23/first-batch.md)执行 original smoke → formal。两份原始 C 的自然错与同错数替换、同值异历史的新子节点、四份基础权重的分支传播。回报自然配对从候选到成功的覆盖和真正发生替换的位置。
+- [x] [2026-11-23 13:28][gpt → Agent C] 按[第一批协议和入口](../docs/records/2026-11-23/first-batch.md)执行 original smoke → formal。两份原始 C 的自然错与同错数替换、同值异历史的新子节点、四份基础权重的分支传播。回报自然配对从候选到成功的覆盖和真正发生替换的位置。
+  - [2026-11-23 14:12][claude] C original formal 完成（GPU0，exit 0）：C natural 192×2、history 64×2、fanout 64×2，A/B fanout 各 64。覆盖：C_s42 natural 337,614 opportunities / 217 node events / 76 selected / 66 matched（donor fail 10）；C_s1234 315,962 / 465 / 118 / 87（donor fail 31）。history：C_s42 common 31/32(d4)、27/32(d8)，confirmed read 7/31、3/27；C_s1234 common 13/32、5/32，新读者首步全为 24（空），confirmed read=0，属零覆盖。fanout：C/A/B 全部 32/32 合格，仅 C_s1234 d8 complete 1/32 不合格。交付 `docs/records/2026-11-23/first-batch-c/`（raw 416 KB + 7 张表 + 784 行 manifest）；trained 与四模型 report 待 B。
 - [ ] [2026-11-23 13:28][gpt → Agent B] 执行 trained smoke → formal。两种后训练 C 同题场景及传播，过程监督第 10、30、50 周期定位、修改与健康误报。两边交齐后由 B 运行 report 并检查同题同轮、拟合、分母与方向相反的配对。旧 A′/B 和原始 C 已交付的大批轨迹直接复用。
 - [2026-11-23 13:28][gpt] 固定快照独立输出；服务器实际推理待执行。本地算术参考四项通过，汇总入口已用旧归档和参考输出做小样本接线检查。
 

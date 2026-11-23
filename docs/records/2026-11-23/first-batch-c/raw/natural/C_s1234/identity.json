@@ -1,0 +1,22 @@
+{
+  "model": "C_s1234",
+  "checkpoint": "0bca3a2b91e82d70d5808859d3a907e0b8a32e0a852ba483c208f955d7d70475",
+  "plan": "b3c4b1be9325dd37aefc2004dc19b6e5ee6d82c6ff097c25c072d3f39038bc24",
+  "config": "C0-M4-Nodes32-ADD-L4H16D384-DeBERTa",
+  "code": {
+    "abc_scene_queue.py": "aa4ddba7cfaea6efb79e4163e4a4ac7c7bb089915fdcc0b8761f7ee8e98acf57",
+    "original_c_recovery.py": "da64c812b9ef7e1ef3e3bf5d325e50d4e716e0be33b0bac2597bd1e389679295",
+    "attribution_cases.py": "2fac333ccbb57aec8081a5a5b6844abc8d80aa4bde809e33f8b8688d386187e2",
+    "research_probes.py": "178706d0af93c3826c5127cda71b8ef2bfad94968333a8dd3638b24b5e91fa21",
+    "runtime.py": "e2e4077972a71fde4580c757452bfaf7c0edc40bff5fdd5aa0a355795854d201",
+    "rebinding.py": "4f65b6444c64a5c282a55e10d8ed24c8ea0b32fdb66289628da6d1ad92c8b7df",
+    "model.py": "dccaeaf24619c2e685e7e3146a700b42fc565abbffcbdc9d1f0f6eda53fb07dc",
+    "model_base.py": "f8e419b832232db3913227952d1c9ba48c2af5ad8b0666edc37aa021f18a3285",
+    "data_config.yaml": "7c098fa1975e8e7638171b5fd54e5c77b78305be88b105256a91cf42614d1ae3",
+    "model_config.yaml": "1787c0435b1f2ba73aad0bc2989ebea01e7e834b13b88e9cfd51a5e2c729c6b1",
+    "train_config.yaml": "87f6352d9b00aae6291d635fc154e918915eaea7323c1ccc5eaf7a39c9ba52ad",
+    "first_batch.py": "b564a312f014cf01d17308cc992126fc8c7c1d84ee6f37e6798062eef639055e",
+    "first_batch_probes.py": "a6e07f9155da9ebabe4c85861b1b3061bf5f87628ede7fbcb7970522d6213710",
+    "attribution_queue.py": "893bfd5d8c59163aa7307c5ba710a3ee0e91a0dd71dbddc31555f30fc222d340"
+  }
+}
