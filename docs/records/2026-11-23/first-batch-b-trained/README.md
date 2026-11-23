@@ -83,26 +83,26 @@ python tools/c_hard_graphs/first_batch_report.py --out "$FIRST_BATCH_OUT"
 
 ## 5. Fanout：一、二、四子节点传播
 
-`fanout-counts.csv` 为各模型/深度/fanout/phase 的共同合格计数；下表取 fanout=1 与 4 的 `complete` 阶段（C_s1234 d8 complete 有 1/32 不合格，common 分母为 63/64；其余为 64/64）：
+`fanout-counts.csv` 为各模型/深度/fanout/phase 的共同合格计数。下表取 fanout=1 与 4 的 `complete` 阶段；斜杠后为 **eligible 分母**，不是 attempts。C_s1234 三臂的 group common 都是 63/64（attempts=64；原始 C_s1234 individual 31/32，唯一不合格是 gid 422 depth8 complete，fanout 1/2/4；correction/update individual 32/32，但 group common 仍含该题，故为 63/64）；C_s42 家族为 64/64。A_s42/B_s42 individual 32/32；`primary` common 64/64，`four_with_C1234` common 63/64 同样由该题触发，不是 A/B 个体失败。
 
 | 模型 | fanout | target_next | child_specific | descendant wrong node-rounds | output ever wrong |
 |---|---:|---:|---:|---:|---:|
 | C_s42 原始 | 1 | 59/64 | 19/64 | 293 | 37/64 |
 | C_s42-correction | 1 | 64/64 | 61/64 | 191 | 64/64 |
 | C_s42-update | 1 | 62/64 | 57/64 | 240 | 64/64 |
-| C_s1234 原始 | 1 | 17/64 | 20/64 | 338 | 60/64 |
-| C_s1234-correction | 1 | 52/64 | 30/64 | 207 | 63/64 |
-| C_s1234-update | 1 | 30/64 | 50/64 | 252 | 63/64 |
+| C_s1234 原始 | 1 | 17/63 | 20/63 | 338 | 60/63 |
+| C_s1234-correction | 1 | 52/63 | 30/63 | 207 | 63/63 |
+| C_s1234-update | 1 | 30/63 | 50/63 | 252 | 63/63 |
 | C_s42 原始 | 4 | 59/64 | 19/64 | 484 | 34/64 |
 | C_s42-correction | 4 | 64/64 | 60/64 | 343 | 45/64 |
 | C_s42-update | 4 | 62/64 | 61/64 | 551 | 64/64 |
-| C_s1234 原始 | 4 | 17/64 | 30/64 | 809 | 58/64 |
-| C_s1234-correction | 4 | 52/64 | 32/64 | 498 | 61/64 |
-| C_s1234-update | 4 | 30/64 | 62/64 | 509 | 47/64 |
+| C_s1234 原始 | 4 | 17/63 | 30/63 | 809 | 58/63 |
+| C_s1234-correction | 4 | 52/63 | 32/63 | 498 | 61/63 |
+| C_s1234-update | 4 | 30/63 | 62/63 | 509 | 47/63 |
 
 - 后训练在 `before` 阶段几乎消除了基础模型的 descendant wrong rounds（例如 C_s42/C_s1234 fanout=4 before：原始 358/365，correction 2/8，update 13/230）；`complete` 阶段则出现明显的 fanout 依赖：C_s42 update 的 descendant wrong rounds 从 240（fanout=1）升到 551（fanout=4），correction 从 191 升到 343；C_s1234 两臂也从 207/252 升到 498/509。
 - `child_specific` 在 `children_correct`/`complete` 随 fanout 增大而增大，且后训练通常高于原始（尤其 update）。`descendant_empty_rounds` 在 C_s42-correction 的 `just_correct` 出现 5/17/39（fanout 1/2/4），报告保留。
-- `output_ever_wrong` 只表示终点曾错过，不等于末轮仍错；末轮指标见 CSV 的 `output_wrong_end`。C_s42 原始在 complete 的 `output_wrong_end` 为 5/64（fanout=1），后训练为 0–1；C_s1234 原始为 1/64，后训练 0。
+- `output_ever_wrong` 只表示终点曾错过，不等于末轮仍错；末轮指标见 CSV 的 `output_wrong_end`。C_s42 原始在 complete 的 `output_wrong_end` 为 5/64（fanout=1），后训练为 0–1/64；C_s1234 原始为 1/63（eligible 63），后训练为 0/63。
 
 ## 6. 过程监督标出（mark，仅 update）
 
@@ -128,7 +128,7 @@ C 侧 original 交付（`docs/records/2026-11-23/first-batch-c/`）的覆盖与�
 
 - natural：C_s42 337,614 个机会 / 217 个 node events / 306 条 edge records / 76 条 selected / 66 条 matched，donor fail 10；C_s1234 315,962 / 465 / 623 / 118 / 87，donor fail 31。
 - history：C_s42 common 31/32(d4)、27/32(d8)，confirmed read 7/31、3/27；C_s1234 common 13/32、5/32，新读者首步恒为 24（空），`confirmed_read_opportunities=0`。这是**结构性零覆盖**，不是“答错”，也不是缺失；`same-value-counts.csv` 的空值保留为零分母。
-- fanout：C_s1234 d8 complete 1/32 不合格，common 分母 63/64；其余 C/A/B cell 32/32。报告保留该缺口。
+- fanout：原始 C_s1234 的 individual 在 d8 complete 为 31/32（唯一 gid 422）；C_s1234 三臂的 group common 均为 63/64；C_s42 家族 common 仍为 64/64；A_s42/B_s42 individual 32/32，`primary` common 64/64，`four_with_C1234` common 63/64 是由原始 C_s1234 的 gid 422 触发的 group common 传播，不是 A/B 个体失败。报告保留该缺口。
 - 自然/人工同错数的完整交叉表见 C 侧 `tables/natural-*.csv`；本报告的 `natural-coverage/pairs/counts` 复用同一 raw，不另造第二套表。
 
 ## 8. 文件与校验
@@ -138,12 +138,13 @@ C 侧 original 交付（`docs/records/2026-11-23/first-batch-c/`）的覆盖与�
 - `fit-sources/`：四个后训练模型的 `fit-source.json` 副本。
 - `first-batch-trained-raw.tar.gz`：22 个 trained 目录的全部 raw/identity/fit-source（1,836 个文件；archive SHA256 `1e9912a3…`）；逐文件哈希在 `first-batch-trained-raw-manifest.sha256`。C 侧 raw 在 C 交付目录，A/B 与原始 C 的大批轨迹沿用 2026-11-22 归档。
 - 完整 report 运行根：`tmp/analysis/first-batch-20261123/`；raw 不搬到 docs。报告脚本 `reproduction@f14c14b`。
+- C 侧复核：`docs/records/2026-11-23/first-batch-c/verification.md`（`3281ba2`）；五项数值可复算，两处分母标签（fanout eligible 与 A/B `four_with_C1234` common）已在本 README 修正。
 
 ## 9. 边界
 
 - 固定权重、固定题面、固定输出；不是训练新模型，也不把后训练差异单独归因于某一目标函数或“纠错训练”。两种后训练的损失目标不同，验证格式也不同。
 - 目标回正 ≠ 下游未受损；本批多处显示 trained 目标更高但 child_specific/descendant 损伤也更高；方向计数同时列出 base_only 和 trained_only。
-- C_s1234 history 的零覆盖、fanout 的 1/32 不合格、A/B 标准组较低的基础拟合（见上一批 `abc-input-scenarios-results`）都必须与结果一起读。
+- C_s1234 history 的零覆盖、原始 C_s1234 fanout individual 的 1/32 不合格（group common 63/64，A/B 的 `four_with_C1234` common 也随之为 63/64，individual 仍 32/32）、A/B 标准组较低的基础拟合（见上一批 `abc-input-scenarios-results`）都必须与结果一起读。
 - 候选五（逐位置测试时自适应计算）另立批次，不混入本批结论。
 
 ## 10. 分工
