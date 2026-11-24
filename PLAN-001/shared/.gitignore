@@ -1,0 +1,7 @@
+**data/
+**__pycache__/
+**val_datasets/
+**tmp_valset/
+**tmp_idset/
+wandb/
+tmp/

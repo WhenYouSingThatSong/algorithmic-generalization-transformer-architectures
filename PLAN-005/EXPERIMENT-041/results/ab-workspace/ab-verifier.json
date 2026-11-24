@@ -1,0 +1,24 @@
+{
+  "status": "ok",
+  "errors": 0,
+  "bundle": "/workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/analysis/abc-workspace-20261119/AB-main",
+  "plan_commit": "3c360ece3e6fe41dcf9f4ba07c977f489efda1a7",
+  "tasks_sha256": "b13f87df400c4d2596dd43284b6f906b3ae5eda6a2ae44441404cb05358690d8",
+  "models_sha256": "73e99dcbc603f419962e93bce46021b84ed1d9737936ec325dd9ac372d1bfd19",
+  "tokens_mod": 23,
+  "tokenizer_n_vars": 128,
+  "records": {
+    "A_s42/assignment": 1940,
+    "A_s42/program": 2600,
+    "B_s42/assignment": 1940,
+    "B_s42/program": 2600
+  },
+  "node_values_checked": 290560,
+  "reference_records": 4800,
+  "conditional_records": 5400,
+  "probe_records": 600,
+  "common_initial_first4": 80,
+  "summary_groups": 1460,
+  "program_rows": 240,
+  "probe_pair_rows": 480
+}

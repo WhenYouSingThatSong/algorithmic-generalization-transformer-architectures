@@ -1,0 +1,69 @@
+graph_id,condition,target_index,injection_pos,node_pos,round,reachable_from_injection,protected_exclusive,parents,parent_input_values,true_value,input_value,output_value,clean_output,expected_from_input_parents,matches_parent_expression
+142,late_u,0,26,64,1,True,False,[26],"[""6""]",5,5,EMPTY,5,6,False
+142,late_u,0,26,112,1,True,False,"[86, 26]","[""18"", ""6""]",0,0,1,0,1,True
+142,late_u,0,26,128,2,True,False,"[92, 64, 22]","[""10"", ""EMPTY"", ""10""]",2,2,8,2,,
+142,late_u,0,26,140,2,True,False,"[112, 2]","[""1"", ""5""]",5,5,6,5,6,True
+142,late_u,0,26,156,2,True,False,"[120, 64, 14]","[""21"", ""EMPTY"", ""22""]",2,2,EMPTY,2,,
+142,late_u,0,26,170,2,True,False,"[120, 18, 64]","[""21"", ""7"", ""EMPTY""]",10,10,EMPTY,10,,
+142,late_u,0,26,182,2,True,False,"[64, 98, 156]","[""EMPTY"", ""7"", ""2""]",14,14,EMPTY,14,,
+142,late_u,0,26,190,2,True,False,"[162, 112, 50]","[""20"", ""1"", ""0""]",20,20,9,20,21,False
+142,late_u,0,26,128,3,True,False,"[92, 64, 22]","[""10"", ""5"", ""10""]",2,8,8,2,2,False
+142,late_u,0,26,182,3,True,False,"[64, 98, 156]","[""5"", ""7"", ""EMPTY""]",14,EMPTY,EMPTY,14,,
+142,late_u,0,26,128,4,True,False,"[92, 64, 22]","[""10"", ""5"", ""10""]",2,8,8,2,2,False
+142,late_u,0,26,128,5,True,False,"[92, 64, 22]","[""10"", ""5"", ""10""]",2,8,8,2,2,False
+142,late_u,0,26,128,6,True,False,"[92, 64, 22]","[""10"", ""5"", ""10""]",2,8,8,2,2,False
+142,late_u,0,26,128,7,True,False,"[92, 64, 22]","[""10"", ""5"", ""10""]",2,8,8,2,2,False
+142,late_u,0,26,128,8,True,False,"[92, 64, 22]","[""10"", ""5"", ""10""]",2,8,8,2,2,False
+142,late_u,0,26,128,9,True,False,"[92, 64, 22]","[""10"", ""5"", ""10""]",2,8,8,2,2,False
+142,late_u,0,26,128,10,True,False,"[92, 64, 22]","[""10"", ""5"", ""10""]",2,8,8,2,2,False
+142,late_u,0,26,128,11,True,False,"[92, 64, 22]","[""10"", ""5"", ""10""]",2,8,8,2,2,False
+142,late_u,0,26,128,12,True,False,"[92, 64, 22]","[""10"", ""5"", ""10""]",2,8,8,2,2,False
+142,late_u,0,26,128,13,True,False,"[92, 64, 22]","[""10"", ""5"", ""10""]",2,8,8,2,2,False
+142,late_u,0,26,128,14,True,False,"[92, 64, 22]","[""10"", ""5"", ""10""]",2,8,8,2,2,False
+142,late_u,0,26,128,15,True,False,"[92, 64, 22]","[""10"", ""5"", ""10""]",2,8,8,2,2,False
+142,late_u,0,26,128,16,True,False,"[92, 64, 22]","[""10"", ""5"", ""10""]",2,8,8,2,2,False
+146,unrelated,0,26,58,1,True,False,[26],"[""1""]",21,21,EMPTY,21,1,False
+146,unrelated,0,26,90,1,True,False,[58],"[""21""]",21,21,EMPTY,21,21,False
+146,unrelated,0,26,94,1,True,False,[58],"[""21""]",21,21,EMPTY,21,21,False
+146,unrelated,0,26,140,1,True,False,"[110, 22, 26]","[""13"", ""6"", ""1""]",17,17,20,17,20,True
+146,unrelated,0,26,90,2,True,False,[58],"[""EMPTY""]",21,EMPTY,EMPTY,21,,
+146,unrelated,0,26,94,2,True,False,[58],"[""EMPTY""]",21,EMPTY,EMPTY,21,,
+146,unrelated,0,26,102,2,False,True,"[14, 48, 64]","[""4"", ""15"", ""21""]",17,17,0,17,17,False
+146,unrelated,0,26,132,2,True,False,"[102, 90]","[""17"", ""EMPTY""]",15,15,EMPTY,15,,
+146,unrelated,0,26,140,2,True,False,"[110, 22, 26]","[""13"", ""6"", ""21""]",17,20,6,17,17,False
+146,unrelated,0,26,162,2,True,False,"[94, 6, 144]","[""EMPTY"", ""6"", ""17""]",21,21,EMPTY,21,,
+146,unrelated,0,26,120,3,False,True,[102],"[""0""]",17,17,0,17,0,True
+146,unrelated,0,26,126,3,False,True,"[48, 102]","[""15"", ""0""]",9,9,15,9,15,True
+146,unrelated,0,26,132,3,True,False,"[102, 90]","[""0"", ""EMPTY""]",15,EMPTY,EMPTY,15,,
+146,unrelated,0,26,140,3,True,False,"[110, 22, 26]","[""13"", ""6"", ""21""]",17,6,6,17,17,False
+146,unrelated,0,26,154,3,False,True,"[126, 116]","[""9"", ""15""]",1,1,EMPTY,1,1,False
+146,unrelated,0,26,162,3,True,False,"[94, 6, 144]","[""EMPTY"", ""6"", ""17""]",21,EMPTY,EMPTY,21,,
+146,unrelated,0,26,144,4,False,True,[120],"[""0""]",17,17,0,17,0,True
+146,unrelated,0,26,148,4,False,True,[126],"[""15""]",9,9,15,9,15,True
+146,unrelated,0,26,154,4,False,True,"[126, 116]","[""15"", ""15""]",1,EMPTY,7,1,7,True
+146,unrelated,0,26,162,4,True,False,"[94, 6, 144]","[""21"", ""6"", ""17""]",21,EMPTY,EMPTY,21,21,False
+146,unrelated,0,26,162,5,True,False,"[94, 6, 144]","[""21"", ""6"", ""0""]",21,EMPTY,4,21,4,True
+146,unrelated,0,26,170,5,False,True,"[38, 148, 78]","[""6"", ""15"", ""9""]",1,1,7,1,7,True
+149,unrelated,0,70,90,1,True,False,[70],"[""2""]",22,22,EMPTY,22,2,False
+149,unrelated,0,70,94,1,True,False,[70],"[""2""]",22,22,EMPTY,22,2,False
+149,unrelated,0,70,118,2,True,False,"[60, 90]","[""22"", ""EMPTY""]",21,21,4,21,,
+149,unrelated,0,70,128,2,False,True,"[98, 66]","[""12"", ""10""]",22,22,10,22,22,False
+149,unrelated,0,70,144,2,True,False,"[122, 30, 90]","[""12"", ""17"", ""EMPTY""]",5,5,EMPTY,5,,
+149,unrelated,0,70,150,3,False,True,"[128, 40]","[""10"", ""12""]",11,11,22,11,22,True
+149,unrelated,0,70,162,3,True,False,"[144, 98]","[""EMPTY"", ""12""]",17,17,12,17,,
+149,unrelated,0,70,168,4,False,True,"[150, 48]","[""22"", ""12""]",0,0,11,0,11,True
+275,unrelated,0,28,72,1,True,False,"[2, 28]","[""13"", ""10""]",20,20,EMPTY,20,0,False
+275,unrelated,0,28,94,1,True,False,"[46, 28, 6]","[""2"", ""10"", ""17""]",3,3,6,3,6,True
+275,unrelated,0,28,160,1,True,False,"[28, 132]","[""10"", ""17""]",1,1,4,1,4,True
+275,unrelated,0,28,124,2,True,False,"[72, 94, 22]","[""EMPTY"", ""6"", ""13""]",13,13,EMPTY,13,,
+275,unrelated,0,28,140,2,False,True,"[110, 14, 80]","[""2"", ""3"", ""12""]",17,17,6,17,17,False
+275,unrelated,0,28,184,2,True,False,"[22, 160, 94]","[""13"", ""4"", ""6""]",17,17,0,17,0,True
+275,unrelated,0,28,154,3,True,False,"[124, 116, 6]","[""EMPTY"", ""12"", ""17""]",19,19,EMPTY,19,,
+276,unrelated,1,82,120,1,True,False,"[18, 82, 36]","[""1"", ""16"", ""1""]",15,15,18,15,18,True
+276,unrelated,1,82,142,1,True,False,"[18, 96, 82]","[""1"", ""2"", ""16""]",16,16,19,16,19,True
+276,unrelated,1,82,180,1,True,False,"[82, 160]","[""16"", ""8""]",21,21,1,21,1,True
+276,unrelated,1,82,150,2,True,False,"[72, 56, 120]","[""1"", ""15"", ""18""]",8,8,EMPTY,8,11,False
+276,unrelated,1,82,160,3,True,False,[150],"[""EMPTY""]",8,8,EMPTY,8,,
+276,unrelated,1,82,166,3,True,False,"[40, 150]","[""1"", ""EMPTY""]",9,9,EMPTY,9,,
+276,unrelated,1,82,174,3,False,True,"[40, 48, 156]","[""1"", ""18"", ""11""]",7,7,EMPTY,7,7,False
+276,unrelated,1,82,180,4,True,False,"[82, 160]","[""13"", ""EMPTY""]",21,21,EMPTY,21,,

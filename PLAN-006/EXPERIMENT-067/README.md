@@ -1,0 +1,19 @@
+# EXPERIMENT-067　自然错态与同错数人工供体交叉回放
+
+所属计划 [PLAN-006](../../Research%20Record.md#plan-006)。旧台账 72。
+
+[主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-067)
+
+## 优先查阅
+
+[README.md](analysis/first-batch-c/README.md)（[原版第 17 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-23/first-batch-c/README.md#L17)） · [natural-pairs.csv](results/first-batch-c/tables/natural-pairs.csv)
+
+阅读报告中的历史相对链接，可从原目录打开。[README.md](../../docs/records/2026-11-23/first-batch-c/README.md)
+
+## 文件
+
+[方案、报告与复核说明](analysis)、[代码快照](code)、[结果与原始轨迹](results)。逐文件来源和校验值见[文件清单](files.tsv)。
+
+C 侧原始文件按 natural、history、fanout 分入各自实验。[共同校验清单](results/first-batch-c/raw-manifest.sha256)。
+
+代码按基线版本留档。运行所需的模块结构、相对导入和调用方法以旧位置及其交接文档为准。

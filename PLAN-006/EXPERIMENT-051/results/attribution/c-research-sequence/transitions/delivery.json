@@ -1,0 +1,11 @@
+{
+  "stage": "transitions",
+  "cases_per_model": 544,
+  "models": [
+    "C_s42",
+    "C_s1234"
+  ],
+  "summary_sha256": "de84117147c4921ec939439f390442baf44ce6829ff5f6f7d4bd425edbd89d7b",
+  "contrasts_sha256": "4d0e7a8317dbac0aafea8233c93761cac06b2c35bb3f26cc154690dc050ff90c",
+  "smoke": false
+}

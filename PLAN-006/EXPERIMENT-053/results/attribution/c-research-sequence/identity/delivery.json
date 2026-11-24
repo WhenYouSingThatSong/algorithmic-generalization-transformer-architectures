@@ -1,0 +1,11 @@
+{
+  "stage": "identity",
+  "cases_per_model": 64,
+  "models": [
+    "C_s42",
+    "C_s1234"
+  ],
+  "summary_sha256": "7b654fa68d317f2ac27c184dde683352a06bd539e7c1e3d8caed7683915bb4c3",
+  "contrasts_sha256": "ee4f1e78a0cb63588692b1570d0aac33947666132476271784ca61917f48f99b",
+  "smoke": false
+}

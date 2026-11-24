@@ -1,0 +1,80 @@
+{
+ "date": "2026-11-21",
+ "protocol": "c_local_update_normal_window_v1",
+ "status": "all_three_completed_dev_only",
+ "manifest_sha256": "a91fd53e2e13251ad02284b8e3262869066cf471128f7f68d0744d7fdedbfb1c",
+ "plan_sha256": "b3c4b1be9325dd37aefc2004dc19b6e5ee6d82c6ff097c25c072d3f39038bc24",
+ "training": {
+  "started_at": "2026-11-21T00:29:00",
+  "finished_at": "2026-11-21T05:18:00",
+  "epochs": 50,
+  "steps": 78200,
+  "effective_batch": 32,
+  "micro_batch": 32,
+  "donor_batch": 32
+ },
+ "runs": [
+  {
+   "model": "C_s42", "physical_gpu": 1,
+   "source_sha256": "4a00d6a21a7ed6ec9730daccf27f6077af45d2f2d7ff7376386bf0aa8903a798",
+   "seed": 1296029488,
+   "final_ckpt": {"path": "tmp/analysis/c-local-update-normal-v1/train/C_s42/final.ckpt", "sha256": "f14f4bbfbfd0069eadcad56d61d46e78159a45cd92beb8540594cc848c55dd5a"},
+   "meta": {"path": "tmp/analysis/c-local-update-normal-v1/train/C_s42/meta.json", "sha256": "7102aa3033ef1276847d94c6967a12297a4876049897327041b12f61a8de5bbc", "status": "complete"},
+   "dev_50": {"path": "tmp/analysis/c-local-update-normal-v1/train/C_s42/dev-50.json", "sha256": "ed268a6b0320b92d4adf97a2dca059107461d24f3ed497326759a8d88a507878"},
+   "dev_clean": {
+    "D": {"graph_value_all": 1.0, "graph_first4_all": 1.0, "mean_value": 1.0, "mean_variable": 1.0},
+    "D+4": {"graph_value_all": 1.0, "graph_first4_all": 1.0, "mean_value": 1.0, "mean_variable": 1.0},
+    "D+16": {"graph_value_all": 0.9921875, "graph_first4_all": 0.0, "mean_value": 0.999755859375, "mean_variable": 0.748779296875}
+   },
+   "dose": {"accepted": 1424539, "changed": 1408524, "completed_accepted": 439537, "frontier_accepted": 638065, "middle_accepted": 346937}
+  },
+  {
+   "model": "C_s1234", "physical_gpu": 2,
+   "source_sha256": "0bca3a2b91e82d70d5808859d3a907e0b8a32e0a852ba483c208f955d7d70475",
+   "seed": 2942770351,
+   "final_ckpt": {"path": "tmp/analysis/c-local-update-normal-v1/train/C_s1234/final.ckpt", "sha256": "693b6338ac69281cf766e070b36530d1fdf61a2601068779aab7f780ccebb104"},
+   "meta": {"path": "tmp/analysis/c-local-update-normal-v1/train/C_s1234/meta.json", "sha256": "c998e4b0b3e7ba7105a12fbca1c534440e725b2e10470370a6a2f4c7e0cb1833", "status": "complete"},
+   "dev_50": {"path": "tmp/analysis/c-local-update-normal-v1/train/C_s1234/dev-50.json", "sha256": "25fdb82a0efaaa990710f6557059a95454eb197aec5d4534f88508fc29881999"},
+   "dev_clean": {
+    "D": {"graph_value_all": 1.0, "graph_first4_all": 1.0, "mean_value": 1.0, "mean_variable": 1.0},
+    "D+4": {"graph_value_all": 1.0, "graph_first4_all": 1.0, "mean_value": 1.0, "mean_variable": 1.0},
+    "D+16": {"graph_value_all": 0.9765625, "graph_first4_all": 0.0625, "mean_value": 0.999267578125, "mean_variable": 0.89111328125}
+   },
+   "dose": {"accepted": 1485817, "changed": 1469341, "completed_accepted": 481601, "frontier_accepted": 653707, "middle_accepted": 350509}
+  },
+  {
+   "model": "C_s2026", "physical_gpu": 3,
+   "source_sha256": "40babb206b1393d0892b047202b9d6469cd140c82f3ba82c96a466fa3c76e780",
+   "seed": 900330519,
+   "final_ckpt": {"path": "tmp/analysis/c-local-update-normal-v1/train/C_s2026/final.ckpt", "sha256": "53ba33c6a205e9e64e530398497cbb4e2cb0e1e1f22ec45c205b998cd9ec996c"},
+   "meta": {"path": "tmp/analysis/c-local-update-normal-v1/train/C_s2026/meta.json", "sha256": "0546046f437bca81cc8f90e3de735f443bd44c58faab63d5c609b34c6bf3026a", "status": "complete"},
+   "dev_50": {"path": "tmp/analysis/c-local-update-normal-v1/train/C_s2026/dev-50.json", "sha256": "1e8fd52e721b4f190f51d1198553889f1d59bb9e555b387c0cfc86d2383d805f"},
+   "dev_clean": {
+    "D": {"graph_value_all": 0.5546875, "graph_first4_all": 0.5546875, "mean_value": 0.945068359375, "mean_variable": 1.0},
+    "D+4": {"graph_value_all": 0.59375, "graph_first4_all": 0.59375, "mean_value": 0.951904296875, "mean_variable": 1.0},
+    "D+16": {"graph_value_all": 0.59375, "graph_first4_all": 0.0078125, "mean_value": 0.939697265625, "mean_variable": 0.826904296875}
+   },
+   "dose": {"accepted": 1297768, "changed": 1283130, "completed_accepted": 342154, "frontier_accepted": 608742, "middle_accepted": 346872}
+  }
+ ],
+ "dev_D_trajectory": {
+  "epochs": [1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50],
+  "C_s42": [1.0, 1.0, 1.0, 0.984375, 0.9453125, 0.921875, 0.875, 0.515625, 1.0, 1.0, 1.0],
+  "C_s1234": [1.0, 0.9921875, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+  "C_s2026": [1.0, 0.953125, 0.546875, 0.6328125, 0.4609375, 0.5078125, 0.5, 0.515625, 0.5234375, 0.53125, 0.5546875]
+ },
+ "dose_common": {
+  "steps": 78200,
+  "enabled_steps": 3852,
+  "enabled_rate": 0.0492583119898977,
+  "structural_candidates": 67811938,
+  "attempts": 1674541,
+  "mode_enabled": {"frontier": 1279, "middle": 1262, "completed": 1311}
+ },
+ "boundaries": [
+  "Dev clean only; update classification and formal stratification belong to Agent B.",
+  "C_s2026 final whole-graph dev VALUE is low but node mean is 0.945; keep the seed and report as-is.",
+  "D+16 is observational only; the recipe trains only the D+1 normal window.",
+  "Old multitime result is separate and is not part of this three-seed cohort."
+ ]
+}

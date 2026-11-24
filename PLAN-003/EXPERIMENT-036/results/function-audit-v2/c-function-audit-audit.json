@@ -1,0 +1,136 @@
+{
+  "status": "audit_summary",
+  "protocol": "C_function_audit_v2",
+  "report": "docs/records/2026-11-18/priority-function-audit.md",
+  "code_commit": "3454e07",
+  "source_audit": "tmp/analysis/priority-pilots-20261118/function-audit",
+  "display_names": {
+    "initial": "C（原始）",
+    "hold": "C（保持后训练）",
+    "noise": "C（噪声后训练）",
+    "semantic": "C（语义后训练）"
+  },
+  "phenomena": {
+    "phenomenon_1": "现象①：u输入仍错、u输出已对、q输出错",
+    "phenomenon_2": "现象②：u输入/输出正确、q输入错、q输出错（controlled）",
+    "phenomenon_3": "现象③：u输入/输出与q输入正确、其余父与参照正确、q输出错（controlled）"
+  },
+  "sources": {
+    "pair": {
+      "path": "tmp/analysis/c-evaluation-suite-20261115/pair",
+      "meta_sha256": "82a408adbb60f4f052622566b5d330e4fbdda1b6b940ad01254c092a02cf0c43",
+      "records_sha256": "07640fea7acfaae1479b9f92514895cafa291b83ad99b0617b8200544717ea74",
+      "coverage_sha256": "9492491dd56333ff4ef4f856c5ce66cca4e0a398a8a0eff269c12b5f00367609",
+      "records": 1024,
+      "paired_graph_timings": 256,
+      "common_graph_timings": 256
+    },
+    "sustained": {
+      "path": "tmp/analysis/c-sustained-noise-20261115/sustained",
+      "meta_sha256": "d74fed0c03e81c4e7a96fee7200f1fc9e97fb3c08481f27eac29601e0f51d006",
+      "records_sha256": "9af2dd1746d22dbf46fb4781b2b997909f3224bb7a223c89e69e68fc225bbae6",
+      "coverage_sha256": "de4704b40bd09a698ab2e34058cc579e903bb8bb1a30cf96992e063fc7df4502",
+      "records": 2048,
+      "paired_graph_timings": 256,
+      "common_graph_timings": 256
+    },
+    "noise": {
+      "path": "tmp/analysis/c-sustained-noise-20261115/noise",
+      "meta_sha256": "38a996d0bebeab8c9543af831eb9919fc44f51210b511ca615cbe1e5c9c706f3",
+      "records_sha256": "9ec6fc4e10e896a68c1f5c4507dde4599cb29cf803dd45de476ca44da1f5b146",
+      "coverage_sha256": "a6e31d867484e7fe369a309275872fd0cd474fe29070ecced6f7bfe550c74a31",
+      "records": 512,
+      "paired_graph_timings": 128,
+      "common_graph_timings": 128
+    }
+  },
+  "raw": {
+    "edge_rounds.csv": {
+      "path": "tmp/analysis/priority-pilots-20261118/function-audit/edge_rounds.csv",
+      "sha256": "16eaf58bc92a5d0c147869dc95ce2fcbd2a4afab1d35eebb686b92ea6d940671"
+    },
+    "quadrants.csv": {
+      "path": "tmp/analysis/priority-pilots-20261118/function-audit/quadrants.csv",
+      "sha256": "ae9f08a92a7b2942043436033050598d2181e81eafaae6ff5062e4315e635caa"
+    },
+    "events.csv": {
+      "path": "tmp/analysis/priority-pilots-20261118/function-audit/events.csv",
+      "sha256": "9a126222e02d077baf8deb4f8ecd6836a17977737517e7830a174d3e77abf3c1"
+    },
+    "coverage.csv": {
+      "path": "tmp/analysis/priority-pilots-20261118/function-audit/coverage.csv",
+      "sha256": "5fdbce4455ba91dbb853b316343776eb0dd3335b1d35df28d14e6cb3deb2ec7b"
+    },
+    "meta.json": {
+      "path": "tmp/analysis/priority-pilots-20261118/function-audit/meta.json",
+      "sha256": "8988d7766d4a4fd34548844b7c7ec805120e8c163be73fb0d75b704fd8cacc4c"
+    }
+  },
+  "code": {
+    "function_audit.py": "0bc1a31fb4b16321cdada5147b2e3db094344fcd5c90419eaa64f3a001fd163e",
+    "io_utils.py": "402b2c6b8b40c3f5cd67fda49bdbf2c5f7ffa3e852a48543ee68b86c34c25ed0",
+    "export_function_audit_tables.py": "29d8be44bc30c4c5ad90cb86119472a0e2aa68b8a41bf63bc5fc46709a56c2b4"
+  },
+  "exports": [
+    {
+      "path": "docs/records/2026-11-18/function-audit-v2/c-function-audit-events-focal.csv",
+      "sha256": "89e2bc8b208e788e132e3b387192caaa989713f36986f43a09608c8799a31b5f"
+    },
+    {
+      "path": "docs/records/2026-11-18/function-audit-v2/c-function-audit-events.csv",
+      "sha256": "c1dc63844f0efef0a657f00a5e088571d58cd8f31ef55661fe4f3a7d7314771b"
+    },
+    {
+      "path": "docs/records/2026-11-18/function-audit-v2/c-function-audit-examples.csv",
+      "sha256": "d8f78105f17f80d74f900f23e792c3bb72b38f2f3d2142146a54027bcf9da9f3"
+    },
+    {
+      "path": "docs/records/2026-11-18/function-audit-v2/c-function-audit-joint.csv",
+      "sha256": "44001e41dbb40abc0db799c11afbc0faec9429dbf3170438fc3ec1dfb18d22d9"
+    },
+    {
+      "path": "docs/records/2026-11-18/function-audit-v2/c-function-audit-matched.csv",
+      "sha256": "201405b3e34288ad5463a6e9eb42df4e8f903b60f41e89f69a7398b81a7b5ed0"
+    },
+    {
+      "path": "docs/records/2026-11-18/function-audit-v2/c-function-audit-quadrants.csv",
+      "sha256": "fda76fff1cf8b2d5935ca225791ee4c59aa15159a613700b118bb029a50ee24d"
+    },
+    {
+      "path": "docs/records/2026-11-18/function-audit-v2/c-function-audit-situation-counts.csv",
+      "sha256": "f5b52bfdccfd887a208618eac52799520b1f1615ce1e6da4e418be9a90f917ed"
+    },
+    {
+      "path": "docs/records/2026-11-18/function-audit-v2/c-function-audit-source-summary.csv",
+      "sha256": "240a96d71b88b8b13bfa63ef1458432f9cd62dd1c50813233b1ce33a7b386416"
+    }
+  ],
+  "checks": {
+    "pair_u_wrong_hold_r2": {
+      "edges": 1064,
+      "controlled": 1013,
+      "u_in_out_ok_q_out_wrong": 289,
+      "controlled_u_out_ok_q_out_wrong": 363,
+      "controlled_u_out_ok_q_out_wrong_q_in_ok": 44,
+      "controlled_u_out_ok_q_out_wrong_q_in_bad": 319,
+      "controlled_u_in_out_ok_q_out_wrong": 251,
+      "controlled_phenomenon_3": 32
+    },
+    "sustained_wrong_q_clean_hold_L2_R1": {
+      "edges": 1064,
+      "controlled": 973,
+      "u_in_out_ok_q_out_wrong": 446,
+      "controlled_u_out_ok_q_out_wrong": 515,
+      "controlled_u_out_ok_q_out_wrong_q_in_ok": 0,
+      "controlled_u_out_ok_q_out_wrong_q_in_bad": 515,
+      "controlled_u_in_out_ok_q_out_wrong": 375,
+      "controlled_phenomenon_3": 0
+    }
+  },
+  "notes": [
+    "No model was loaded; this is a CPU re-export of existing records.",
+    "Joint counts are direct intersections from edge_rounds.csv; checks pool the four stored versions.",
+    "Focal events use focal q only and start at post_round 1; no injection instant.",
+    "The first submitted CSVs are not overwritten."
+  ]
+}

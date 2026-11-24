@@ -1,0 +1,10 @@
+{
+  "stage": "readers",
+  "cases_per_model": 64,
+  "models": [
+    "C_s42",
+    "C_s1234"
+  ],
+  "smoke": false,
+  "summary_sha256": "eae81b59b318b6467af5b439cac7d7d0c6d0348cb18d2b9a3e5ad2691f548ade"
+}

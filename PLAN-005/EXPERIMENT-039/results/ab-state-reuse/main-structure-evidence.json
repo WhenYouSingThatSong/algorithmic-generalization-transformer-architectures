@@ -1,0 +1,24 @@
+{
+  "A": {
+    "records": 576,
+    "groups": 128,
+    "return_original_groups_ok": 128,
+    "checks": {},
+    "reuse": {
+      "records": 128,
+      "checks": {},
+      "examples": []
+    }
+  },
+  "B": {
+    "records": 576,
+    "groups": 128,
+    "return_original_groups_ok": 128,
+    "checks": {},
+    "reuse": {
+      "records": 128,
+      "checks": {},
+      "examples": []
+    }
+  }
+}

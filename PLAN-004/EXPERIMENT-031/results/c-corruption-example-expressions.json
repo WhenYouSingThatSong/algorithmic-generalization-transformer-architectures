@@ -1,0 +1,115 @@
+{
+  "note": "Numeric node positions are token positions; x<var_id> is the variable id; leaf values come from the referenced constant token; all internal operations are ADD mod23.",
+  "graphs": [
+    {
+      "graph_id": 68,
+      "node_pos": 70,
+      "role": "target",
+      "variable_id": 105,
+      "truth_value": 6,
+      "immediate_expression": "x105 = x57(14)+x84(15) mod23 = 6",
+      "expanded_expression": "x105 = (x57(14)+(x71(11)+x51(17)+x81(10))) mod23 = 6",
+      "local_expected_shifted": 0,
+      "delta": 17
+    },
+    {
+      "graph_id": 68,
+      "node_pos": 92,
+      "role": "child",
+      "variable_id": 49,
+      "truth_value": 6,
+      "immediate_expression": "x49 = x105(6)+x96(0) mod23 = 6",
+      "expanded_expression": "x49 = ((x57(14)+(x71(11)+x51(17)+x81(10)))+x96(0)) mod23 = 6",
+      "local_expected_shifted": 0,
+      "delta": 17
+    },
+    {
+      "graph_id": 68,
+      "node_pos": 98,
+      "role": "child",
+      "variable_id": 79,
+      "truth_value": 17,
+      "immediate_expression": "x79 = x105(6)+x71(11) mod23 = 17",
+      "expanded_expression": "x79 = ((x57(14)+(x71(11)+x51(17)+x81(10)))+x71(11)) mod23 = 17",
+      "local_expected_shifted": 11,
+      "delta": 17
+    },
+    {
+      "graph_id": 68,
+      "node_pos": 106,
+      "role": "child",
+      "variable_id": 26,
+      "truth_value": 16,
+      "immediate_expression": "x26 = x96(0)+x105(6)+x114(10) mod23 = 16",
+      "expanded_expression": "x26 = (x96(0)+(x57(14)+(x71(11)+x51(17)+x81(10)))+(x81(10))) mod23 = 16",
+      "local_expected_shifted": 10,
+      "delta": 17
+    },
+    {
+      "graph_id": 68,
+      "node_pos": 120,
+      "role": "child",
+      "variable_id": 93,
+      "truth_value": 12,
+      "immediate_expression": "x93 = x105(6)+x49(6) mod23 = 12",
+      "expanded_expression": "x93 = ((x57(14)+(x71(11)+x51(17)+x81(10)))+((x57(14)+(x71(11)+x51(17)+x81(10)))+x96(0))) mod23 = 12",
+      "local_expected_shifted": 6,
+      "delta": 17
+    },
+    {
+      "graph_id": 68,
+      "node_pos": 190,
+      "role": "child",
+      "variable_id": 33,
+      "truth_value": 17,
+      "immediate_expression": "x33 = x13(3)+x4(8)+x105(6) mod23 = 17",
+      "expanded_expression": "x33 = ((x57(14)+((x57(14)+(x71(11)+x51(17)+x81(10)))+((x57(14)+(x71(11)+x51(17)+x81(10)))+x96(0))))+((x81(10)+x51(17))+x9(1)+(x71(11)+(x71(11)+x51(17)+x81(10))+x96(0)))+(x57(14)+(x71(11)+x51(17)+x81(10)))) mod23 = 17",
+      "local_expected_shifted": 11,
+      "delta": 17
+    },
+    {
+      "graph_id": 89,
+      "node_pos": 76,
+      "role": "target",
+      "variable_id": 1,
+      "truth_value": 14,
+      "immediate_expression": "x1 = x60(21)+x64(16) mod23 = 14",
+      "expanded_expression": "x1 = ((x50(15)+x75(12)+x15(17))+(x15(17)+x66(22))) mod23 = 14",
+      "local_expected_shifted": 22,
+      "delta": 8
+    },
+    {
+      "graph_id": 89,
+      "node_pos": 108,
+      "role": "child",
+      "variable_id": 106,
+      "truth_value": 14,
+      "immediate_expression": "x106 = x1(14) mod23 = 14",
+      "expanded_expression": "x106 = (((x50(15)+x75(12)+x15(17))+(x15(17)+x66(22)))) mod23 = 14",
+      "local_expected_shifted": 22,
+      "delta": 8
+    },
+    {
+      "graph_id": 89,
+      "node_pos": 130,
+      "role": "child",
+      "variable_id": 99,
+      "truth_value": 13,
+      "immediate_expression": "x99 = x76(12)+x78(10)+x1(14) mod23 = 13",
+      "expanded_expression": "x99 = ((x75(12))+((x75(12)+(x75(12)+x109(17))+x50(15)))+((x50(15)+x75(12)+x15(17))+(x15(17)+x66(22)))) mod23 = 13",
+      "local_expected_shifted": 21,
+      "delta": 8
+    },
+    {
+      "graph_id": 89,
+      "node_pos": 162,
+      "role": "child",
+      "variable_id": 77,
+      "truth_value": 21,
+      "immediate_expression": "x77 = x109(17)+x1(14)+x99(13) mod23 = 21",
+      "expanded_expression": "x77 = (x109(17)+((x50(15)+x75(12)+x15(17))+(x15(17)+x66(22)))+((x75(12))+((x75(12)+(x75(12)+x109(17))+x50(15)))+((x50(15)+x75(12)+x15(17))+(x15(17)+x66(22))))) mod23 = 21",
+      "local_expected_shifted": 6,
+      "delta": 8
+    }
+  ]
+}

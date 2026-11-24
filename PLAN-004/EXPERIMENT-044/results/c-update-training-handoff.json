@@ -1,0 +1,365 @@
+{
+ "protocol": "c_update_v1",
+ "status": "c_training_complete",
+ "plan": {
+  "path": "tmp/analysis/c-update-20261119/data/plan.json",
+  "sha256": "b3c4b1be9325dd37aefc2004dc19b6e5ee6d82c6ff097c25c072d3f39038bc24"
+ },
+ "run_root": "tmp/analysis/c-update-20261119/run",
+ "source_commit": "35edb21",
+ "evaluate_command": "python tools/c_update/execute.py --phase evaluate --plan tmp/analysis/c-update-20261119/data/plan.json --out-dir tmp/analysis/c-update-20261119/run --device cuda --num_threads 4",
+ "finals": {
+  "C_s2026-correction": {
+   "model": "C_s2026",
+   "arm": "correction",
+   "final": "tmp/analysis/c-update-20261119/run/train/C_s2026-correction/final.ckpt",
+   "final_sha256": "e78c8ac75c63aa8654e7dc3898c449f9c828f8c7386262056ec495f6f003e007",
+   "final_size": 96502242,
+   "meta_sha256": "4c62e701eb26c93c41eb9160072d0713d1a38023d0476f22e2483180494daf04",
+   "status": "complete",
+   "epochs": 50,
+   "batches_per_epoch": 1564,
+   "best": {
+    "epoch": 1,
+    "score": 1.0
+   },
+   "training_audit_sha256": "5a6fbd8afbfa869ad1fd4a9e1ec20a68ee0282b07f2d80aaadbddc37f1c2aee5",
+   "dev50_sha256": "22fd193ee4c1bd6b23f2403df86350cb689d2c7c7400fd4dab8c5ab1b59f6514",
+   "dose": {
+    "enabled_batch_rate": 0.049603580562659844,
+    "source_acceptance": 0.9999763320522427,
+    "attempts_per_candidate": 0.0248226,
+    "accepted_per_candidate": 0.0248220125
+   },
+   "dev_clean": [
+    {
+     "horizon": "D",
+     "mean_value": 1.0,
+     "mean_first4": 1.0,
+     "mean_variable": 1.0,
+     "graph_value_all": 1.0,
+     "graph_first4_all": 1.0
+    },
+    {
+     "horizon": "D+16",
+     "mean_value": 1.0,
+     "mean_first4": 1.0,
+     "mean_variable": 1.0,
+     "graph_value_all": 1.0,
+     "graph_first4_all": 1.0
+    },
+    {
+     "horizon": "D+4",
+     "mean_value": 1.0,
+     "mean_first4": 1.0,
+     "mean_variable": 1.0,
+     "graph_value_all": 1.0,
+     "graph_first4_all": 1.0
+    }
+   ],
+   "identity": {
+    "protocol": "c_update_v1",
+    "arm": "correction",
+    "model": "C_s2026",
+    "source": {
+     "id": "C_s2026",
+     "family": "C",
+     "seed": 2026,
+     "config": "C0-M4-Nodes32-ADD-L4H16D384-DeBERTa",
+     "path": "/workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/runs/oldC0-newseed-150ep/checkpoints/Nodes32-ADD - L4H16D384_DeBERTa-seed-2026 - 2026-11-14-10:12:43/epoch=143-val_loss=0.0000.ckpt",
+     "sha256": "40babb206b1393d0892b047202b9d6469cd140c82f3ba82c96a466fa3c76e780",
+     "arm": "correction"
+    },
+    "plan_sha256": "b3c4b1be9325dd37aefc2004dc19b6e5ee6d82c6ff097c25c072d3f39038bc24",
+    "code_hashes": {
+     "tools/c_update/runtime.py": "e2e4077972a71fde4580c757452bfaf7c0edc40bff5fdd5aa0a355795854d201",
+     "tools/c_update/train_model.py": "b1ffdd6833d08cccddc945b963279a8950c2456e7b3f06a825e5f49680bc04cf",
+     "tools/c_update/summarize_training.py": "38e359df64c2f4b80f6e90e7d8acf0bd353d1c786176ec3eaa9abaeb8370bc4a",
+     "tools/c_update/prepare.py": "f2fdd7ba256bb0daf9366cc883f95017d1d28d892f27a1be845cf1393bd87bb1",
+     "tools/c_update/protocol.py": "3a44dfb793ccb941ad23f385cc6a37bb82a7980e7e8fc20f2ebb6cdeaaa9d44b",
+     "tools/c_update/execute.py": "4443e18a29d7b1b49f6cca90d1fab4fa797fd4e08fdfe71f72d421e8ca76c909",
+     "tools/c_update/summarize.py": "8b549dfb8053cf8691579458fe66b8601ff08da0894cbafa80a6c23abdef715f",
+     "tools/c_update/evaluate.py": "089ba0bd4d1753d2220e0c180be3a1203d7430bae6e1863f16b02cb34419725c",
+     "tools/c_update/verify_server.py": "b3d7b2f6b5a052d20cc784b8d46abcfc4d379abeaf3ac188dd7000398449578c",
+     "tools/c_update/compare.py": "c732c4409c2a2d50b85d547364293c07ef604cded8e4681a270f5275e06ab42b",
+     "tools/c_update/losses.py": "da394d898380596992aaf0874fa88f922b4870f4fa68da25730aee52f3c97f36",
+     "tools/c_update/functional_probe.py": "cd855d5b8a6f5a27ce4ec406ac8b0b8d1b00b37e9068da6b9c29091c26327561",
+     "experiments/model.py": "dccaeaf24619c2e685e7e3146a700b42fc565abbffcbdc9d1f0f6eda53fb07dc",
+     "experiments/tokenizers.py": "611e9964cf326c2bf03ab1287993908a172f0a9fa221bc0f4f6bdb811dbdca53",
+     "Simtransformer/simtransformer/model_base.py": "f8e419b832232db3913227952d1c9ba48c2af5ad8b0666edc37aa021f18a3285",
+     "tools/b_mechanism/b_mechanism_common.py": "85af46c4c331eaa827ac4880c5879334d94b5c0c953eebe2c6df712074d33074",
+     "tools/b_mechanism/trajectory_io.py": "164f593c9ea0ac94f6fe81295c3b5551042919a63fb66851de864b30b3fa8322",
+     "tools/counterfactual_control/design.py": "9af2555e0cf110b8df8166611cf67f76f6a3dc8c9e9c91c3eb40d466fbc4a489",
+     "tools/c_capability/c_common.py": "f1d41a3edfe615045abbae91938c67fab0bda7eca4b7d4c0d37a79140ac423a9",
+     "experiments/generate_data.py": "0cf94fa24c9465e66b6f27e9e1b62453c001d88ef980fbc311cd69fd5f4d35ca"
+    },
+    "micro_batch": 8,
+    "cohort": "main"
+   }
+  },
+  "C_s2026-update": {
+   "model": "C_s2026",
+   "arm": "update",
+   "final": "tmp/analysis/c-update-20261119/run/train/C_s2026-update/final.ckpt",
+   "final_sha256": "c6ba26a0faed6185eed1685266bcbffd847c699215a44baf377eb659c0e7d107",
+   "final_size": 96510026,
+   "meta_sha256": "9e3251bd2013ade84a2940cf1538378dee1c2dcf4a502dcd78a1dbc77a716304",
+   "status": "complete",
+   "epochs": 50,
+   "batches_per_epoch": 1564,
+   "best": {
+    "epoch": 1,
+    "score": 1.0
+   },
+   "training_audit_sha256": "ab6cb1d23b1c1516036290e7d49d1d64fc33151f6b96e82e5d63fb036e35e5c7",
+   "dev50_sha256": "ab5b1607fa9bb993360105bec12bd17c6c0f26310a14c5f27d2a2a5923335fd5",
+   "dose": {
+    "enabled_batch_rate": 0.049603580562659844,
+    "source_acceptance": 0.989310648360768,
+    "attempts_per_candidate": 0.0248226,
+    "accepted_per_candidate": 0.0245572625
+   },
+   "dev_clean": [
+    {
+     "horizon": "D",
+     "mean_value": 0.998291015625,
+     "mean_first4": 0.998291015625,
+     "mean_variable": 1.0,
+     "graph_value_all": 0.984375,
+     "graph_first4_all": 0.984375
+    },
+    {
+     "horizon": "D+16",
+     "mean_value": 0.998046875,
+     "mean_first4": 0.76123046875,
+     "mean_variable": 0.7626953125,
+     "graph_value_all": 0.9765625,
+     "graph_first4_all": 0.0
+    },
+    {
+     "horizon": "D+4",
+     "mean_value": 0.99951171875,
+     "mean_first4": 0.99951171875,
+     "mean_variable": 1.0,
+     "graph_value_all": 0.9921875,
+     "graph_first4_all": 0.9921875
+    }
+   ],
+   "identity": {
+    "protocol": "c_update_v1",
+    "arm": "update",
+    "model": "C_s2026",
+    "source": {
+     "id": "C_s2026",
+     "family": "C",
+     "seed": 2026,
+     "config": "C0-M4-Nodes32-ADD-L4H16D384-DeBERTa",
+     "path": "/workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/runs/oldC0-newseed-150ep/checkpoints/Nodes32-ADD - L4H16D384_DeBERTa-seed-2026 - 2026-11-14-10:12:43/epoch=143-val_loss=0.0000.ckpt",
+     "sha256": "40babb206b1393d0892b047202b9d6469cd140c82f3ba82c96a466fa3c76e780",
+     "arm": "update"
+    },
+    "plan_sha256": "b3c4b1be9325dd37aefc2004dc19b6e5ee6d82c6ff097c25c072d3f39038bc24",
+    "code_hashes": {
+     "tools/c_update/runtime.py": "e2e4077972a71fde4580c757452bfaf7c0edc40bff5fdd5aa0a355795854d201",
+     "tools/c_update/train_model.py": "b1ffdd6833d08cccddc945b963279a8950c2456e7b3f06a825e5f49680bc04cf",
+     "tools/c_update/summarize_training.py": "38e359df64c2f4b80f6e90e7d8acf0bd353d1c786176ec3eaa9abaeb8370bc4a",
+     "tools/c_update/prepare.py": "f2fdd7ba256bb0daf9366cc883f95017d1d28d892f27a1be845cf1393bd87bb1",
+     "tools/c_update/protocol.py": "3a44dfb793ccb941ad23f385cc6a37bb82a7980e7e8fc20f2ebb6cdeaaa9d44b",
+     "tools/c_update/execute.py": "4443e18a29d7b1b49f6cca90d1fab4fa797fd4e08fdfe71f72d421e8ca76c909",
+     "tools/c_update/summarize.py": "8b549dfb8053cf8691579458fe66b8601ff08da0894cbafa80a6c23abdef715f",
+     "tools/c_update/evaluate.py": "089ba0bd4d1753d2220e0c180be3a1203d7430bae6e1863f16b02cb34419725c",
+     "tools/c_update/verify_server.py": "b3d7b2f6b5a052d20cc784b8d46abcfc4d379abeaf3ac188dd7000398449578c",
+     "tools/c_update/compare.py": "c732c4409c2a2d50b85d547364293c07ef604cded8e4681a270f5275e06ab42b",
+     "tools/c_update/losses.py": "da394d898380596992aaf0874fa88f922b4870f4fa68da25730aee52f3c97f36",
+     "tools/c_update/functional_probe.py": "cd855d5b8a6f5a27ce4ec406ac8b0b8d1b00b37e9068da6b9c29091c26327561",
+     "experiments/model.py": "dccaeaf24619c2e685e7e3146a700b42fc565abbffcbdc9d1f0f6eda53fb07dc",
+     "experiments/tokenizers.py": "611e9964cf326c2bf03ab1287993908a172f0a9fa221bc0f4f6bdb811dbdca53",
+     "Simtransformer/simtransformer/model_base.py": "f8e419b832232db3913227952d1c9ba48c2af5ad8b0666edc37aa021f18a3285",
+     "tools/b_mechanism/b_mechanism_common.py": "85af46c4c331eaa827ac4880c5879334d94b5c0c953eebe2c6df712074d33074",
+     "tools/b_mechanism/trajectory_io.py": "164f593c9ea0ac94f6fe81295c3b5551042919a63fb66851de864b30b3fa8322",
+     "tools/counterfactual_control/design.py": "9af2555e0cf110b8df8166611cf67f76f6a3dc8c9e9c91c3eb40d466fbc4a489",
+     "tools/c_capability/c_common.py": "f1d41a3edfe615045abbae91938c67fab0bda7eca4b7d4c0d37a79140ac423a9",
+     "experiments/generate_data.py": "0cf94fa24c9465e66b6f27e9e1b62453c001d88ef980fbc311cd69fd5f4d35ca"
+    },
+    "micro_batch": 8,
+    "cohort": "main"
+   }
+  },
+  "C_s42-correction": {
+   "model": "C_s42",
+   "arm": "correction",
+   "final": "tmp/analysis/c-update-20261119/run/train/C_s42-correction/final.ckpt",
+   "final_sha256": "88430930dac93c70363715c4217f4d611cee3e7c1ee14a061fe55f5868641b7e",
+   "final_size": 96502178,
+   "meta_sha256": "8d3bcefd531c6f457780c53783dc4ec8f6ed55970a95731a341af609a64407fb",
+   "status": "complete",
+   "epochs": 50,
+   "batches_per_epoch": 1564,
+   "best": {
+    "epoch": 1,
+    "score": 1.0
+   },
+   "training_audit_sha256": "a1c8e0a2f8d4b41b731812e93f79c2e602670ad4b6ad4b956b509a546a2b16ea",
+   "dev50_sha256": "05b1b9ce786d29247f8755163dc20641d8aa269297d91d941c47dae73af08036",
+   "dose": {
+    "enabled_batch_rate": 0.049603580562659844,
+    "source_acceptance": 0.9999677713051816,
+    "attempts_per_candidate": 0.0248226,
+    "accepted_per_candidate": 0.0248218
+   },
+   "dev_clean": [
+    {
+     "horizon": "D",
+     "mean_value": 1.0,
+     "mean_first4": 1.0,
+     "mean_variable": 1.0,
+     "graph_value_all": 1.0,
+     "graph_first4_all": 1.0
+    },
+    {
+     "horizon": "D+16",
+     "mean_value": 1.0,
+     "mean_first4": 0.998291015625,
+     "mean_variable": 0.998291015625,
+     "graph_value_all": 1.0,
+     "graph_first4_all": 0.9453125
+    },
+    {
+     "horizon": "D+4",
+     "mean_value": 1.0,
+     "mean_first4": 1.0,
+     "mean_variable": 1.0,
+     "graph_value_all": 1.0,
+     "graph_first4_all": 1.0
+    }
+   ],
+   "identity": {
+    "protocol": "c_update_v1",
+    "arm": "correction",
+    "model": "C_s42",
+    "source": {
+     "id": "C_s42",
+     "family": "C",
+     "seed": 42,
+     "config": "C0-M4-Nodes32-ADD-L4H16D384-DeBERTa",
+     "path": "/workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/runs/oldC0-resume-150ep/checkpoints/Nodes32-ADD - L4H16D384_DeBERTa-seed-42 - 2026-11-14-02:35:10/epoch=143-val_loss=0.0000.ckpt",
+     "sha256": "4a00d6a21a7ed6ec9730daccf27f6077af45d2f2d7ff7376386bf0aa8903a798",
+     "arm": "correction"
+    },
+    "plan_sha256": "b3c4b1be9325dd37aefc2004dc19b6e5ee6d82c6ff097c25c072d3f39038bc24",
+    "code_hashes": {
+     "tools/c_update/runtime.py": "e2e4077972a71fde4580c757452bfaf7c0edc40bff5fdd5aa0a355795854d201",
+     "tools/c_update/train_model.py": "b1ffdd6833d08cccddc945b963279a8950c2456e7b3f06a825e5f49680bc04cf",
+     "tools/c_update/summarize_training.py": "38e359df64c2f4b80f6e90e7d8acf0bd353d1c786176ec3eaa9abaeb8370bc4a",
+     "tools/c_update/prepare.py": "f2fdd7ba256bb0daf9366cc883f95017d1d28d892f27a1be845cf1393bd87bb1",
+     "tools/c_update/protocol.py": "3a44dfb793ccb941ad23f385cc6a37bb82a7980e7e8fc20f2ebb6cdeaaa9d44b",
+     "tools/c_update/execute.py": "4443e18a29d7b1b49f6cca90d1fab4fa797fd4e08fdfe71f72d421e8ca76c909",
+     "tools/c_update/summarize.py": "8b549dfb8053cf8691579458fe66b8601ff08da0894cbafa80a6c23abdef715f",
+     "tools/c_update/evaluate.py": "089ba0bd4d1753d2220e0c180be3a1203d7430bae6e1863f16b02cb34419725c",
+     "tools/c_update/verify_server.py": "b3d7b2f6b5a052d20cc784b8d46abcfc4d379abeaf3ac188dd7000398449578c",
+     "tools/c_update/compare.py": "c732c4409c2a2d50b85d547364293c07ef604cded8e4681a270f5275e06ab42b",
+     "tools/c_update/losses.py": "da394d898380596992aaf0874fa88f922b4870f4fa68da25730aee52f3c97f36",
+     "tools/c_update/functional_probe.py": "cd855d5b8a6f5a27ce4ec406ac8b0b8d1b00b37e9068da6b9c29091c26327561",
+     "experiments/model.py": "dccaeaf24619c2e685e7e3146a700b42fc565abbffcbdc9d1f0f6eda53fb07dc",
+     "experiments/tokenizers.py": "611e9964cf326c2bf03ab1287993908a172f0a9fa221bc0f4f6bdb811dbdca53",
+     "Simtransformer/simtransformer/model_base.py": "f8e419b832232db3913227952d1c9ba48c2af5ad8b0666edc37aa021f18a3285",
+     "tools/b_mechanism/b_mechanism_common.py": "85af46c4c331eaa827ac4880c5879334d94b5c0c953eebe2c6df712074d33074",
+     "tools/b_mechanism/trajectory_io.py": "164f593c9ea0ac94f6fe81295c3b5551042919a63fb66851de864b30b3fa8322",
+     "tools/counterfactual_control/design.py": "9af2555e0cf110b8df8166611cf67f76f6a3dc8c9e9c91c3eb40d466fbc4a489",
+     "tools/c_capability/c_common.py": "f1d41a3edfe615045abbae91938c67fab0bda7eca4b7d4c0d37a79140ac423a9",
+     "experiments/generate_data.py": "0cf94fa24c9465e66b6f27e9e1b62453c001d88ef980fbc311cd69fd5f4d35ca"
+    },
+    "micro_batch": 8,
+    "cohort": "main"
+   }
+  },
+  "C_s1234-correction": {
+   "model": "C_s1234",
+   "arm": "correction",
+   "final": "tmp/analysis/c-update-20261119/run/train/C_s1234-correction/final.ckpt",
+   "final_sha256": "b9ad22aa69b4ed0676dcbbbb0604f9a4c2f17b989f24afc1c28f98a4db2c459d",
+   "final_size": 96502178,
+   "meta_sha256": "740cf196317e2a295401d2dfce70f1bdb7780fc305ba888d2cf8c8cf27ae688f",
+   "status": "complete",
+   "epochs": 50,
+   "batches_per_epoch": 1564,
+   "best": {
+    "epoch": 3,
+    "score": 1.0
+   },
+   "training_audit_sha256": "b83c5094eb2a1c24cf50f809a357696d2abb1f99078ae6cb8f38e61ceefd7f21",
+   "dev50_sha256": "fcf1348ce4f266b325a4a0099ed57a123f4f78f77dac602b8e32cb6693185238",
+   "dose": {
+    "enabled_batch_rate": 0.049603580562659844,
+    "source_acceptance": 0.9999360461837197,
+    "attempts_per_candidate": 0.0248226,
+    "accepted_per_candidate": 0.0248210125
+   },
+   "dev_clean": [
+    {
+     "horizon": "D",
+     "mean_value": 1.0,
+     "mean_first4": 1.0,
+     "mean_variable": 1.0,
+     "graph_value_all": 1.0,
+     "graph_first4_all": 1.0
+    },
+    {
+     "horizon": "D+16",
+     "mean_value": 1.0,
+     "mean_first4": 0.994873046875,
+     "mean_variable": 0.994873046875,
+     "graph_value_all": 1.0,
+     "graph_first4_all": 0.8515625
+    },
+    {
+     "horizon": "D+4",
+     "mean_value": 1.0,
+     "mean_first4": 1.0,
+     "mean_variable": 1.0,
+     "graph_value_all": 1.0,
+     "graph_first4_all": 1.0
+    }
+   ],
+   "identity": {
+    "protocol": "c_update_v1",
+    "arm": "correction",
+    "model": "C_s1234",
+    "source": {
+     "id": "C_s1234",
+     "family": "C",
+     "seed": 1234,
+     "config": "C0-M4-Nodes32-ADD-L4H16D384-DeBERTa",
+     "path": "/workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/runs/oldC0-resume-150ep/checkpoints/Nodes32-ADD - L4H16D384_DeBERTa-seed-1234 - 2026-11-14-02:38:10/epoch=143-val_loss=0.0000.ckpt",
+     "sha256": "0bca3a2b91e82d70d5808859d3a907e0b8a32e0a852ba483c208f955d7d70475",
+     "arm": "correction"
+    },
+    "plan_sha256": "b3c4b1be9325dd37aefc2004dc19b6e5ee6d82c6ff097c25c072d3f39038bc24",
+    "code_hashes": {
+     "tools/c_update/runtime.py": "e2e4077972a71fde4580c757452bfaf7c0edc40bff5fdd5aa0a355795854d201",
+     "tools/c_update/train_model.py": "b1ffdd6833d08cccddc945b963279a8950c2456e7b3f06a825e5f49680bc04cf",
+     "tools/c_update/summarize_training.py": "38e359df64c2f4b80f6e90e7d8acf0bd353d1c786176ec3eaa9abaeb8370bc4a",
+     "tools/c_update/prepare.py": "f2fdd7ba256bb0daf9366cc883f95017d1d28d892f27a1be845cf1393bd87bb1",
+     "tools/c_update/protocol.py": "3a44dfb793ccb941ad23f385cc6a37bb82a7980e7e8fc20f2ebb6cdeaaa9d44b",
+     "tools/c_update/execute.py": "4443e18a29d7b1b49f6cca90d1fab4fa797fd4e08fdfe71f72d421e8ca76c909",
+     "tools/c_update/summarize.py": "8b549dfb8053cf8691579458fe66b8601ff08da0894cbafa80a6c23abdef715f",
+     "tools/c_update/evaluate.py": "089ba0bd4d1753d2220e0c180be3a1203d7430bae6e1863f16b02cb34419725c",
+     "tools/c_update/verify_server.py": "b3d7b2f6b5a052d20cc784b8d46abcfc4d379abeaf3ac188dd7000398449578c",
+     "tools/c_update/compare.py": "c732c4409c2a2d50b85d547364293c07ef604cded8e4681a270f5275e06ab42b",
+     "tools/c_update/losses.py": "da394d898380596992aaf0874fa88f922b4870f4fa68da25730aee52f3c97f36",
+     "tools/c_update/functional_probe.py": "cd855d5b8a6f5a27ce4ec406ac8b0b8d1b00b37e9068da6b9c29091c26327561",
+     "experiments/model.py": "dccaeaf24619c2e685e7e3146a700b42fc565abbffcbdc9d1f0f6eda53fb07dc",
+     "experiments/tokenizers.py": "611e9964cf326c2bf03ab1287993908a172f0a9fa221bc0f4f6bdb811dbdca53",
+     "Simtransformer/simtransformer/model_base.py": "f8e419b832232db3913227952d1c9ba48c2af5ad8b0666edc37aa021f18a3285",
+     "tools/b_mechanism/b_mechanism_common.py": "85af46c4c331eaa827ac4880c5879334d94b5c0c953eebe2c6df712074d33074",
+     "tools/b_mechanism/trajectory_io.py": "164f593c9ea0ac94f6fe81295c3b5551042919a63fb66851de864b30b3fa8322",
+     "tools/counterfactual_control/design.py": "9af2555e0cf110b8df8166611cf67f76f6a3dc8c9e9c91c3eb40d466fbc4a489",
+     "tools/c_capability/c_common.py": "f1d41a3edfe615045abbae91938c67fab0bda7eca4b7d4c0d37a79140ac423a9",
+     "experiments/generate_data.py": "0cf94fa24c9465e66b6f27e9e1b62453c001d88ef980fbc311cd69fd5f4d35ca"
+    },
+    "micro_batch": 8,
+    "cohort": "main"
+   }
+  }
+ }
+}

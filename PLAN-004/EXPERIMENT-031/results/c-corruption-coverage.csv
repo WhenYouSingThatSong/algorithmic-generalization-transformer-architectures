@@ -1,0 +1,11 @@
+arm,timing,selected,value_qualified,strict_qualified
+initial,hold,128,128,128
+initial,late,128,128,73
+hold,hold,128,128,128
+hold,late,128,128,128
+noise,hold,128,128,128
+noise,late,128,128,128
+semantic,hold,128,128,128
+semantic,late,128,128,128
+common_value,hold+late,256,256,
+common_strict,hold+late,201,201,201

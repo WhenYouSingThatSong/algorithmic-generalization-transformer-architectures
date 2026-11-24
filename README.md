@@ -1,3 +1,9 @@
+# 实验整理分支｜well_ordered_experiments
+
+[Research Record · 当前研究状态与逐项实验](Research%20Record.md)　·　[全仓库文件去向](PLAN-001/repository-files.tsv)　·　[服务器大数据整理交接](PLAN-001/%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%A4%A7%E6%95%B0%E6%8D%AE%E6%95%B4%E7%90%86%E4%BA%A4%E6%8E%A5.md)
+
+以下保留 reproduction 基线的项目介绍与入口。
+
 > **复现工作入口（`reproduction` 分支）**：[仓库内容与状态](docs/repository-map.md) · [当前任务看板](ai-collab/board.md) · [实验工具索引](tools/README.md) · [A/B/C 命名](docs/model-names.md)。本分支包含原论文代码及后续复现实验；下方保留原论文介绍。GitHub 默认分支目前仍为旧 `main`。
 
 <div align="center">

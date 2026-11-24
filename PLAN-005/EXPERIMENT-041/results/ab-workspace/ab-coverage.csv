@@ -1,0 +1,5 @@
+mode,model,candidates,initial_first4_qualified,common_initial_first4,compare_models
+assignment,A_s42,80,80,80,A_s42|B_s42
+assignment,B_s42,80,80,80,A_s42|B_s42
+program,A_s42,40,,,A_s42|B_s42
+program,B_s42,40,,,A_s42|B_s42

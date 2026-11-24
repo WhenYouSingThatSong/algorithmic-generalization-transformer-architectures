@@ -1,0 +1,11 @@
+{
+  "stage": "signals",
+  "cases_per_model": 64,
+  "models": [
+    "C_s42",
+    "C_s1234"
+  ],
+  "summary_sha256": "e961725b65a8b202d94dafe55a78a7b22c174414b5d9a6da02ff8d8700e4e60f",
+  "contrasts_sha256": "79de45b55fc92f90067f40ca854471e18dea1540cefc5564428177740c8cd3c5",
+  "smoke": false
+}

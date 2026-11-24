@@ -1,0 +1,17 @@
+model,depth,arm,attempts,own_eligible,common,confirmed_read_opportunities,correct_next,correct_end,effective
+C_s42,4,stable,32,32,31,7,7,7,0
+C_s42,4,first_after_empty,32,32,31,7,7,7,7
+C_s42,4,recovered,32,31,31,7,6,7,7
+C_s42,4,wrong_control,32,32,31,7,0,7,7
+C_s42,8,stable,32,32,27,3,3,3,0
+C_s42,8,first_after_empty,32,32,27,3,3,3,3
+C_s42,8,recovered,32,27,27,3,3,3,3
+C_s42,8,wrong_control,32,32,27,3,0,3,3
+C_s1234,4,stable,32,32,13,,,,
+C_s1234,4,first_after_empty,32,32,13,,,,
+C_s1234,4,recovered,32,13,13,,,,
+C_s1234,4,wrong_control,32,32,13,,,,
+C_s1234,8,stable,32,32,5,,,,
+C_s1234,8,first_after_empty,32,32,5,,,,
+C_s1234,8,recovered,32,5,5,,,,
+C_s1234,8,wrong_control,32,32,5,,,,

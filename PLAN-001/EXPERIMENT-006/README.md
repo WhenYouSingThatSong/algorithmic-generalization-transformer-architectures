@@ -1,0 +1,15 @@
+# EXPERIMENT-006　B 的保存点筛查与外部复现权重对照
+
+所属计划 [PLAN-001](../../Research%20Record.md#plan-001)。旧台账 06。
+
+[主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-006)
+
+## 优先查阅
+
+[递归潜空间推理论文复现_数据与结论.md](analysis/%E9%80%92%E5%BD%92%E6%BD%9C%E7%A9%BA%E9%97%B4%E6%8E%A8%E7%90%86%E8%AE%BA%E6%96%87%E5%A4%8D%E7%8E%B0_%E6%95%B0%E6%8D%AE%E4%B8%8E%E7%BB%93%E8%AE%BA.md) · [c0-mixedn-full-context.md](analysis/tmp/records/2026-11-11/c0-mixedn-full-context.md)（[原版第 81 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/tmp/records/2026-11-11/c0-mixedn-full-context.md#L81)）
+
+阅读报告中的历史相对链接，可从原目录打开。[c0-mixedn-full-context.md](../../tmp/records/2026-11-11/c0-mixedn-full-context.md)
+
+## 文件
+
+[方案、报告与复核说明](analysis)、[配置](config)。逐文件来源和校验值见[文件清单](files.tsv)。

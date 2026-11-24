@@ -1,0 +1,378 @@
+{
+  "status": "audit_summary",
+  "report": "docs/records/2026-11-15/c-long-pilot.md",
+  "source": {
+    "weight_name": "s2026_e143",
+    "sha256": "40babb206b1393d0892b047202b9d6469cd140c82f3ba82c96a466fa3c76e780",
+    "source_checkpoint": "tmp/runs/oldC0-newseed-150ep/checkpoints/Nodes32-ADD - L4H16D384_DeBERTa-seed-2026 - 2026-11-14-10:12:43/epoch=143-val_loss=0.0000.ckpt"
+  },
+  "data": {
+    "manifest_path": "tmp/analysis/c-long-pilot-20261115/data/manifest.json",
+    "manifest_sha256": "551163f5947bf25197696a1a8c993a4e5e7c7fc1b96c5f25363d59b9b22b5649",
+    "status": "complete",
+    "config": "C0-M4-Nodes32-ADD-L4H16D384-DeBERTa",
+    "vocab_sizes": [
+      7,
+      129,
+      2,
+      25,
+      2,
+      2
+    ],
+    "overlap_definition": "exact final token sequence ignoring trailing PAD; not graph-isomorphism",
+    "splits": {
+      "train": {
+        "count": 1024,
+        "seed": 20261115,
+        "raw_depth_counts": {
+          "6": 657,
+          "5": 283,
+          "4": 81,
+          "3": 3
+        },
+        "sha256": "1f23380e07628b4d152b416c17591e78b81e23517e9c632f5fc7bd8e585aa4ae"
+      },
+      "val": {
+        "count": 128,
+        "seed": 20261116,
+        "raw_depth_counts": {
+          "6": 91,
+          "5": 31,
+          "4": 6
+        },
+        "sha256": "676aabd2173d007b9c70c1e044ed69b7afe26d1f88e6bfcfd842778af3bcf66f"
+      }
+    },
+    "exclusion_references": [
+      {
+        "path": "experiments/data/Tr32Test128-ADD/train_data.pt",
+        "sha256": "cee36b84b01b7c1fdbd2e32619b402e571275c534a4d685684db07a6e11de1ce",
+        "graphs": 50000
+      },
+      {
+        "path": "experiments/data/Tr32Test128-ADD/val_data.pt",
+        "sha256": "77a3e9b116f5033732209f20ff9178747ac1d060e3106d17f634c4a4000e6cbc",
+        "graphs": 1000
+      },
+      {
+        "path": "tmp/analysis/c0-capability-20261114/data/N32_shallow.pt",
+        "sha256": "4f60cb963748806a37557ac9df2abaa3d555a39024168a6db8c85535c4ddf049",
+        "graphs": 64
+      },
+      {
+        "path": "tmp/analysis/c0-capability-20261114/data/N32_deep.pt",
+        "sha256": "d9d5bdf3e8ed27ce8c41b5bdf26814f1556725a65686ac769c4ba80b5c2962f2",
+        "graphs": 64
+      },
+      {
+        "path": "tmp/analysis/c0-capability-20261114/data/N64_shallow.pt",
+        "sha256": "69996b8056c4447f1a1ef23d86fee2e9847a53b4be546e28e64b33885817a94a",
+        "graphs": 64
+      },
+      {
+        "path": "tmp/analysis/c0-capability-20261114/data/N64_deep.pt",
+        "sha256": "a9f60bbc54d12244069c9cd33cdc14ecf977f9b477d1523e64769d88c41fb44a",
+        "graphs": 64
+      },
+      {
+        "path": "tmp/analysis/c0-capability-20261114/data/N128_shallow.pt",
+        "sha256": "a35aa44021ab867f49d440a2c0a94cb75efd42b50be1992c6086f65c9a8b13b2",
+        "graphs": 64
+      },
+      {
+        "path": "tmp/analysis/c0-capability-20261114/data/N128_deep.pt",
+        "sha256": "37b0026e9c2039f6e61224eed63570827cfbd95dfa081c314512c9613c78c18a",
+        "graphs": 64
+      }
+    ]
+  },
+  "train": {
+    "base": {
+      "status": "complete",
+      "cohort": "main",
+      "epochs": 6,
+      "args": {
+        "arm": "base",
+        "data_dir": "tmp/analysis/c-long-pilot-20261115/data",
+        "out_dir": "tmp/analysis/c-long-pilot-20261115/base",
+        "ckpt": null,
+        "batch_size": 8,
+        "lr": 0.0001,
+        "seed": 20261115,
+        "device": "cuda",
+        "smoke_batches": null,
+        "num_threads": 4
+      },
+      "optimizer": {
+        "betas": [
+          0.9,
+          0.999
+        ],
+        "eps": 1e-08,
+        "lr": 0.0001,
+        "weight_decay": 0.01
+      },
+      "source_code_sha256": {
+        "train.py": "96b902bbf167a926bae92101eb1e14c531113be6f4d476609d5a4038eecbd2b7",
+        "protocol.py": "49040c1d11a7fac0ab8308a85e50860779246f9f3801c5e8059dcdd78276224b"
+      },
+      "config_sha256": {
+        "model_config.yaml": "1787c0435b1f2ba73aad0bc2989ebea01e7e834b13b88e9cfd51a5e2c729c6b1",
+        "train_config.yaml": "87f6352d9b00aae6291d635fc154e918915eaea7323c1ccc5eaf7a39c9ba52ad",
+        "data_config.yaml": "7c098fa1975e8e7638171b5fd54e5c77b78305be88b105256a91cf42614d1ae3"
+      },
+      "batch_count": 131,
+      "completed_steps": 786,
+      "checkpoints": {
+        "same_exposure": {
+          "path": "tmp/analysis/c-long-pilot-20261115/base/same_exposure.ckpt",
+          "sha256": "5b52edab0effb9256ae0bc11517125e24b4ab637e5266e8a46faf2c7b40108a6",
+          "epoch": 2,
+          "optimizer_steps": 262,
+          "graph_presentations": 2048,
+          "sample_forwards": 13428,
+          "token_forwards": 3437568,
+          "attention_units": 880017408,
+          "wall_seconds": 16.98710622638464
+        },
+        "equal_compute": {
+          "path": "tmp/analysis/c-long-pilot-20261115/base/equal_compute.ckpt",
+          "sha256": "d25636c1f369815429aece4a09274f95320ba6fde3a647e456c34394291ee273",
+          "epoch": 6,
+          "optimizer_steps": 786,
+          "graph_presentations": 6144,
+          "sample_forwards": 40284,
+          "token_forwards": 10312704,
+          "attention_units": 2640052224,
+          "wall_seconds": 50.27407772652805
+        }
+      }
+    },
+    "plus_d": {
+      "status": "complete",
+      "cohort": "main",
+      "epochs": 3,
+      "args": {
+        "arm": "plus_d",
+        "data_dir": "tmp/analysis/c-long-pilot-20261115/data",
+        "out_dir": "tmp/analysis/c-long-pilot-20261115/plus_d",
+        "ckpt": null,
+        "batch_size": 8,
+        "lr": 0.0001,
+        "seed": 20261115,
+        "device": "cuda",
+        "smoke_batches": null,
+        "num_threads": 4
+      },
+      "optimizer": {
+        "betas": [
+          0.9,
+          0.999
+        ],
+        "eps": 1e-08,
+        "lr": 0.0001,
+        "weight_decay": 0.01
+      },
+      "source_code_sha256": {
+        "train.py": "96b902bbf167a926bae92101eb1e14c531113be6f4d476609d5a4038eecbd2b7",
+        "protocol.py": "49040c1d11a7fac0ab8308a85e50860779246f9f3801c5e8059dcdd78276224b"
+      },
+      "config_sha256": {
+        "model_config.yaml": "1787c0435b1f2ba73aad0bc2989ebea01e7e834b13b88e9cfd51a5e2c729c6b1",
+        "train_config.yaml": "87f6352d9b00aae6291d635fc154e918915eaea7323c1ccc5eaf7a39c9ba52ad",
+        "data_config.yaml": "7c098fa1975e8e7638171b5fd54e5c77b78305be88b105256a91cf42614d1ae3"
+      },
+      "batch_count": 131,
+      "completed_steps": 393,
+      "checkpoints": {
+        "same_exposure": {
+          "path": "tmp/analysis/c-long-pilot-20261115/plus_d/same_exposure.ckpt",
+          "sha256": "230e1533e19cece7807fd4264ae49f6e6b3942ea615c3780e16521aff866017f",
+          "epoch": 2,
+          "optimizer_steps": 262,
+          "graph_presentations": 2048,
+          "sample_forwards": 26856,
+          "token_forwards": 6875136,
+          "attention_units": 1760034816,
+          "wall_seconds": 32.52561566978693
+        },
+        "equal_compute": {
+          "path": "tmp/analysis/c-long-pilot-20261115/plus_d/equal_compute.ckpt",
+          "sha256": "fb9ab913af1b0708e3f3b02f63124fac0b044e205cab508bab57c6262ae694ad",
+          "epoch": 3,
+          "optimizer_steps": 393,
+          "graph_presentations": 3072,
+          "sample_forwards": 40284,
+          "token_forwards": 10312704,
+          "attention_units": 2640052224,
+          "wall_seconds": 48.618138471618295
+        }
+      }
+    },
+    "plus_2d": {
+      "status": "complete",
+      "cohort": "main",
+      "epochs": 2,
+      "args": {
+        "arm": "plus_2d",
+        "data_dir": "tmp/analysis/c-long-pilot-20261115/data",
+        "out_dir": "tmp/analysis/c-long-pilot-20261115/plus_2d",
+        "ckpt": null,
+        "batch_size": 8,
+        "lr": 0.0001,
+        "seed": 20261115,
+        "device": "cuda",
+        "smoke_batches": null,
+        "num_threads": 4
+      },
+      "optimizer": {
+        "betas": [
+          0.9,
+          0.999
+        ],
+        "eps": 1e-08,
+        "lr": 0.0001,
+        "weight_decay": 0.01
+      },
+      "source_code_sha256": {
+        "train.py": "96b902bbf167a926bae92101eb1e14c531113be6f4d476609d5a4038eecbd2b7",
+        "protocol.py": "49040c1d11a7fac0ab8308a85e50860779246f9f3801c5e8059dcdd78276224b"
+      },
+      "config_sha256": {
+        "model_config.yaml": "1787c0435b1f2ba73aad0bc2989ebea01e7e834b13b88e9cfd51a5e2c729c6b1",
+        "train_config.yaml": "87f6352d9b00aae6291d635fc154e918915eaea7323c1ccc5eaf7a39c9ba52ad",
+        "data_config.yaml": "7c098fa1975e8e7638171b5fd54e5c77b78305be88b105256a91cf42614d1ae3"
+      },
+      "batch_count": 131,
+      "completed_steps": 262,
+      "checkpoints": {
+        "same_exposure": {
+          "path": "tmp/analysis/c-long-pilot-20261115/plus_2d/same_exposure.ckpt",
+          "sha256": "04460f67ab8e72c16b5bc43673c9e757fb39c64a5d4f9d0e6730b3c8af7f16a4",
+          "epoch": 2,
+          "optimizer_steps": 262,
+          "graph_presentations": 2048,
+          "sample_forwards": 40284,
+          "token_forwards": 10312704,
+          "attention_units": 2640052224,
+          "wall_seconds": 48.64831010438502
+        },
+        "equal_compute": {
+          "path": "tmp/analysis/c-long-pilot-20261115/plus_2d/equal_compute.ckpt",
+          "sha256": "b6c81fe0d5c5d96673ab4afff51f3ebf52a4005fd2ffc0881f31330c07697a45",
+          "epoch": 2,
+          "optimizer_steps": 262,
+          "graph_presentations": 2048,
+          "sample_forwards": 40284,
+          "token_forwards": 10312704,
+          "attention_units": 2640052224,
+          "wall_seconds": 48.81063846126199
+        }
+      }
+    }
+  },
+  "validation": {
+    "status": "complete",
+    "data_sha256": "676aabd2173d007b9c70c1e044ed69b7afe26d1f88e6bfcfd842778af3bcf66f",
+    "script_sha256": "d42b03bbb1dceb26041ad07950150dfd9aa6799a67e0db70f2ba266ed9c9654e",
+    "protocol_sha256": "49040c1d11a7fac0ab8308a85e50860779246f9f3801c5e8059dcdd78276224b",
+    "checkpoints": [
+      {
+        "arm": "initial",
+        "endpoint": "initial",
+        "epoch": 0,
+        "path": "tmp/runs/oldC0-newseed-150ep/checkpoints/Nodes32-ADD - L4H16D384_DeBERTa-seed-2026 - 2026-11-14-10:12:43/epoch=143-val_loss=0.0000.ckpt",
+        "sha256": "40babb206b1393d0892b047202b9d6469cd140c82f3ba82c96a466fa3c76e780",
+        "optimizer_steps": null,
+        "graph_presentations": null,
+        "sample_forwards": null,
+        "token_forwards": null,
+        "attention_units": null,
+        "wall_seconds": null
+      },
+      {
+        "arm": "base",
+        "endpoint": "same_exposure",
+        "epoch": 2,
+        "path": "tmp/analysis/c-long-pilot-20261115/base/same_exposure.ckpt",
+        "sha256": "5b52edab0effb9256ae0bc11517125e24b4ab637e5266e8a46faf2c7b40108a6",
+        "optimizer_steps": 262,
+        "graph_presentations": 2048,
+        "sample_forwards": 13428,
+        "token_forwards": 3437568,
+        "attention_units": 880017408,
+        "wall_seconds": 16.98710622638464
+      },
+      {
+        "arm": "base",
+        "endpoint": "equal_compute",
+        "epoch": 6,
+        "path": "tmp/analysis/c-long-pilot-20261115/base/equal_compute.ckpt",
+        "sha256": "d25636c1f369815429aece4a09274f95320ba6fde3a647e456c34394291ee273",
+        "optimizer_steps": 786,
+        "graph_presentations": 6144,
+        "sample_forwards": 40284,
+        "token_forwards": 10312704,
+        "attention_units": 2640052224,
+        "wall_seconds": 50.27407772652805
+      },
+      {
+        "arm": "plus_d",
+        "endpoint": "same_exposure",
+        "epoch": 2,
+        "path": "tmp/analysis/c-long-pilot-20261115/plus_d/same_exposure.ckpt",
+        "sha256": "230e1533e19cece7807fd4264ae49f6e6b3942ea615c3780e16521aff866017f",
+        "optimizer_steps": 262,
+        "graph_presentations": 2048,
+        "sample_forwards": 26856,
+        "token_forwards": 6875136,
+        "attention_units": 1760034816,
+        "wall_seconds": 32.52561566978693
+      },
+      {
+        "arm": "plus_d",
+        "endpoint": "equal_compute",
+        "epoch": 3,
+        "path": "tmp/analysis/c-long-pilot-20261115/plus_d/equal_compute.ckpt",
+        "sha256": "fb9ab913af1b0708e3f3b02f63124fac0b044e205cab508bab57c6262ae694ad",
+        "optimizer_steps": 393,
+        "graph_presentations": 3072,
+        "sample_forwards": 40284,
+        "token_forwards": 10312704,
+        "attention_units": 2640052224,
+        "wall_seconds": 48.618138471618295
+      },
+      {
+        "arm": "plus_2d",
+        "endpoint": "same_exposure",
+        "epoch": 2,
+        "path": "tmp/analysis/c-long-pilot-20261115/plus_2d/same_exposure.ckpt",
+        "sha256": "04460f67ab8e72c16b5bc43673c9e757fb39c64a5d4f9d0e6730b3c8af7f16a4",
+        "optimizer_steps": 262,
+        "graph_presentations": 2048,
+        "sample_forwards": 40284,
+        "token_forwards": 10312704,
+        "attention_units": 2640052224,
+        "wall_seconds": 48.64831010438502
+      },
+      {
+        "arm": "plus_2d",
+        "endpoint": "equal_compute",
+        "epoch": 2,
+        "path": "tmp/analysis/c-long-pilot-20261115/plus_2d/equal_compute.ckpt",
+        "sha256": "b6c81fe0d5c5d96673ab4afff51f3ebf52a4005fd2ffc0881f31330c07697a45",
+        "optimizer_steps": 262,
+        "graph_presentations": 2048,
+        "sample_forwards": 40284,
+        "token_forwards": 10312704,
+        "attention_units": 2640052224,
+        "wall_seconds": 48.81063846126199
+      }
+    ]
+  },
+  "notes": [
+    "Only hashes/counts/budgets; no weights or raw tensors are copied.",
+    "field curves/drift derived from per-graph validation NPZ predictions[round,node,4].",
+    "raw NPZ/weights/logs remain under tmp/analysis/c-long-pilot-20261115/."
+  ]
+}

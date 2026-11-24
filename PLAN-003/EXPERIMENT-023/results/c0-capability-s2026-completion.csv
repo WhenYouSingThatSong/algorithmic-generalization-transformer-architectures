@@ -1,0 +1,7 @@
+weight,stratum,n_graphs,value_completed,value_completed_rate,tV_mean,tV_median,first4_completed,first4_completed_rate,t4_mean,t4_median,value_completed_by_H2,first4_completed_by_H2,value_completed_by_H4,first4_completed_by_H4,value_completed_by_H8,first4_completed_by_H8,value_completed_by_H16,first4_completed_by_H16,value_completed_by_H32,first4_completed_by_H32,value_completed_by_H64,first4_completed_by_H64
+s2026_e143,N128_deep,64,64,1.000000,11.906250,12.000000,64,1.000000,11.906250,12.000000,0,0,0,0,0,0,64,64,64,64,64,64
+s2026_e143,N128_shallow,64,64,1.000000,7.109375,7.000000,64,1.000000,7.109375,7.000000,0,0,0,0,63,63,64,64,64,64,64,64
+s2026_e143,N32_deep,64,63,0.984375,8.634921,8.000000,63,0.984375,8.634921,8.000000,0,0,0,0,36,36,63,63,63,63,63,63
+s2026_e143,N32_shallow,64,64,1.000000,6.500000,7.000000,64,1.000000,6.500000,7.000000,0,0,0,0,64,64,64,64,64,64,64,64
+s2026_e143,N64_deep,64,64,1.000000,9.875000,10.000000,64,1.000000,9.875000,10.000000,0,0,0,0,8,8,64,64,64,64,64,64
+s2026_e143,N64_shallow,64,64,1.000000,7.046875,7.000000,64,1.000000,7.046875,7.000000,0,0,0,0,64,64,64,64,64,64,64,64

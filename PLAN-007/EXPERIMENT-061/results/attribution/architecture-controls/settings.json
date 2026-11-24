@@ -1,0 +1,11 @@
+{
+  "out": "tmp/analysis/architecture-controls-smoke-01",
+  "device": "cpu",
+  "steps": 2,
+  "width": 32,
+  "heads": 4,
+  "stages": 4,
+  "seed": 42,
+  "eval_graphs": 4,
+  "protocol": "prototype-v1"
+}

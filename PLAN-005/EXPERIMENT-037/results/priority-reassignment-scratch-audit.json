@@ -1,0 +1,68 @@
+{
+  "protocol": "scratch_start_audit_v1",
+  "tokenizer": {
+    "config_dir_name": [
+      "A-L4D384fast-Nodes32-ADD-L4H16D384-DeBERTa",
+      "B-M6-Nodes32-ADD-L4H16D384-DeBERTa"
+    ],
+    "factors": [
+      "SYNTAX",
+      "VARIABLE",
+      "OPERATION",
+      "VALUE",
+      "REGRET",
+      "MODIFICATION"
+    ],
+    "mod_val": 23,
+    "n_vars": 128,
+    "vocab_sizes": [
+      7,
+      129,
+      2,
+      25,
+      2,
+      2
+    ]
+  },
+  "checks": [
+    {
+      "model_key": "model_a",
+      "records": 128,
+      "positions_checked": 4224,
+      "six_factor_cells_checked": 786432,
+      "expected_constant_value_cells": 128,
+      "unexpected_six_factor_differences": 0,
+      "raw_aux_nonfalse_cells": 0,
+      "recorded_initial_mismatch_cases": 0,
+      "records_sha256": "c846b754d37b317bcdbce5c75aea9931865c001093f04894c9171241243eee67",
+      "selection_sha256": "aa4d3205ee2f6e7b76c518683e2d73728ac593dc3a1e8c720671acc59bb0c9ad",
+      "config_dir_name": "A-L4D384fast-Nodes32-ADD-L4H16D384-DeBERTa"
+    },
+    {
+      "model_key": "model_b",
+      "records": 128,
+      "positions_checked": 4224,
+      "six_factor_cells_checked": 786432,
+      "expected_constant_value_cells": 128,
+      "unexpected_six_factor_differences": 0,
+      "raw_aux_nonfalse_cells": 0,
+      "recorded_initial_mismatch_cases": 0,
+      "records_sha256": "e53a7de2a9c423a0dfd7ed483b3f767981f68e985210d6e3e1dd02dba71b7f8a",
+      "selection_sha256": "aa4d3205ee2f6e7b76c518683e2d73728ac593dc3a1e8c720671acc59bb0c9ad",
+      "config_dir_name": "B-M6-Nodes32-ADD-L4H16D384-DeBERTa"
+    }
+  ],
+  "totals": {
+    "records": 256,
+    "positions": 8448,
+    "six_factor_cells": 1572864,
+    "expected_constant_value_cells": 256,
+    "unexpected_differences": 0,
+    "raw_aux_nonfalse_cells": 0,
+    "recorded_initial_mismatch_cases": 0
+  },
+  "code_sha256": {
+    "tools/priority_pilots/verify_scratch_start.py": "b92aa4321f990a19d4d462114050b71ff25ffcfd5e09eb31714a2ab7f09a9563"
+  },
+  "note": "This checks the six-factor start tensor reconstructed by reassignment_core.starts; it does not load or run the model."
+}

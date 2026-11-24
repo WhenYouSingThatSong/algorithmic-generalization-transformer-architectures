@@ -1,0 +1,91 @@
+{
+  "date": "2026-11-21",
+  "scope": "C_s42 and C_s1234 normal-window final checkpoints; C_s2026 excluded",
+  "code_commit": "27aa861",
+  "plan_sha256": "b3c4b1be9325dd37aefc2004dc19b6e5ee6d82c6ff097c25c072d3f39038bc24",
+  "models": {
+    "C_s42": {
+      "checkpoint": "f14f4bbfbfd0069eadcad56d61d46e78159a45cd92beb8540594cc848c55dd5a",
+      "formal_complete": "tmp/analysis/c-hard-graphs-v1/formal/C_s42/complete.json",
+      "formal_complete_sha256": "dce79223dc4cdc9ca3d9b06e839510302708cd9af934c17cda3161d39f81f7b5",
+      "smoke_complete": "tmp/analysis/c-hard-graphs-v1/smoke/C_s42/complete.json",
+      "smoke_complete_sha256": "a2f532b2e27dbab64185a715a7e2c11b280fa32adf2d26f6aaea9de3c26527d3",
+      "sources": {
+        "hard_eval.py": "6fbbccd9e2fbf32c708151745292814d7f8ec66b78e06cb74c1b1bf359a4980f",
+        "design.py": "44f435a680f7862922714b459a93cb96212f2786594d831f41fcdef88d61effd",
+        "rebinding.py": "4f65b6444c64a5c282a55e10d8ed24c8ea0b32fdb66289628da6d1ad92c8b7df",
+        "runtime.py": "e2e4077972a71fde4580c757452bfaf7c0edc40bff5fdd5aa0a355795854d201",
+        "protocol.py": "3a44dfb793ccb941ad23f385cc6a37bb82a7980e7e8fc20f2ebb6cdeaaa9d44b"
+      }
+    },
+    "C_s1234": {
+      "checkpoint": "693b6338ac69281cf766e070b36530d1fdf61a2601068779aab7f780ccebb104",
+      "formal_complete": "tmp/analysis/c-hard-graphs-v1/formal/C_s1234/complete.json",
+      "formal_complete_sha256": "6c845a494d7e5eddc6868c5e071628c5a17e91f562ddb981c076653d5f3cd09d",
+      "smoke_complete": "tmp/analysis/c-hard-graphs-v1/smoke/C_s1234/complete.json",
+      "smoke_complete_sha256": "ddaf6929fb79e62bbf3791b1fcde396a53897cfdbabfdafff639f7c262a4dd47",
+      "sources": {
+        "hard_eval.py": "6fbbccd9e2fbf32c708151745292814d7f8ec66b78e06cb74c1b1bf359a4980f",
+        "design.py": "44f435a680f7862922714b459a93cb96212f2786594d831f41fcdef88d61effd",
+        "rebinding.py": "4f65b6444c64a5c282a55e10d8ed24c8ea0b32fdb66289628da6d1ad92c8b7df",
+        "runtime.py": "e2e4077972a71fde4580c757452bfaf7c0edc40bff5fdd5aa0a355795854d201",
+        "protocol.py": "3a44dfb793ccb941ad23f385cc6a37bb82a7980e7e8fc20f2ebb6cdeaaa9d44b"
+      }
+    }
+  },
+  "commands": [
+    "CUDA_VISIBLE_DEVICES=0 python tools/c_hard_graphs/hard_eval.py --model C_s42 --smoke --plan /workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/analysis/c-update-20261119/data/plan.json",
+    "CUDA_VISIBLE_DEVICES=1 python tools/c_hard_graphs/hard_eval.py --model C_s1234 --smoke --plan /workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/analysis/c-update-20261119/data/plan.json",
+    "python tools/c_hard_graphs/report.py --smoke",
+    "CUDA_VISIBLE_DEVICES=0 python tools/c_hard_graphs/hard_eval.py --model C_s42 --plan /workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/analysis/c-update-20261119/data/plan.json",
+    "CUDA_VISIBLE_DEVICES=1 python tools/c_hard_graphs/hard_eval.py --model C_s1234 --plan /workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/analysis/c-update-20261119/data/plan.json",
+    "python tools/c_hard_graphs/report.py"
+  ],
+  "smoke": {
+    "cases_per_model": 17,
+    "attempted_events_per_model": 32,
+    "root": "tmp/analysis/c-hard-graphs-v1/smoke"
+  },
+  "formal": {
+    "cases_per_model": 544,
+    "attempted_events_per_model": 256,
+    "graphs_per_cell": 32,
+    "probe_first": 8,
+    "root": "tmp/analysis/c-hard-graphs-v1/formal"
+  },
+  "tables": {
+    "capability-summary.csv": {
+      "path": "docs/records/2026-11-21/hard-graphs/capability-summary.csv",
+      "sha256": "f0d24a023da587f7be94a8cb5339768b7f5e42569cdcbb8d5d00db953117ac25",
+      "rows": 1488
+    },
+    "early-readouts-summary.csv": {
+      "path": "docs/records/2026-11-21/hard-graphs/early-readouts-summary.csv",
+      "sha256": "e809d4b71150ddbc9d00487046410ae7f3fdb932fe8b3273bb00311a62c94c94",
+      "rows": 172
+    },
+    "paired-naming-summary.csv": {
+      "path": "docs/records/2026-11-21/hard-graphs/paired-naming-summary.csv",
+      "sha256": "64189776909f74941fad43cf255beaf36240084a53bd2a7edae9ba9fcc3aa0af",
+      "rows": 256
+    },
+    "profile-differences-summary.csv": {
+      "path": "docs/records/2026-11-21/hard-graphs/profile-differences-summary.csv",
+      "sha256": "71b227a0b53f4c784b7ff81959f01fed6945f07a830df18ac08133fbc397306b",
+      "rows": 96
+    },
+    "propagation-summary.csv": {
+      "path": "docs/records/2026-11-21/hard-graphs/propagation-summary.csv",
+      "sha256": "ac2d9ae416163b868e40374871d8827bfb1391e915b9fbf0219c068bdd12fead",
+      "rows": 192
+    }
+  },
+  "notes": [
+    "Both smoke and formal complete.json identities match the receipt checkpoints and plan.",
+    "No training was run; this is an evaluation of the two existing final checkpoints.",
+    "The 166-definition extension has no independent-naming control; naming comparisons use the paired-naming table.",
+    "The two seeds share the same generated cases but are reported separately."
+  ],
+  "worktree": "/workspace/lab-xj/users/jinxi/code/yhy/management-20261120",
+  "run_status_commit": "6f3e349"
+}

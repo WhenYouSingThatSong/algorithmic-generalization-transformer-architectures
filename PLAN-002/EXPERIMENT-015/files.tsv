@@ -1,0 +1,4 @@
+实验内路径	原始位置	原文件 SHA-256	归集文件 SHA-256
+analysis/tmp/records/2026-11-10/parent-2x2-finding.md	tmp/records/2026-11-10/parent-2x2-finding.md	73d3228ac4b045ebaf4484da976ae881924fd9955a49f72884a7129fce548779	73d3228ac4b045ebaf4484da976ae881924fd9955a49f72884a7129fce548779
+analysis/tmp/records/2026-11-13/code-review-fixes-20261113.md	tmp/records/2026-11-13/code-review-fixes-20261113.md	aaf5750de182dc4db052fdeff705cc014267f557d0aacce3ca5ca5146cfba3bb	aaf5750de182dc4db052fdeff705cc014267f557d0aacce3ca5ca5146cfba3bb
+code/tmp/scripts/parent_corruption_2x2.py	tmp/scripts/parent_corruption_2x2.py	50e97cf8b2fd0c448cfea5b6716364256456572e884030711e0bc77c2a5aaf48	50e97cf8b2fd0c448cfea5b6716364256456572e884030711e0bc77c2a5aaf48

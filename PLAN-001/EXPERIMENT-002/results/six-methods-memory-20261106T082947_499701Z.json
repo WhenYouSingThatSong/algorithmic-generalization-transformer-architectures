@@ -1,0 +1,2274 @@
+{
+  "schema_version": 2,
+  "scope": "six existing core model/loss branches, bounded updates",
+  "expected_optimizer_steps_per_method": 2,
+  "diagnostic_script_sha256": "669dde64b4c56181419ed80bc355f87a5d4f44aeee82994b1c95575431263f55",
+  "boundaries": [
+    "Core-model/loss smoke check only: not successful execution of six original CLIs.",
+    "Tiny diagnostic configurations and a few optimizer updates do not test paper accuracy.",
+    "Repository data-generation functions are called directly; their CLI wrappers are bypassed.",
+    "The CoT generator CLI prints five examples even for four samples; this runner bypasses that print loop.",
+    "External Lightning subclasses call original compute_batch_loss methods with log=False.",
+    "This bypasses the known fast-path logging-variable overwrite; original training logs are not validated.",
+    "CoT uses the original CoTDataset with a bool-mask adapter; original buggy metrics are not accepted or reported.",
+    "CoT padding/target-mask alignment and the underlying training loss are otherwise left unchanged.",
+    "Correction probability 1 is a diagnostic override; tokenwise selection and original last-mask semantics are retained.",
+    "Validation is disabled; bounded inference is autonomous but is not the official OOD evaluation.",
+    "New checkpoints are reloaded with strict state_dict loading, not the original load_ckpt prefix-conversion helper.",
+    "Only newly created trusted checkpoints are loaded with weights_only=False; no distributed demo checkpoint is loaded."
+  ],
+  "python": "3.11.18 | packaged by conda-forge | (main, Oct 26 2026, 11:29:07) [MSC v.1944 64 bit (AMD64)]",
+  "executable": "C:\\Users\\adam2\\miniforge3\\envs\\looped-repro\\python.exe",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "repo": "C:\\Users\\adam2\\Desktop\\projects\\algorithmic-generalization-transformer-architectures",
+  "setup": "C:\\Users\\adam2\\Desktop\\projects\\repro_setup",
+  "run_root": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z",
+  "output": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\reports\\six-methods-memory-20261106T082947_499701Z.json",
+  "device": "cuda",
+  "git_before": {
+    "commit": "52dd950dce8d32a8e72513999cac5a310e01ca53",
+    "tracked_status": ""
+  },
+  "selected_methods": [
+    "M1_feedforward",
+    "M2_recurrent",
+    "M3_cot",
+    "M4_continuous",
+    "M5_discrete",
+    "M6_discrete_correction"
+  ],
+  "trainer_policy": {
+    "logger": false,
+    "limit_train_batches": 2,
+    "max_epochs": 1,
+    "limit_val_batches": 0,
+    "num_workers": 0,
+    "precision": "32-true",
+    "compile": false,
+    "automatic_checkpointing": false
+  },
+  "methods": [
+    {
+      "method": "M1_feedforward",
+      "passed": true,
+      "seed": 42,
+      "data": {
+        "effective_data_config": {
+          "dag_config": {
+            "data_file_name": "train_data.pt",
+            "fix_graph": false,
+            "func_vocab": [
+              "ADD"
+            ],
+            "max_comp_depth": 3,
+            "max_depth": 3,
+            "max_fan_in_deg": 3,
+            "max_length": 128,
+            "min_fan_in_deg": 1,
+            "mod_val": 23,
+            "num_leaf_nodes": 3,
+            "num_nodes": 8,
+            "num_samples": 4,
+            "shuffle_node_name": true,
+            "verbose": false
+          },
+          "data_dir": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\data\\factored-95aef534dd1d",
+          "tokenizer_file_name": "tokenizer.pickle",
+          "val_dag_config": {
+            "data_file_name": "val_data.pt",
+            "fix_graph": false,
+            "func_vocab": [
+              "ADD"
+            ],
+            "max_comp_depth": 3,
+            "max_depth": 3,
+            "max_fan_in_deg": 3,
+            "max_length": 128,
+            "min_fan_in_deg": 1,
+            "mod_val": 23,
+            "num_leaf_nodes": 3,
+            "num_nodes": 8,
+            "num_samples": 4,
+            "shuffle_node_name": true,
+            "verbose": false
+          }
+        },
+        "original_configured_data_dir": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\data\\factored_smoke",
+        "note": "Per-run external data directory isolates generated diagnostic artifacts.",
+        "tokenizer_path": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\data\\factored-95aef534dd1d\\tokenizer.pickle",
+        "tokenizer_sha256": "33605838c9ce2054466ad644cb2caf0d21d7ed1bbcf3a2b5c38a3762e0cc398c",
+        "splits": {
+          "dag_config": {
+            "path": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\data\\factored-95aef534dd1d\\train_data.pt",
+            "sha256": "76f1d7b01244ad71cd25f07719fcca865daac2f0ae67519067fafe104a00f508",
+            "shape": [
+              4,
+              128,
+              6
+            ],
+            "samples": 4,
+            "maximum_zero_based_depth": 3
+          },
+          "val_dag_config": {
+            "path": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\data\\factored-95aef534dd1d\\val_data.pt",
+            "sha256": "2152b3553b9fd8a8279a28e651afed02c98e94a1eed224016753ec801b71ffc1",
+            "shape": [
+              4,
+              128,
+              6
+            ],
+            "samples": 4,
+            "maximum_zero_based_depth": 3
+          }
+        },
+        "generation_seconds": 0.02131569990888238
+      },
+      "effective_configurations": {
+        "data": {
+          "dag_config": {
+            "data_file_name": "train_data.pt",
+            "fix_graph": false,
+            "func_vocab": [
+              "ADD"
+            ],
+            "max_comp_depth": 3,
+            "max_depth": 3,
+            "max_fan_in_deg": 3,
+            "max_length": 128,
+            "min_fan_in_deg": 1,
+            "mod_val": 23,
+            "num_leaf_nodes": 3,
+            "num_nodes": 8,
+            "num_samples": 4,
+            "shuffle_node_name": true,
+            "verbose": false
+          },
+          "data_dir": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\data\\factored-95aef534dd1d",
+          "tokenizer_file_name": "tokenizer.pickle",
+          "val_dag_config": {
+            "data_file_name": "val_data.pt",
+            "fix_graph": false,
+            "func_vocab": [
+              "ADD"
+            ],
+            "max_comp_depth": 3,
+            "max_depth": 3,
+            "max_fan_in_deg": 3,
+            "max_length": 128,
+            "min_fan_in_deg": 1,
+            "mod_val": 23,
+            "num_leaf_nodes": 3,
+            "num_nodes": 8,
+            "num_samples": 4,
+            "shuffle_node_name": true,
+            "verbose": false
+          }
+        },
+        "model": {
+          "attention_type": "softmax",
+          "attn_pdrop": 0.0,
+          "causal_attn": true,
+          "hidden_size": 128,
+          "input_size": 256,
+          "layer_norm_eps": 1e-05,
+          "max_seq_len": 128,
+          "n_iters": 1,
+          "num_heads": 4,
+          "num_layers": 2,
+          "pos_enc_type": "RoPE",
+          "q_k_v_o_proj_enabled": [
+            true,
+            true,
+            true,
+            true
+          ],
+          "relpos_embed_size": 256,
+          "relpos_q_k_enabled": [
+            true,
+            true
+          ],
+          "relpos_shift": 0,
+          "relpos_win_size": 64,
+          "resid_pdrop": 0.0,
+          "use_bias": true,
+          "use_layer_norm": true,
+          "use_pos_layer_norm": true,
+          "use_readout_proj": true
+        },
+        "train": {
+          "AdamW_optimizer_config": {
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "lr": 0.001,
+            "weight_decay": 0.01
+          },
+          "Adam_optimizer_config": {
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "lr": 0.0001,
+            "weight_decay": 0.0
+          },
+          "RMSprop_optimizer_config": {
+            "alpha": 0.99,
+            "lr": 0.001,
+            "momentum": 0.0,
+            "weight_decay": 0.01
+          },
+          "SGD_optimizer_config": {
+            "lr": 0.01,
+            "momentum": 0.9,
+            "nesterov": true,
+            "weight_decay": 0.01
+          },
+          "Shampoo_optimizer_config": {
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "lr": 0.1,
+            "momentum": 0.0,
+            "weight_decay": 0.0
+          },
+          "StepLR_scheduler_config": {
+            "gamma": 0.1,
+            "step_size": 1000
+          },
+          "batch_size": 1,
+          "compile": false,
+          "cosine_scheduler_config": {
+            "lr_decay_steps": 300000.0,
+            "min_lr": 1e-05,
+            "warmup_steps": 1000
+          },
+          "learning_rate": 0.001,
+          "lr_scheduler": "none",
+          "matmul_precision": "highest",
+          "max_epochs": 1,
+          "max_train_depth": 6,
+          "max_train_loop": 4,
+          "max_val_loop": 4,
+          "num_workers": 0,
+          "optimizer": "AdamW",
+          "precision": 32,
+          "train_temperature": 0.0,
+          "use_teacher_pred_for_next_loop": true,
+          "val_check_interval": 1.0,
+          "val_temperature": 0.0,
+          "wandb_config": {
+            "wandb_entity": [
+              "YOUR ENTITY"
+            ],
+            "wandb_project": [
+              "YOUR PROJECT"
+            ]
+          },
+          "seed": 42,
+          "experiment_group": "M1_feedforward",
+          "experiment_run_name": "smoke-seed-42"
+        }
+      },
+      "original_configuration_directory": "C:\\Users\\adam2\\Desktop\\projects\\repro_setup\\experiments\\smoke\\M1_feedforward",
+      "resolved_model_configuration": {
+        "attention_type": "softmax",
+        "attn_pdrop": 0.0,
+        "causal_attn": true,
+        "hidden_size": 128,
+        "input_size": 256,
+        "layer_norm_eps": 1e-05,
+        "max_seq_len": 128,
+        "n_iters": 1,
+        "num_heads": 4,
+        "num_layers": 2,
+        "pos_enc_type": "RoPE",
+        "q_k_v_o_proj_enabled": [
+          true,
+          true,
+          true,
+          true
+        ],
+        "relpos_embed_size": 256,
+        "relpos_q_k_enabled": [
+          true,
+          true
+        ],
+        "relpos_shift": 0,
+        "relpos_win_size": 64,
+        "resid_pdrop": 0.0,
+        "use_bias": true,
+        "use_layer_norm": true,
+        "use_pos_layer_norm": true,
+        "use_readout_proj": true,
+        "vocab_sizes": [
+          7,
+          9,
+          2,
+          25,
+          2,
+          2
+        ],
+        "factors": [
+          "SYNTAX",
+          "VARIABLE",
+          "OPERATION",
+          "VALUE",
+          "REGRET",
+          "MODIFICATION"
+        ],
+        "data_dim": 6,
+        "label_dim": 6,
+        "info_dim": 6
+      },
+      "parameter_count": 540463,
+      "parameter_dtypes": [
+        "torch.float32"
+      ],
+      "training_branch": "final factored-label loss",
+      "training_seconds": 14.840346400043927,
+      "training_cuda_memory": {
+        "device": "cuda",
+        "peak_allocated_bytes": 28109312,
+        "peak_reserved_bytes": 33554432
+      },
+      "losses": [
+        8.901552200317383,
+        6.979440212249756
+      ],
+      "training_batches": 2,
+      "trainer_global_step": 2,
+      "gradients": {
+        "tensors": 52,
+        "all_finite": true,
+        "nonzero_tensors": 48,
+        "max_abs": 2.494947671890259
+      },
+      "parameter_update": {
+        "changed_tensors": 52,
+        "max_absolute_change": 0.0020608901977539062
+      },
+      "corruption": {
+        "probability_override": null,
+        "original_last_mask_retained": false,
+        "function_calls": 0,
+        "events": [],
+        "actual_changed_value_positions": 0
+      },
+      "bounded_inference": {
+        "paper_accuracy_measured": false,
+        "kind": "fixed_budget_final_forward",
+        "configured_n_iters": 1,
+        "input_shape": [
+          1,
+          128,
+          6
+        ]
+      },
+      "inference_seconds": 0.008925700094550848,
+      "checkpoint_save_seconds": 0.03289919998496771,
+      "reload_seconds": 0.15480360004585236,
+      "strict_reload": {
+        "lightning_checkpoint": {
+          "passed": true,
+          "compared_tensors": 6,
+          "max_absolute_difference": 0.0,
+          "rtol": 1e-05,
+          "atol": 1e-06
+        },
+        "pure_model_state_dict": {
+          "passed": true,
+          "compared_tensors": 6,
+          "max_absolute_difference": 0.0,
+          "rtol": 1e-05,
+          "atol": 1e-06
+        },
+        "original_load_ckpt_helper_used": false
+      },
+      "artifacts": {
+        "checkpoint": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\methods\\M1_feedforward\\2_updates.ckpt",
+        "checkpoint_sha256": "44591423f4c3b700b88ffafb8f0cb05db1c9dc91d34fc7132176d94994b1c604",
+        "state_dict": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\methods\\M1_feedforward\\model_state_dict.pt",
+        "state_dict_sha256": "195bb236ddbaabd00e1d9b00eb3bfff08669dc5ba52808b02085d633d9541347"
+      },
+      "whole_method_cuda_memory": {
+        "device": "cuda",
+        "peak_allocated_bytes": 28109312,
+        "peak_reserved_bytes": 33554432
+      },
+      "total_seconds": 15.200632099993527
+    },
+    {
+      "method": "M2_recurrent",
+      "passed": true,
+      "seed": 42,
+      "data": {
+        "effective_data_config": {
+          "dag_config": {
+            "data_file_name": "train_data.pt",
+            "fix_graph": false,
+            "func_vocab": [
+              "ADD"
+            ],
+            "max_comp_depth": 3,
+            "max_depth": 3,
+            "max_fan_in_deg": 3,
+            "max_length": 128,
+            "min_fan_in_deg": 1,
+            "mod_val": 23,
+            "num_leaf_nodes": 3,
+            "num_nodes": 8,
+            "num_samples": 4,
+            "shuffle_node_name": true,
+            "verbose": false
+          },
+          "data_dir": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\data\\factored-95aef534dd1d",
+          "tokenizer_file_name": "tokenizer.pickle",
+          "val_dag_config": {
+            "data_file_name": "val_data.pt",
+            "fix_graph": false,
+            "func_vocab": [
+              "ADD"
+            ],
+            "max_comp_depth": 3,
+            "max_depth": 3,
+            "max_fan_in_deg": 3,
+            "max_length": 128,
+            "min_fan_in_deg": 1,
+            "mod_val": 23,
+            "num_leaf_nodes": 3,
+            "num_nodes": 8,
+            "num_samples": 4,
+            "shuffle_node_name": true,
+            "verbose": false
+          }
+        },
+        "original_configured_data_dir": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\data\\factored_smoke",
+        "note": "Per-run external data directory isolates generated diagnostic artifacts.",
+        "tokenizer_path": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\data\\factored-95aef534dd1d\\tokenizer.pickle",
+        "tokenizer_sha256": "33605838c9ce2054466ad644cb2caf0d21d7ed1bbcf3a2b5c38a3762e0cc398c",
+        "splits": {
+          "dag_config": {
+            "path": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\data\\factored-95aef534dd1d\\train_data.pt",
+            "sha256": "76f1d7b01244ad71cd25f07719fcca865daac2f0ae67519067fafe104a00f508",
+            "shape": [
+              4,
+              128,
+              6
+            ],
+            "samples": 4,
+            "maximum_zero_based_depth": 3
+          },
+          "val_dag_config": {
+            "path": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\data\\factored-95aef534dd1d\\val_data.pt",
+            "sha256": "2152b3553b9fd8a8279a28e651afed02c98e94a1eed224016753ec801b71ffc1",
+            "shape": [
+              4,
+              128,
+              6
+            ],
+            "samples": 4,
+            "maximum_zero_based_depth": 3
+          }
+        },
+        "generation_seconds": 0.02131569990888238
+      },
+      "effective_configurations": {
+        "data": {
+          "dag_config": {
+            "data_file_name": "train_data.pt",
+            "fix_graph": false,
+            "func_vocab": [
+              "ADD"
+            ],
+            "max_comp_depth": 3,
+            "max_depth": 3,
+            "max_fan_in_deg": 3,
+            "max_length": 128,
+            "min_fan_in_deg": 1,
+            "mod_val": 23,
+            "num_leaf_nodes": 3,
+            "num_nodes": 8,
+            "num_samples": 4,
+            "shuffle_node_name": true,
+            "verbose": false
+          },
+          "data_dir": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\data\\factored-95aef534dd1d",
+          "tokenizer_file_name": "tokenizer.pickle",
+          "val_dag_config": {
+            "data_file_name": "val_data.pt",
+            "fix_graph": false,
+            "func_vocab": [
+              "ADD"
+            ],
+            "max_comp_depth": 3,
+            "max_depth": 3,
+            "max_fan_in_deg": 3,
+            "max_length": 128,
+            "min_fan_in_deg": 1,
+            "mod_val": 23,
+            "num_leaf_nodes": 3,
+            "num_nodes": 8,
+            "num_samples": 4,
+            "shuffle_node_name": true,
+            "verbose": false
+          }
+        },
+        "model": {
+          "attention_type": "softmax",
+          "attn_pdrop": 0.0,
+          "causal_attn": true,
+          "hidden_size": 128,
+          "input_size": 256,
+          "layer_norm_eps": 1e-05,
+          "max_seq_len": 128,
+          "n_iters": 2,
+          "num_heads": 4,
+          "num_layers": 2,
+          "pos_enc_type": "RoPE",
+          "q_k_v_o_proj_enabled": [
+            true,
+            true,
+            true,
+            true
+          ],
+          "relpos_embed_size": 256,
+          "relpos_q_k_enabled": [
+            true,
+            true
+          ],
+          "relpos_shift": 0,
+          "relpos_win_size": 64,
+          "resid_pdrop": 0.0,
+          "use_bias": true,
+          "use_layer_norm": true,
+          "use_pos_layer_norm": true,
+          "use_readout_proj": true
+        },
+        "train": {
+          "AdamW_optimizer_config": {
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "lr": 0.001,
+            "weight_decay": 0.01
+          },
+          "Adam_optimizer_config": {
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "lr": 0.0001,
+            "weight_decay": 0.0
+          },
+          "RMSprop_optimizer_config": {
+            "alpha": 0.99,
+            "lr": 0.001,
+            "momentum": 0.0,
+            "weight_decay": 0.01
+          },
+          "SGD_optimizer_config": {
+            "lr": 0.01,
+            "momentum": 0.9,
+            "nesterov": true,
+            "weight_decay": 0.01
+          },
+          "Shampoo_optimizer_config": {
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "lr": 0.1,
+            "momentum": 0.0,
+            "weight_decay": 0.0
+          },
+          "StepLR_scheduler_config": {
+            "gamma": 0.1,
+            "step_size": 1000
+          },
+          "batch_size": 1,
+          "compile": false,
+          "cosine_scheduler_config": {
+            "lr_decay_steps": 300000.0,
+            "min_lr": 1e-05,
+            "warmup_steps": 1000
+          },
+          "learning_rate": 0.001,
+          "lr_scheduler": "none",
+          "matmul_precision": "highest",
+          "max_epochs": 1,
+          "max_train_depth": 6,
+          "max_train_loop": 4,
+          "max_val_loop": 4,
+          "num_workers": 0,
+          "optimizer": "AdamW",
+          "precision": 32,
+          "train_temperature": 0.0,
+          "use_teacher_pred_for_next_loop": true,
+          "val_check_interval": 1.0,
+          "val_temperature": 0.0,
+          "wandb_config": {
+            "wandb_entity": [
+              "YOUR ENTITY"
+            ],
+            "wandb_project": [
+              "YOUR PROJECT"
+            ]
+          },
+          "seed": 42,
+          "experiment_group": "M2_recurrent",
+          "experiment_run_name": "smoke-seed-42"
+        }
+      },
+      "original_configuration_directory": "C:\\Users\\adam2\\Desktop\\projects\\repro_setup\\experiments\\smoke\\M2_recurrent",
+      "resolved_model_configuration": {
+        "attention_type": "softmax",
+        "attn_pdrop": 0.0,
+        "causal_attn": true,
+        "hidden_size": 128,
+        "input_size": 256,
+        "layer_norm_eps": 1e-05,
+        "max_seq_len": 128,
+        "n_iters": 2,
+        "num_heads": 4,
+        "num_layers": 2,
+        "pos_enc_type": "RoPE",
+        "q_k_v_o_proj_enabled": [
+          true,
+          true,
+          true,
+          true
+        ],
+        "relpos_embed_size": 256,
+        "relpos_q_k_enabled": [
+          true,
+          true
+        ],
+        "relpos_shift": 0,
+        "relpos_win_size": 64,
+        "resid_pdrop": 0.0,
+        "use_bias": true,
+        "use_layer_norm": true,
+        "use_pos_layer_norm": true,
+        "use_readout_proj": true,
+        "vocab_sizes": [
+          7,
+          9,
+          2,
+          25,
+          2,
+          2
+        ],
+        "factors": [
+          "SYNTAX",
+          "VARIABLE",
+          "OPERATION",
+          "VALUE",
+          "REGRET",
+          "MODIFICATION"
+        ],
+        "data_dim": 6,
+        "label_dim": 6,
+        "info_dim": 6
+      },
+      "parameter_count": 540463,
+      "parameter_dtypes": [
+        "torch.float32"
+      ],
+      "training_branch": "final factored-label loss",
+      "training_seconds": 0.05570089991670102,
+      "training_cuda_memory": {
+        "device": "cuda",
+        "peak_allocated_bytes": 30408192,
+        "peak_reserved_bytes": 35651584
+      },
+      "losses": [
+        8.580940246582031,
+        4.796517372131348
+      ],
+      "training_batches": 2,
+      "trainer_global_step": 2,
+      "gradients": {
+        "tensors": 52,
+        "all_finite": true,
+        "nonzero_tensors": 48,
+        "max_abs": 2.420971393585205
+      },
+      "parameter_update": {
+        "changed_tensors": 52,
+        "max_absolute_change": 0.0020525455474853516
+      },
+      "corruption": {
+        "probability_override": null,
+        "original_last_mask_retained": false,
+        "function_calls": 0,
+        "events": [],
+        "actual_changed_value_positions": 0
+      },
+      "bounded_inference": {
+        "paper_accuracy_measured": false,
+        "kind": "fixed_budget_final_forward",
+        "configured_n_iters": 2,
+        "input_shape": [
+          1,
+          128,
+          6
+        ]
+      },
+      "inference_seconds": 0.013678999966941774,
+      "checkpoint_save_seconds": 0.03444719989784062,
+      "reload_seconds": 0.15571119997184724,
+      "strict_reload": {
+        "lightning_checkpoint": {
+          "passed": true,
+          "compared_tensors": 6,
+          "max_absolute_difference": 0.0,
+          "rtol": 1e-05,
+          "atol": 1e-06
+        },
+        "pure_model_state_dict": {
+          "passed": true,
+          "compared_tensors": 6,
+          "max_absolute_difference": 0.0,
+          "rtol": 1e-05,
+          "atol": 1e-06
+        },
+        "original_load_ckpt_helper_used": false
+      },
+      "artifacts": {
+        "checkpoint": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\methods\\M2_recurrent\\2_updates.ckpt",
+        "checkpoint_sha256": "c89a1ac16c74441546a1b19ccb06dd0d28296de825947fb3dab977c391a6aded",
+        "state_dict": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\methods\\M2_recurrent\\model_state_dict.pt",
+        "state_dict_sha256": "71de7f20a3b93724d28442e33a8200a2300d6ddfb9097a88e15a1816d066de9f"
+      },
+      "whole_method_cuda_memory": {
+        "device": "cuda",
+        "peak_allocated_bytes": 30408192,
+        "peak_reserved_bytes": 35651584
+      },
+      "total_seconds": 0.30139349994715303
+    },
+    {
+      "method": "M3_cot",
+      "passed": true,
+      "seed": 42,
+      "data": {
+        "effective_data_config": {
+          "cot": true,
+          "cot_type": "eq-val",
+          "dag_config": {
+            "data_file_name": "train_data.pt",
+            "fix_graph": false,
+            "func_vocab": [
+              "ADD"
+            ],
+            "max_comp_depth": 3,
+            "max_depth": 3,
+            "max_fan_in_deg": 3,
+            "max_length": 256,
+            "min_fan_in_deg": 1,
+            "mod_val": 23,
+            "num_leaf_nodes": 3,
+            "num_nodes": 8,
+            "num_samples": 4,
+            "shuffle_node_name": true,
+            "verbose": false
+          },
+          "data_dir": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\data\\cot-7dbcb4a97fa6",
+          "tokenizer_file_name": "tokenizer.pickle",
+          "val_dag_config": {
+            "data_file_name": "val_data.pt",
+            "fix_graph": false,
+            "func_vocab": [
+              "ADD"
+            ],
+            "max_comp_depth": 3,
+            "max_depth": 3,
+            "max_fan_in_deg": 3,
+            "max_length": 256,
+            "min_fan_in_deg": 1,
+            "mod_val": 23,
+            "num_leaf_nodes": 3,
+            "num_nodes": 8,
+            "num_samples": 4,
+            "shuffle_node_name": true,
+            "verbose": false
+          }
+        },
+        "original_configured_data_dir": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\data\\cot_smoke",
+        "note": "Per-run external data directory isolates generated diagnostic artifacts.",
+        "tokenizer_path": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\data\\cot-7dbcb4a97fa6\\tokenizer.pickle",
+        "tokenizer_sha256": "be11988390d873e4cca673b2c3b061836973a5f8665cc45b9bceabf590bace94",
+        "splits": {
+          "dag_config": {
+            "path": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\data\\cot-7dbcb4a97fa6\\train_data.pt",
+            "sha256": "a1aa8c295d30ddeaed59e8b4796806bc7847c7196c9aeff3ac66cd0624a98282",
+            "shape": [
+              4,
+              256
+            ],
+            "samples": 4
+          },
+          "val_dag_config": {
+            "path": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\data\\cot-7dbcb4a97fa6\\val_data.pt",
+            "sha256": "49e966360aa30ab6388e60be3734e94437bc1f6f401b4fa0b98dcaa557b9e182",
+            "shape": [
+              4,
+              256
+            ],
+            "samples": 4
+          }
+        },
+        "generation_seconds": 0.01346040004864335
+      },
+      "effective_configurations": {
+        "data": {
+          "cot": true,
+          "cot_type": "eq-val",
+          "dag_config": {
+            "data_file_name": "train_data.pt",
+            "fix_graph": false,
+            "func_vocab": [
+              "ADD"
+            ],
+            "max_comp_depth": 3,
+            "max_depth": 3,
+            "max_fan_in_deg": 3,
+            "max_length": 256,
+            "min_fan_in_deg": 1,
+            "mod_val": 23,
+            "num_leaf_nodes": 3,
+            "num_nodes": 8,
+            "num_samples": 4,
+            "shuffle_node_name": true,
+            "verbose": false
+          },
+          "data_dir": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\data\\cot-7dbcb4a97fa6",
+          "tokenizer_file_name": "tokenizer.pickle",
+          "val_dag_config": {
+            "data_file_name": "val_data.pt",
+            "fix_graph": false,
+            "func_vocab": [
+              "ADD"
+            ],
+            "max_comp_depth": 3,
+            "max_depth": 3,
+            "max_fan_in_deg": 3,
+            "max_length": 256,
+            "min_fan_in_deg": 1,
+            "mod_val": 23,
+            "num_leaf_nodes": 3,
+            "num_nodes": 8,
+            "num_samples": 4,
+            "shuffle_node_name": true,
+            "verbose": false
+          }
+        },
+        "model": {
+          "attention_type": "softmax",
+          "attn_pdrop": 0.0,
+          "causal_attn": true,
+          "hidden_size": 128,
+          "input_size": 256,
+          "layer_norm_eps": 1e-05,
+          "max_seq_len": 256,
+          "n_iters": 1,
+          "num_heads": 4,
+          "num_layers": 2,
+          "pos_enc_type": "RoPE",
+          "q_k_v_o_proj_enabled": [
+            true,
+            true,
+            true,
+            true
+          ],
+          "relpos_embed_size": 256,
+          "relpos_q_k_enabled": [
+            true,
+            true
+          ],
+          "relpos_shift": 0,
+          "relpos_win_size": 64,
+          "resid_pdrop": 0.0,
+          "use_bias": true,
+          "use_layer_norm": true,
+          "use_pos_layer_norm": true,
+          "use_readout_proj": true
+        },
+        "train": {
+          "AdamW_optimizer_config": {
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "lr": 0.001,
+            "weight_decay": 0.01
+          },
+          "Adam_optimizer_config": {
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "lr": 0.0001,
+            "weight_decay": 0.0
+          },
+          "RMSprop_optimizer_config": {
+            "alpha": 0.99,
+            "lr": 0.001,
+            "momentum": 0.0,
+            "weight_decay": 0.01
+          },
+          "SGD_optimizer_config": {
+            "lr": 0.01,
+            "momentum": 0.9,
+            "nesterov": true,
+            "weight_decay": 0.01
+          },
+          "Shampoo_optimizer_config": {
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "lr": 0.1,
+            "momentum": 0.0,
+            "weight_decay": 0.0
+          },
+          "StepLR_scheduler_config": {
+            "gamma": 0.1,
+            "step_size": 1000
+          },
+          "batch_size": 1,
+          "compile": false,
+          "cosine_scheduler_config": {
+            "lr_decay_steps": 300000.0,
+            "min_lr": 1e-05,
+            "warmup_steps": 1000
+          },
+          "cot_type": "eq-val",
+          "learning_rate": 0.001,
+          "lr_scheduler": "none",
+          "matmul_precision": "highest",
+          "max_epochs": 1,
+          "max_train_depth": 6,
+          "max_train_loop": 4,
+          "max_val_loop": 4,
+          "num_workers": 0,
+          "optimizer": "AdamW",
+          "precision": 32,
+          "train_temperature": 0.0,
+          "use_teacher_pred_for_next_loop": true,
+          "val_check_interval": 1.0,
+          "val_temperature": 0.0,
+          "wandb_config": {
+            "wandb_entity": [
+              "YOUR ENTITY"
+            ],
+            "wandb_project": [
+              "YOUR PROJECT"
+            ]
+          },
+          "seed": 42,
+          "experiment_group": "M3_cot",
+          "experiment_run_name": "smoke-seed-42"
+        }
+      },
+      "original_configuration_directory": "C:\\Users\\adam2\\Desktop\\projects\\repro_setup\\experiments\\smoke\\M3_cot",
+      "cot_mask_adapter": {
+        "original_mask_dtypes": {
+          "cot_mask": "torch.int64",
+          "value_mask": "torch.int64",
+          "var_mask": "torch.int64",
+          "operation_mask": "torch.int64"
+        },
+        "returned_masks": "torch.bool",
+        "mask_positions_changed": false,
+        "original_accuracy_metrics_accepted": false
+      },
+      "resolved_model_configuration": {
+        "attention_type": "softmax",
+        "attn_pdrop": 0.0,
+        "causal_attn": true,
+        "hidden_size": 128,
+        "input_size": 256,
+        "layer_norm_eps": 1e-05,
+        "max_seq_len": 256,
+        "n_iters": 1,
+        "num_heads": 4,
+        "num_layers": 2,
+        "pos_enc_type": "RoPE",
+        "q_k_v_o_proj_enabled": [
+          true,
+          true,
+          true,
+          true
+        ],
+        "relpos_embed_size": 256,
+        "relpos_q_k_enabled": [
+          true,
+          true
+        ],
+        "relpos_shift": 0,
+        "relpos_win_size": 64,
+        "resid_pdrop": 0.0,
+        "use_bias": true,
+        "use_layer_norm": true,
+        "use_pos_layer_norm": true,
+        "use_readout_proj": true,
+        "vocab_size": 37
+      },
+      "parameter_count": 537893,
+      "parameter_dtypes": [
+        "torch.float32"
+      ],
+      "training_branch": "CoT next-token loss",
+      "training_seconds": 0.15536019997671247,
+      "training_cuda_memory": {
+        "device": "cuda",
+        "peak_allocated_bytes": 32848896,
+        "peak_reserved_bytes": 37748736
+      },
+      "losses": [
+        3.150919198989868,
+        1.497924566268921
+      ],
+      "training_batches": 2,
+      "trainer_global_step": 2,
+      "gradients": {
+        "tensors": 37,
+        "all_finite": true,
+        "nonzero_tensors": 37,
+        "max_abs": 1.2695412635803223
+      },
+      "parameter_update": {
+        "changed_tensors": 37,
+        "max_absolute_change": 0.002059459686279297
+      },
+      "corruption": {
+        "probability_override": null,
+        "original_last_mask_retained": false,
+        "function_calls": 0,
+        "events": [],
+        "actual_changed_value_positions": 0
+      },
+      "bounded_inference": {
+        "paper_accuracy_measured": false,
+        "kind": "bounded_autoregressive_generation",
+        "prefix_tokens": 42,
+        "generated_tokens": 4,
+        "generated_ids": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "generated_text": "<PAD> <PAD> <PAD> <PAD>"
+      },
+      "inference_seconds": 0.016677299980074167,
+      "checkpoint_save_seconds": 0.02921740000601858,
+      "reload_seconds": 0.156403899891302,
+      "strict_reload": {
+        "lightning_checkpoint": {
+          "passed": true,
+          "compared_tensors": 4,
+          "max_absolute_difference": 0.0,
+          "rtol": 1e-05,
+          "atol": 1e-06
+        },
+        "pure_model_state_dict": {
+          "passed": true,
+          "compared_tensors": 4,
+          "max_absolute_difference": 0.0,
+          "rtol": 1e-05,
+          "atol": 1e-06
+        },
+        "original_load_ckpt_helper_used": false
+      },
+      "artifacts": {
+        "checkpoint": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\methods\\M3_cot\\2_updates.ckpt",
+        "checkpoint_sha256": "dda6dbfffe576a9919385a35df308b929ced5624baf8a1eb297a61ac344a4e03",
+        "state_dict": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\methods\\M3_cot\\model_state_dict.pt",
+        "state_dict_sha256": "396929664d3f3ecb977b5920abcc10390189219307fcea7c34c9371b8695e225"
+      },
+      "whole_method_cuda_memory": {
+        "device": "cuda",
+        "peak_allocated_bytes": 32848896,
+        "peak_reserved_bytes": 37748736
+      },
+      "total_seconds": 0.411933199968189
+    },
+    {
+      "method": "M4_continuous",
+      "passed": true,
+      "seed": 42,
+      "data": {
+        "effective_data_config": {
+          "dag_config": {
+            "data_file_name": "train_data.pt",
+            "fix_graph": false,
+            "func_vocab": [
+              "ADD"
+            ],
+            "max_comp_depth": 3,
+            "max_depth": 3,
+            "max_fan_in_deg": 3,
+            "max_length": 128,
+            "min_fan_in_deg": 1,
+            "mod_val": 23,
+            "num_leaf_nodes": 3,
+            "num_nodes": 8,
+            "num_samples": 4,
+            "shuffle_node_name": true,
+            "verbose": false
+          },
+          "data_dir": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\data\\factored-95aef534dd1d",
+          "tokenizer_file_name": "tokenizer.pickle",
+          "val_dag_config": {
+            "data_file_name": "val_data.pt",
+            "fix_graph": false,
+            "func_vocab": [
+              "ADD"
+            ],
+            "max_comp_depth": 3,
+            "max_depth": 3,
+            "max_fan_in_deg": 3,
+            "max_length": 128,
+            "min_fan_in_deg": 1,
+            "mod_val": 23,
+            "num_leaf_nodes": 3,
+            "num_nodes": 8,
+            "num_samples": 4,
+            "shuffle_node_name": true,
+            "verbose": false
+          }
+        },
+        "original_configured_data_dir": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\data\\factored_smoke",
+        "note": "Per-run external data directory isolates generated diagnostic artifacts.",
+        "tokenizer_path": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\data\\factored-95aef534dd1d\\tokenizer.pickle",
+        "tokenizer_sha256": "33605838c9ce2054466ad644cb2caf0d21d7ed1bbcf3a2b5c38a3762e0cc398c",
+        "splits": {
+          "dag_config": {
+            "path": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\data\\factored-95aef534dd1d\\train_data.pt",
+            "sha256": "76f1d7b01244ad71cd25f07719fcca865daac2f0ae67519067fafe104a00f508",
+            "shape": [
+              4,
+              128,
+              6
+            ],
+            "samples": 4,
+            "maximum_zero_based_depth": 3
+          },
+          "val_dag_config": {
+            "path": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\data\\factored-95aef534dd1d\\val_data.pt",
+            "sha256": "2152b3553b9fd8a8279a28e651afed02c98e94a1eed224016753ec801b71ffc1",
+            "shape": [
+              4,
+              128,
+              6
+            ],
+            "samples": 4,
+            "maximum_zero_based_depth": 3
+          }
+        },
+        "generation_seconds": 0.02131569990888238
+      },
+      "effective_configurations": {
+        "data": {
+          "dag_config": {
+            "data_file_name": "train_data.pt",
+            "fix_graph": false,
+            "func_vocab": [
+              "ADD"
+            ],
+            "max_comp_depth": 3,
+            "max_depth": 3,
+            "max_fan_in_deg": 3,
+            "max_length": 128,
+            "min_fan_in_deg": 1,
+            "mod_val": 23,
+            "num_leaf_nodes": 3,
+            "num_nodes": 8,
+            "num_samples": 4,
+            "shuffle_node_name": true,
+            "verbose": false
+          },
+          "data_dir": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\data\\factored-95aef534dd1d",
+          "tokenizer_file_name": "tokenizer.pickle",
+          "val_dag_config": {
+            "data_file_name": "val_data.pt",
+            "fix_graph": false,
+            "func_vocab": [
+              "ADD"
+            ],
+            "max_comp_depth": 3,
+            "max_depth": 3,
+            "max_fan_in_deg": 3,
+            "max_length": 128,
+            "min_fan_in_deg": 1,
+            "mod_val": 23,
+            "num_leaf_nodes": 3,
+            "num_nodes": 8,
+            "num_samples": 4,
+            "shuffle_node_name": true,
+            "verbose": false
+          }
+        },
+        "model": {
+          "attention_type": "softmax",
+          "attn_pdrop": 0.0,
+          "causal_attn": true,
+          "hidden_size": 128,
+          "input_size": 256,
+          "layer_norm_eps": 1e-05,
+          "max_seq_len": 128,
+          "num_heads": 4,
+          "num_layers": 2,
+          "pos_enc_type": "DeBERTa",
+          "q_k_v_o_proj_enabled": [
+            true,
+            true,
+            true,
+            true
+          ],
+          "relpos_embed_size": 256,
+          "relpos_q_k_enabled": [
+            true,
+            true
+          ],
+          "relpos_shift": 0,
+          "relpos_win_size": 64,
+          "resid_pdrop": 0.0,
+          "use_bias": true,
+          "use_layer_norm": true,
+          "use_pos_layer_norm": true,
+          "use_readout_proj": true
+        },
+        "train": {
+          "AdamW_optimizer_config": {
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "lr": 0.001,
+            "weight_decay": 0.01
+          },
+          "Adam_optimizer_config": {
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "lr": 0.0001,
+            "weight_decay": 0.0
+          },
+          "RMSprop_optimizer_config": {
+            "alpha": 0.99,
+            "lr": 0.001,
+            "momentum": 0.0,
+            "weight_decay": 0.01
+          },
+          "SGD_optimizer_config": {
+            "lr": 0.01,
+            "momentum": 0.9,
+            "nesterov": true,
+            "weight_decay": 0.01
+          },
+          "Shampoo_optimizer_config": {
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "lr": 0.1,
+            "momentum": 0.0,
+            "weight_decay": 0.0
+          },
+          "StepLR_scheduler_config": {
+            "gamma": 0.1,
+            "step_size": 1000
+          },
+          "batch_size": 1,
+          "compile": false,
+          "cosine_scheduler_config": {
+            "lr_decay_steps": 300000.0,
+            "min_lr": 1e-05,
+            "warmup_steps": 1000
+          },
+          "learning_rate": 0.001,
+          "lr_scheduler": "none",
+          "matmul_precision": "highest",
+          "max_epochs": 1,
+          "max_train_depth": 6,
+          "max_train_loop": 4,
+          "max_val_loop": 4,
+          "num_workers": 0,
+          "optimizer": "AdamW",
+          "precision": 32,
+          "recorrection_args": {
+            "enable": false,
+            "corruption_prob": 0.0,
+            "tokenwise_corruption_prob": 0.5,
+            "corruption_strategy": "last"
+          },
+          "train_temperature": 0.0,
+          "use_fast_batch_forward": true,
+          "use_teacher_pred_for_next_loop": true,
+          "val_check_interval": 1.0,
+          "val_temperature": 0.0,
+          "wandb_config": {
+            "wandb_entity": [
+              "YOUR ENTITY"
+            ],
+            "wandb_project": [
+              "YOUR PROJECT"
+            ]
+          },
+          "seed": 42,
+          "experiment_group": "M4_continuous",
+          "experiment_run_name": "smoke-seed-42",
+          "nointerm": true
+        }
+      },
+      "original_configuration_directory": "C:\\Users\\adam2\\Desktop\\projects\\repro_setup\\experiments\\smoke\\M4_continuous",
+      "resolved_model_configuration": {
+        "attention_type": "softmax",
+        "attn_pdrop": 0.0,
+        "causal_attn": true,
+        "hidden_size": 128,
+        "input_size": 256,
+        "layer_norm_eps": 1e-05,
+        "max_seq_len": 128,
+        "num_heads": 4,
+        "num_layers": 2,
+        "pos_enc_type": "DeBERTa",
+        "q_k_v_o_proj_enabled": [
+          true,
+          true,
+          true,
+          true
+        ],
+        "relpos_embed_size": 256,
+        "relpos_q_k_enabled": [
+          true,
+          true
+        ],
+        "relpos_shift": 0,
+        "relpos_win_size": 64,
+        "resid_pdrop": 0.0,
+        "use_bias": true,
+        "use_layer_norm": true,
+        "use_pos_layer_norm": true,
+        "use_readout_proj": true,
+        "vocab_sizes": [
+          7,
+          9,
+          2,
+          25,
+          2,
+          2
+        ],
+        "factors": [
+          "SYNTAX",
+          "VARIABLE",
+          "OPERATION",
+          "VALUE",
+          "REGRET",
+          "MODIFICATION"
+        ],
+        "data_dim": 6,
+        "label_dim": 6,
+        "info_dim": 6
+      },
+      "parameter_count": 557359,
+      "parameter_dtypes": [
+        "torch.float32"
+      ],
+      "training_branch": "continuous per-loop supervised loss",
+      "training_seconds": 0.12815739994402975,
+      "training_cuda_memory": {
+        "device": "cuda",
+        "peak_allocated_bytes": 40027648,
+        "peak_reserved_bytes": 44040192
+      },
+      "losses": [
+        31.136085510253906,
+        18.29216766357422
+      ],
+      "training_batches": 2,
+      "trainer_global_step": 2,
+      "gradients": {
+        "tensors": 63,
+        "all_finite": true,
+        "nonzero_tensors": 59,
+        "max_abs": 7.039229393005371
+      },
+      "parameter_update": {
+        "changed_tensors": 63,
+        "max_absolute_change": 0.002060413360595703
+      },
+      "corruption": {
+        "probability_override": null,
+        "original_last_mask_retained": false,
+        "function_calls": 0,
+        "events": [],
+        "actual_changed_value_positions": 0
+      },
+      "bounded_inference": {
+        "paper_accuracy_measured": false,
+        "kind": "continuous_hidden_recurrence",
+        "loops": 3,
+        "input_shape": [
+          1,
+          128,
+          6
+        ],
+        "teacher_feedback": false
+      },
+      "inference_seconds": 0.017599600018002093,
+      "checkpoint_save_seconds": 0.04360960004851222,
+      "reload_seconds": 0.17005389998666942,
+      "strict_reload": {
+        "lightning_checkpoint": {
+          "passed": true,
+          "compared_tensors": 18,
+          "max_absolute_difference": 0.0,
+          "rtol": 1e-05,
+          "atol": 1e-06
+        },
+        "pure_model_state_dict": {
+          "passed": true,
+          "compared_tensors": 18,
+          "max_absolute_difference": 0.0,
+          "rtol": 1e-05,
+          "atol": 1e-06
+        },
+        "original_load_ckpt_helper_used": false
+      },
+      "artifacts": {
+        "checkpoint": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\methods\\M4_continuous\\2_updates.ckpt",
+        "checkpoint_sha256": "c990d7f5273350b95fddcf9ae2d0d6e6b8fce1a99f7f680dee6940aca3ad6ea4",
+        "state_dict": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\methods\\M4_continuous\\model_state_dict.pt",
+        "state_dict_sha256": "bc1623ea4d89f3fd275715f7689f9bf1a5ba8d81ef030e73544d4b130f1b83d6"
+      },
+      "whole_method_cuda_memory": {
+        "device": "cuda",
+        "peak_allocated_bytes": 40027648,
+        "peak_reserved_bytes": 44040192
+      },
+      "total_seconds": 0.4024078000802547
+    },
+    {
+      "method": "M5_discrete",
+      "passed": true,
+      "seed": 42,
+      "data": {
+        "effective_data_config": {
+          "dag_config": {
+            "data_file_name": "train_data.pt",
+            "fix_graph": false,
+            "func_vocab": [
+              "ADD"
+            ],
+            "max_comp_depth": 3,
+            "max_depth": 3,
+            "max_fan_in_deg": 3,
+            "max_length": 128,
+            "min_fan_in_deg": 1,
+            "mod_val": 23,
+            "num_leaf_nodes": 3,
+            "num_nodes": 8,
+            "num_samples": 4,
+            "shuffle_node_name": true,
+            "verbose": false
+          },
+          "data_dir": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\data\\factored-95aef534dd1d",
+          "tokenizer_file_name": "tokenizer.pickle",
+          "val_dag_config": {
+            "data_file_name": "val_data.pt",
+            "fix_graph": false,
+            "func_vocab": [
+              "ADD"
+            ],
+            "max_comp_depth": 3,
+            "max_depth": 3,
+            "max_fan_in_deg": 3,
+            "max_length": 128,
+            "min_fan_in_deg": 1,
+            "mod_val": 23,
+            "num_leaf_nodes": 3,
+            "num_nodes": 8,
+            "num_samples": 4,
+            "shuffle_node_name": true,
+            "verbose": false
+          }
+        },
+        "original_configured_data_dir": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\data\\factored_smoke",
+        "note": "Per-run external data directory isolates generated diagnostic artifacts.",
+        "tokenizer_path": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\data\\factored-95aef534dd1d\\tokenizer.pickle",
+        "tokenizer_sha256": "33605838c9ce2054466ad644cb2caf0d21d7ed1bbcf3a2b5c38a3762e0cc398c",
+        "splits": {
+          "dag_config": {
+            "path": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\data\\factored-95aef534dd1d\\train_data.pt",
+            "sha256": "76f1d7b01244ad71cd25f07719fcca865daac2f0ae67519067fafe104a00f508",
+            "shape": [
+              4,
+              128,
+              6
+            ],
+            "samples": 4,
+            "maximum_zero_based_depth": 3
+          },
+          "val_dag_config": {
+            "path": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\data\\factored-95aef534dd1d\\val_data.pt",
+            "sha256": "2152b3553b9fd8a8279a28e651afed02c98e94a1eed224016753ec801b71ffc1",
+            "shape": [
+              4,
+              128,
+              6
+            ],
+            "samples": 4,
+            "maximum_zero_based_depth": 3
+          }
+        },
+        "generation_seconds": 0.02131569990888238
+      },
+      "effective_configurations": {
+        "data": {
+          "dag_config": {
+            "data_file_name": "train_data.pt",
+            "fix_graph": false,
+            "func_vocab": [
+              "ADD"
+            ],
+            "max_comp_depth": 3,
+            "max_depth": 3,
+            "max_fan_in_deg": 3,
+            "max_length": 128,
+            "min_fan_in_deg": 1,
+            "mod_val": 23,
+            "num_leaf_nodes": 3,
+            "num_nodes": 8,
+            "num_samples": 4,
+            "shuffle_node_name": true,
+            "verbose": false
+          },
+          "data_dir": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\data\\factored-95aef534dd1d",
+          "tokenizer_file_name": "tokenizer.pickle",
+          "val_dag_config": {
+            "data_file_name": "val_data.pt",
+            "fix_graph": false,
+            "func_vocab": [
+              "ADD"
+            ],
+            "max_comp_depth": 3,
+            "max_depth": 3,
+            "max_fan_in_deg": 3,
+            "max_length": 128,
+            "min_fan_in_deg": 1,
+            "mod_val": 23,
+            "num_leaf_nodes": 3,
+            "num_nodes": 8,
+            "num_samples": 4,
+            "shuffle_node_name": true,
+            "verbose": false
+          }
+        },
+        "model": {
+          "attention_type": "softmax",
+          "attn_pdrop": 0.0,
+          "causal_attn": true,
+          "hidden_size": 128,
+          "input_size": 256,
+          "layer_norm_eps": 1e-05,
+          "max_seq_len": 128,
+          "num_heads": 4,
+          "num_layers": 2,
+          "pos_enc_type": "DeBERTa",
+          "q_k_v_o_proj_enabled": [
+            true,
+            true,
+            true,
+            true
+          ],
+          "relpos_embed_size": 256,
+          "relpos_q_k_enabled": [
+            true,
+            true
+          ],
+          "relpos_shift": 0,
+          "relpos_win_size": 64,
+          "resid_pdrop": 0.0,
+          "use_bias": true,
+          "use_layer_norm": true,
+          "use_pos_layer_norm": true,
+          "use_readout_proj": true
+        },
+        "train": {
+          "AdamW_optimizer_config": {
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "lr": 0.001,
+            "weight_decay": 0.01
+          },
+          "Adam_optimizer_config": {
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "lr": 0.0001,
+            "weight_decay": 0.0
+          },
+          "RMSprop_optimizer_config": {
+            "alpha": 0.99,
+            "lr": 0.001,
+            "momentum": 0.0,
+            "weight_decay": 0.01
+          },
+          "SGD_optimizer_config": {
+            "lr": 0.01,
+            "momentum": 0.9,
+            "nesterov": true,
+            "weight_decay": 0.01
+          },
+          "Shampoo_optimizer_config": {
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "lr": 0.1,
+            "momentum": 0.0,
+            "weight_decay": 0.0
+          },
+          "StepLR_scheduler_config": {
+            "gamma": 0.1,
+            "step_size": 1000
+          },
+          "batch_size": 1,
+          "compile": false,
+          "cosine_scheduler_config": {
+            "lr_decay_steps": 300000.0,
+            "min_lr": 1e-05,
+            "warmup_steps": 1000
+          },
+          "learning_rate": 0.001,
+          "lr_scheduler": "none",
+          "matmul_precision": "highest",
+          "max_epochs": 1,
+          "max_train_depth": 6,
+          "max_train_loop": 4,
+          "max_val_loop": 4,
+          "num_workers": 0,
+          "optimizer": "AdamW",
+          "precision": 32,
+          "recorrection_args": {
+            "enable": false,
+            "corruption_prob": 0.0,
+            "tokenwise_corruption_prob": 0.5,
+            "corruption_strategy": "last"
+          },
+          "train_temperature": 0.0,
+          "use_fast_batch_forward": true,
+          "use_teacher_pred_for_next_loop": true,
+          "val_check_interval": 1.0,
+          "val_temperature": 0.0,
+          "wandb_config": {
+            "wandb_entity": [
+              "YOUR ENTITY"
+            ],
+            "wandb_project": [
+              "YOUR PROJECT"
+            ]
+          },
+          "seed": 42,
+          "experiment_group": "M5_discrete",
+          "experiment_run_name": "smoke-seed-42",
+          "nointerm": false
+        }
+      },
+      "original_configuration_directory": "C:\\Users\\adam2\\Desktop\\projects\\repro_setup\\experiments\\smoke\\M5_discrete",
+      "resolved_model_configuration": {
+        "attention_type": "softmax",
+        "attn_pdrop": 0.0,
+        "causal_attn": true,
+        "hidden_size": 128,
+        "input_size": 256,
+        "layer_norm_eps": 1e-05,
+        "max_seq_len": 128,
+        "num_heads": 4,
+        "num_layers": 2,
+        "pos_enc_type": "DeBERTa",
+        "q_k_v_o_proj_enabled": [
+          true,
+          true,
+          true,
+          true
+        ],
+        "relpos_embed_size": 256,
+        "relpos_q_k_enabled": [
+          true,
+          true
+        ],
+        "relpos_shift": 0,
+        "relpos_win_size": 64,
+        "resid_pdrop": 0.0,
+        "use_bias": true,
+        "use_layer_norm": true,
+        "use_pos_layer_norm": true,
+        "use_readout_proj": true,
+        "vocab_sizes": [
+          7,
+          9,
+          2,
+          25,
+          2,
+          2
+        ],
+        "factors": [
+          "SYNTAX",
+          "VARIABLE",
+          "OPERATION",
+          "VALUE",
+          "REGRET",
+          "MODIFICATION"
+        ],
+        "data_dim": 6,
+        "label_dim": 6,
+        "info_dim": 6
+      },
+      "parameter_count": 557359,
+      "parameter_dtypes": [
+        "torch.float32"
+      ],
+      "training_branch": "discrete teacher-forced fast loss",
+      "training_seconds": 0.05288640002254397,
+      "training_cuda_memory": {
+        "device": "cuda",
+        "peak_allocated_bytes": 42568192,
+        "peak_reserved_bytes": 48234496
+      },
+      "losses": [
+        7.490367889404297,
+        5.753429889678955
+      ],
+      "training_batches": 2,
+      "trainer_global_step": 2,
+      "gradients": {
+        "tensors": 63,
+        "all_finite": true,
+        "nonzero_tensors": 59,
+        "max_abs": 2.3109323978424072
+      },
+      "parameter_update": {
+        "changed_tensors": 63,
+        "max_absolute_change": 0.0020885467529296875
+      },
+      "corruption": {
+        "probability_override": null,
+        "original_last_mask_retained": false,
+        "function_calls": 0,
+        "events": [],
+        "actual_changed_value_positions": 0
+      },
+      "bounded_inference": {
+        "paper_accuracy_measured": false,
+        "kind": "discrete_argmax_recurrence",
+        "loops": 3,
+        "input_shape": [
+          1,
+          128,
+          6
+        ],
+        "teacher_feedback": false,
+        "auxiliary_factors_reset_to_false": true
+      },
+      "inference_seconds": 0.018728700000792742,
+      "checkpoint_save_seconds": 0.03558540006633848,
+      "reload_seconds": 0.17265449999831617,
+      "strict_reload": {
+        "lightning_checkpoint": {
+          "passed": true,
+          "compared_tensors": 18,
+          "max_absolute_difference": 0.0,
+          "rtol": 1e-05,
+          "atol": 1e-06
+        },
+        "pure_model_state_dict": {
+          "passed": true,
+          "compared_tensors": 18,
+          "max_absolute_difference": 0.0,
+          "rtol": 1e-05,
+          "atol": 1e-06
+        },
+        "original_load_ckpt_helper_used": false
+      },
+      "artifacts": {
+        "checkpoint": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\methods\\M5_discrete\\2_updates.ckpt",
+        "checkpoint_sha256": "68df5eb3525d385c018665d292afe9ae69976960e6a718950410a09776dc9d24",
+        "state_dict": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\methods\\M5_discrete\\model_state_dict.pt",
+        "state_dict_sha256": "ff8572d828c618a644b6e5fb7349a587b14ccc1db47cee183f63a69c3d86509a"
+      },
+      "whole_method_cuda_memory": {
+        "device": "cuda",
+        "peak_allocated_bytes": 42568192,
+        "peak_reserved_bytes": 48234496
+      },
+      "total_seconds": 0.3290891000069678
+    },
+    {
+      "method": "M6_discrete_correction",
+      "passed": true,
+      "seed": 42,
+      "data": {
+        "effective_data_config": {
+          "dag_config": {
+            "data_file_name": "train_data.pt",
+            "fix_graph": false,
+            "func_vocab": [
+              "ADD"
+            ],
+            "max_comp_depth": 3,
+            "max_depth": 3,
+            "max_fan_in_deg": 3,
+            "max_length": 128,
+            "min_fan_in_deg": 1,
+            "mod_val": 23,
+            "num_leaf_nodes": 3,
+            "num_nodes": 8,
+            "num_samples": 4,
+            "shuffle_node_name": true,
+            "verbose": false
+          },
+          "data_dir": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\data\\factored-95aef534dd1d",
+          "tokenizer_file_name": "tokenizer.pickle",
+          "val_dag_config": {
+            "data_file_name": "val_data.pt",
+            "fix_graph": false,
+            "func_vocab": [
+              "ADD"
+            ],
+            "max_comp_depth": 3,
+            "max_depth": 3,
+            "max_fan_in_deg": 3,
+            "max_length": 128,
+            "min_fan_in_deg": 1,
+            "mod_val": 23,
+            "num_leaf_nodes": 3,
+            "num_nodes": 8,
+            "num_samples": 4,
+            "shuffle_node_name": true,
+            "verbose": false
+          }
+        },
+        "original_configured_data_dir": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\data\\factored_smoke",
+        "note": "Per-run external data directory isolates generated diagnostic artifacts.",
+        "tokenizer_path": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\data\\factored-95aef534dd1d\\tokenizer.pickle",
+        "tokenizer_sha256": "33605838c9ce2054466ad644cb2caf0d21d7ed1bbcf3a2b5c38a3762e0cc398c",
+        "splits": {
+          "dag_config": {
+            "path": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\data\\factored-95aef534dd1d\\train_data.pt",
+            "sha256": "76f1d7b01244ad71cd25f07719fcca865daac2f0ae67519067fafe104a00f508",
+            "shape": [
+              4,
+              128,
+              6
+            ],
+            "samples": 4,
+            "maximum_zero_based_depth": 3
+          },
+          "val_dag_config": {
+            "path": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\data\\factored-95aef534dd1d\\val_data.pt",
+            "sha256": "2152b3553b9fd8a8279a28e651afed02c98e94a1eed224016753ec801b71ffc1",
+            "shape": [
+              4,
+              128,
+              6
+            ],
+            "samples": 4,
+            "maximum_zero_based_depth": 3
+          }
+        },
+        "generation_seconds": 0.02131569990888238
+      },
+      "effective_configurations": {
+        "data": {
+          "dag_config": {
+            "data_file_name": "train_data.pt",
+            "fix_graph": false,
+            "func_vocab": [
+              "ADD"
+            ],
+            "max_comp_depth": 3,
+            "max_depth": 3,
+            "max_fan_in_deg": 3,
+            "max_length": 128,
+            "min_fan_in_deg": 1,
+            "mod_val": 23,
+            "num_leaf_nodes": 3,
+            "num_nodes": 8,
+            "num_samples": 4,
+            "shuffle_node_name": true,
+            "verbose": false
+          },
+          "data_dir": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\data\\factored-95aef534dd1d",
+          "tokenizer_file_name": "tokenizer.pickle",
+          "val_dag_config": {
+            "data_file_name": "val_data.pt",
+            "fix_graph": false,
+            "func_vocab": [
+              "ADD"
+            ],
+            "max_comp_depth": 3,
+            "max_depth": 3,
+            "max_fan_in_deg": 3,
+            "max_length": 128,
+            "min_fan_in_deg": 1,
+            "mod_val": 23,
+            "num_leaf_nodes": 3,
+            "num_nodes": 8,
+            "num_samples": 4,
+            "shuffle_node_name": true,
+            "verbose": false
+          }
+        },
+        "model": {
+          "attention_type": "softmax",
+          "attn_pdrop": 0.0,
+          "causal_attn": true,
+          "hidden_size": 128,
+          "input_size": 256,
+          "layer_norm_eps": 1e-05,
+          "max_seq_len": 128,
+          "num_heads": 4,
+          "num_layers": 2,
+          "pos_enc_type": "DeBERTa",
+          "q_k_v_o_proj_enabled": [
+            true,
+            true,
+            true,
+            true
+          ],
+          "relpos_embed_size": 256,
+          "relpos_q_k_enabled": [
+            true,
+            true
+          ],
+          "relpos_shift": 0,
+          "relpos_win_size": 64,
+          "resid_pdrop": 0.0,
+          "use_bias": true,
+          "use_layer_norm": true,
+          "use_pos_layer_norm": true,
+          "use_readout_proj": true
+        },
+        "train": {
+          "AdamW_optimizer_config": {
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "lr": 0.001,
+            "weight_decay": 0.01
+          },
+          "Adam_optimizer_config": {
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "lr": 0.0001,
+            "weight_decay": 0.0
+          },
+          "RMSprop_optimizer_config": {
+            "alpha": 0.99,
+            "lr": 0.001,
+            "momentum": 0.0,
+            "weight_decay": 0.01
+          },
+          "SGD_optimizer_config": {
+            "lr": 0.01,
+            "momentum": 0.9,
+            "nesterov": true,
+            "weight_decay": 0.01
+          },
+          "Shampoo_optimizer_config": {
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "lr": 0.1,
+            "momentum": 0.0,
+            "weight_decay": 0.0
+          },
+          "StepLR_scheduler_config": {
+            "gamma": 0.1,
+            "step_size": 1000
+          },
+          "batch_size": 1,
+          "compile": false,
+          "cosine_scheduler_config": {
+            "lr_decay_steps": 300000.0,
+            "min_lr": 1e-05,
+            "warmup_steps": 1000
+          },
+          "learning_rate": 0.001,
+          "lr_scheduler": "none",
+          "matmul_precision": "highest",
+          "max_epochs": 1,
+          "max_train_depth": 6,
+          "max_train_loop": 4,
+          "max_val_loop": 4,
+          "num_workers": 0,
+          "optimizer": "AdamW",
+          "precision": 32,
+          "recorrection_args": {
+            "enable": true,
+            "corruption_prob": 1.0,
+            "tokenwise_corruption_prob": 0.5,
+            "corruption_strategy": "last"
+          },
+          "train_temperature": 0.0,
+          "use_fast_batch_forward": true,
+          "use_teacher_pred_for_next_loop": true,
+          "val_check_interval": 1.0,
+          "val_temperature": 0.0,
+          "wandb_config": {
+            "wandb_entity": [
+              "YOUR ENTITY"
+            ],
+            "wandb_project": [
+              "YOUR PROJECT"
+            ]
+          },
+          "seed": 42,
+          "experiment_group": "M6_discrete_correction",
+          "experiment_run_name": "smoke-seed-42",
+          "nointerm": false
+        }
+      },
+      "original_configuration_directory": "C:\\Users\\adam2\\Desktop\\projects\\repro_setup\\experiments\\smoke\\M6_discrete_correction",
+      "resolved_model_configuration": {
+        "attention_type": "softmax",
+        "attn_pdrop": 0.0,
+        "causal_attn": true,
+        "hidden_size": 128,
+        "input_size": 256,
+        "layer_norm_eps": 1e-05,
+        "max_seq_len": 128,
+        "num_heads": 4,
+        "num_layers": 2,
+        "pos_enc_type": "DeBERTa",
+        "q_k_v_o_proj_enabled": [
+          true,
+          true,
+          true,
+          true
+        ],
+        "relpos_embed_size": 256,
+        "relpos_q_k_enabled": [
+          true,
+          true
+        ],
+        "relpos_shift": 0,
+        "relpos_win_size": 64,
+        "resid_pdrop": 0.0,
+        "use_bias": true,
+        "use_layer_norm": true,
+        "use_pos_layer_norm": true,
+        "use_readout_proj": true,
+        "vocab_sizes": [
+          7,
+          9,
+          2,
+          25,
+          2,
+          2
+        ],
+        "factors": [
+          "SYNTAX",
+          "VARIABLE",
+          "OPERATION",
+          "VALUE",
+          "REGRET",
+          "MODIFICATION"
+        ],
+        "data_dim": 6,
+        "label_dim": 6,
+        "info_dim": 6
+      },
+      "parameter_count": 557359,
+      "parameter_dtypes": [
+        "torch.float32"
+      ],
+      "training_branch": "discrete teacher-forced fast loss",
+      "training_seconds": 0.3605230998946354,
+      "training_cuda_memory": {
+        "device": "cuda",
+        "peak_allocated_bytes": 42593280,
+        "peak_reserved_bytes": 48234496
+      },
+      "losses": [
+        7.493904113769531,
+        5.757669448852539
+      ],
+      "training_batches": 2,
+      "trainer_global_step": 2,
+      "gradients": {
+        "tensors": 63,
+        "all_finite": true,
+        "nonzero_tensors": 59,
+        "max_abs": 2.309511661529541
+      },
+      "parameter_update": {
+        "changed_tensors": 63,
+        "max_absolute_change": 0.0020880699157714844
+      },
+      "corruption": {
+        "probability_override": 1.0,
+        "original_last_mask_retained": true,
+        "function_calls": 2,
+        "events": [
+          {
+            "selected_positions": 6,
+            "actual_changed_value_positions": 6,
+            "selected_originally_empty": 6,
+            "changed_originally_empty": 6,
+            "selected_originally_numeric": 0,
+            "selected_unchanged": 0,
+            "changes_outside_selected_mask": 0,
+            "selected_per_depth": [
+              2,
+              2,
+              1,
+              1
+            ],
+            "actual_changed_per_depth": [
+              2,
+              2,
+              1,
+              1
+            ],
+            "changed_non_value_components": 0
+          },
+          {
+            "selected_positions": 3,
+            "actual_changed_value_positions": 3,
+            "selected_originally_empty": 3,
+            "changed_originally_empty": 3,
+            "selected_originally_numeric": 0,
+            "selected_unchanged": 0,
+            "changes_outside_selected_mask": 0,
+            "selected_per_depth": [
+              0,
+              1,
+              1,
+              1
+            ],
+            "actual_changed_per_depth": [
+              0,
+              1,
+              1,
+              1
+            ],
+            "changed_non_value_components": 0
+          }
+        ],
+        "actual_changed_value_positions": 9
+      },
+      "bounded_inference": {
+        "paper_accuracy_measured": false,
+        "kind": "discrete_argmax_recurrence",
+        "loops": 3,
+        "input_shape": [
+          1,
+          128,
+          6
+        ],
+        "teacher_feedback": false,
+        "auxiliary_factors_reset_to_false": true
+      },
+      "inference_seconds": 0.0181590000865981,
+      "checkpoint_save_seconds": 0.0364274000748992,
+      "reload_seconds": 0.16237969999201596,
+      "strict_reload": {
+        "lightning_checkpoint": {
+          "passed": true,
+          "compared_tensors": 18,
+          "max_absolute_difference": 0.0,
+          "rtol": 1e-05,
+          "atol": 1e-06
+        },
+        "pure_model_state_dict": {
+          "passed": true,
+          "compared_tensors": 18,
+          "max_absolute_difference": 0.0,
+          "rtol": 1e-05,
+          "atol": 1e-06
+        },
+        "original_load_ckpt_helper_used": false
+      },
+      "artifacts": {
+        "checkpoint": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\methods\\M6_discrete_correction\\2_updates.ckpt",
+        "checkpoint_sha256": "9edbc12fe305cfb66c34314ed37d5daec2abe5b9ee90517d02480e833032af8e",
+        "state_dict": "C:\\Users\\adam2\\Desktop\\projects\\repro_runs\\core_smoke\\20261106T082949_641624Z\\methods\\M6_discrete_correction\\model_state_dict.pt",
+        "state_dict_sha256": "89d2ce3428238f532fbe32610d6d9c1dd007c448a7d17eb51f379568352ec41b"
+      },
+      "whole_method_cuda_memory": {
+        "device": "cuda",
+        "peak_allocated_bytes": 42593280,
+        "peak_reserved_bytes": 48234496
+      },
+      "total_seconds": 0.6265190999256447
+    }
+  ],
+  "passed": true,
+  "packages": {
+    "torch": "2.7.1+cu128",
+    "lightning": "2.5.2",
+    "pytorch-lightning": "2.5.2",
+    "torchmetrics": "1.7.3",
+    "numpy": "2.2.6",
+    "PyYAML": "6.0.2"
+  },
+  "repository_imports": {
+    "tokenizers": "C:\\Users\\adam2\\Desktop\\projects\\algorithmic-generalization-transformer-architectures\\experiments\\tokenizers.py",
+    "model": "C:\\Users\\adam2\\Desktop\\projects\\algorithmic-generalization-transformer-architectures\\experiments\\model.py",
+    "train": "C:\\Users\\adam2\\Desktop\\projects\\algorithmic-generalization-transformer-architectures\\experiments\\train.py",
+    "baseline_models": "C:\\Users\\adam2\\Desktop\\projects\\algorithmic-generalization-transformer-architectures\\experiments\\baselines\\baseline_models.py",
+    "baseline_cot_train": "C:\\Users\\adam2\\Desktop\\projects\\algorithmic-generalization-transformer-architectures\\experiments\\baselines\\baseline_cot_train.py",
+    "generate_data": "C:\\Users\\adam2\\Desktop\\projects\\algorithmic-generalization-transformer-architectures\\experiments\\generate_data.py",
+    "generate_cot_data": "C:\\Users\\adam2\\Desktop\\projects\\algorithmic-generalization-transformer-architectures\\experiments\\baselines\\generate_cot_data.py",
+    "Simtransformer.simtransformer.utils": "C:\\Users\\adam2\\Desktop\\projects\\algorithmic-generalization-transformer-architectures\\Simtransformer\\simtransformer\\utils.py"
+  },
+  "gpu": {
+    "name": "NVIDIA GeForce RTX 5060 Ti",
+    "capability": [
+      12,
+      0
+    ],
+    "torch_cuda": "12.8",
+    "total_memory_bytes": 8518041600
+  },
+  "repository_source_check": {
+    "unchanged": true,
+    "changed_source_or_config_files": [],
+    "fingerprinted_files": 47,
+    "bytecode_writes_disabled": true,
+    "note": "Checks .py/.yaml/.yml/.md content; Git metadata may be unavailable."
+  },
+  "git_after": {
+    "commit": "52dd950dce8d32a8e72513999cac5a310e01ca53",
+    "tracked_status": ""
+  }
+}

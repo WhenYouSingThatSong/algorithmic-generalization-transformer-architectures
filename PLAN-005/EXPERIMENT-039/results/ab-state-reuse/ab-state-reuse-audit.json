@@ -1,0 +1,290 @@
+{
+  "protocol": "ab_state_reuse_audit_v1",
+  "base_commit": "6ef63e36f51113fa5c60f95d6d107c8521df4482",
+  "plan_sha256": "43dee563c854a7d2e658d790a144cc727068c29747eb42a9b7373ced13b03d7e",
+  "source_dirs": [
+    "/workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/analysis/priority-pilots-20261118/reassign-main-A",
+    "/workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/analysis/priority-pilots-20261118/reassign-main-B"
+  ],
+  "source_meta": {
+    "A": {
+      "dataset_sha256": "08f52382f6e3a2b62ec50e4603b8a10454cba48e0f5449543dd79c9925cee707",
+      "manifest_sha256": "19c992643a8b2c6892a98fead06d67bd47fd3820d25864f5379d3ef4444928cf",
+      "model": "model_a",
+      "records_sha256": "c846b754d37b317bcdbce5c75aea9931865c001093f04894c9171241243eee67"
+    },
+    "B": {
+      "dataset_sha256": "08f52382f6e3a2b62ec50e4603b8a10454cba48e0f5449543dd79c9925cee707",
+      "manifest_sha256": "19c992643a8b2c6892a98fead06d67bd47fd3820d25864f5379d3ef4444928cf",
+      "model": "model_b",
+      "records_sha256": "e53a7de2a9c423a0dfd7ed483b3f767981f68e985210d6e3e1dd02dba71b7f8a"
+    }
+  },
+  "runs": {
+    "repeat-A": {
+      "records": 576,
+      "records_sha256": "0e531909d871adb9a474e19787af6eeebf4ca59fcb428774f7dae7ba9b3f85b5",
+      "candidate_ids": [
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63
+      ],
+      "horizons": [
+        8,
+        16
+      ]
+    },
+    "repeat-B": {
+      "records": 576,
+      "records_sha256": "3b9e9b7973e12eac87c838136c9b58395048152ee9facbf5263281b70fdb9cad",
+      "candidate_ids": [
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63
+      ],
+      "horizons": [
+        8,
+        16
+      ]
+    },
+    "reuse-A": {
+      "records": 128,
+      "records_sha256": "b5affc1c1c8833b65a42a2daba1a4118dba69d1660c129e606bda267552d0eea",
+      "candidate_ids": [
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63
+      ],
+      "horizons": [
+        8,
+        16
+      ]
+    },
+    "reuse-B": {
+      "records": 128,
+      "records_sha256": "f06a1fa4a937a87bedc7410a6f8e14a3a4bdfb923662b8a6668369b903d27c86",
+      "candidate_ids": [
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63
+      ],
+      "horizons": [
+        8,
+        16
+      ]
+    }
+  },
+  "receipts": {
+    "repeat-A.receipt.json": {
+      "status": "complete",
+      "elapsed_seconds": 248.2,
+      "exit_code": 0,
+      "meta_sha256": "1a041064a0487eb6bce38b50f81efe67afb396e31d81d23aa60710a7b6f52ce9"
+    },
+    "repeat-B.receipt.json": {
+      "status": "complete",
+      "elapsed_seconds": 250.0,
+      "exit_code": 0,
+      "meta_sha256": "337cd4473520ef67300956bbe305b1e4f284f3a17d1d0ef222a8648c5713824a"
+    },
+    "repeat-delivery.receipt.json": {
+      "status": "complete",
+      "elapsed_seconds": 11.8,
+      "exit_code": 0,
+      "meta_sha256": "d6fc4c28903a0958188d141bc0bda19983c330fa00d4978f05f088fb036e77f3"
+    },
+    "repeat-summary.receipt.json": {
+      "status": "complete",
+      "elapsed_seconds": 28.8,
+      "exit_code": 0,
+      "meta_sha256": "7c337649a2f0599080b6eedee6931fd78d15f1e582c3878ad956eb2a8a93a81e"
+    },
+    "reuse-A.receipt.json": {
+      "status": "complete",
+      "elapsed_seconds": 61.7,
+      "exit_code": 0,
+      "meta_sha256": "d65b19c03c13413c7d87efc8423dac099f73cec3f24d7e019dfa79f7d4414a20"
+    },
+    "reuse-B.receipt.json": {
+      "status": "complete",
+      "elapsed_seconds": 61.6,
+      "exit_code": 0,
+      "meta_sha256": "4bbe435f96b7baf630b04ad69d7cc33ebf305ac937b5e065206c73cec9885977"
+    },
+    "reuse-delivery.receipt.json": {
+      "status": "complete",
+      "elapsed_seconds": 2.6,
+      "exit_code": 0,
+      "meta_sha256": "11d43e3be2a548bf1c849dd1ba1014675baa8f05b25459a3e5a5db7ded4a5b1d"
+    },
+    "reuse-summary.receipt.json": {
+      "status": "complete",
+      "elapsed_seconds": 9.6,
+      "exit_code": 0,
+      "meta_sha256": "b5592e76d9563496aba5b0cc185936596b2d574bbd2ba5b49c0a6e5e1ef12125"
+    }
+  },
+  "smoke": {
+    "accepted_sha256": "7588010264f5522833bd00b3df63f37195c7a7c39f8efd63c13d2110c96bea67",
+    "plan_sha256": "6c8bcf560639d15919e16db29ef0f8318f81b6829ffa4c101e6cafbc1f4bbc7d",
+    "notes_sha256": "9bac13bd3f53ae7c4c8a4a66697ee116ff87dbb6a87d7f8e96dce835476e09f2"
+  },
+  "structural_evidence": {
+    "A": {
+      "records": 576,
+      "groups": 128,
+      "return_original_groups_ok": 128,
+      "checks": {},
+      "reuse": {
+        "records": 128,
+        "checks": {},
+        "examples": []
+      }
+    },
+    "B": {
+      "records": 576,
+      "groups": 128,
+      "return_original_groups_ok": 128,
+      "checks": {},
+      "reuse": {
+        "records": 128,
+        "checks": {},
+        "examples": []
+      }
+    }
+  },
+  "files": {
+    "ab-event-summary.csv": "7f3aa63b3d11e8cdb929229cd1df7041aca48e8a6c0ff60ecc29946cce54cb90",
+    "ab-forward-cost.csv": "c65ee31f67d62d0c7ad3e85ea52c7f9ca412b8820c99907f930ac84604832e05",
+    "ab-report-audit.json": "e45ecb552d5ab9dafa6fb7ec27a323379c342f4324cb19b0dc7ec6e8eb902424",
+    "ab-resource.csv": "559cd6d2cb5641f941e22ad617d6e528ea95a412199d353c0bfe0c0b88048d89",
+    "ab-retention-summary.csv": "4ba749e7bf2668c141f52345689973335052cccc5650eb38cfb007a8668d88ca",
+    "ab-reuse-interface.csv": "0088c7e3dbee1a38bf5afbbb4dd9d17bbc4f37f04b13ddec4c15a2a2a5e37a8c",
+    "ab-stage-summary.csv": "e927cebf8836f310ab904bd0958a2c7f9038ef1a58ab3bbbf9396eb3e2b06543",
+    "main-structure-evidence.json": "16c6c8cbd4cb98f8effea7bb4d386fb714fbf0f124ee3fbbe89435824b1b4c3d",
+    "repeat-delivery-report.md": "cade30fd49f34a9fb78178b7b5d344d739ac26f9fa971e144f859f79cc59f7fe",
+    "repeat-examples.jsonl": "4962b5df5ce9bc80c9c6032889038256e644e32ac5130a0fe7e9ca3056b5dd4f",
+    "repeat-key-results.csv": "ef00aeb7cf6c0f3a851b75c2c95add679dac0935eb37c78b4cec517b8f358171",
+    "reuse-delivery-report.md": "a141c10f669da5c5a195e6f5c24899263a2e28ab6279417c02de00347109cb15",
+    "reuse-examples.jsonl": "8298235bde836d0a272878526213f8e3f1c241eecfd5029da9bada146644be16",
+    "reuse-key-results.csv": "3245200c60dbd06c81af89da49ded69fbc2827d200f664375ba69d38e737bd7e",
+    "smoke-checks.md": "9bac13bd3f53ae7c4c8a4a66697ee116ff87dbb6a87d7f8e96dce835476e09f2"
+  },
+  "note": "H8/H16 are separate sequences; 32 fixed development graphs; no model run by this audit."
+}

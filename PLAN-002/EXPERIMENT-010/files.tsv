@@ -1,0 +1,5 @@
+实验内路径	原始位置	原文件 SHA-256	归集文件 SHA-256
+analysis/tmp/records/2026-11-10/all-experiments-synthesis.md	tmp/records/2026-11-10/all-experiments-synthesis.md	18f3ba87d778ce101acb657bd6c4faa83d6f7eb57e5332ac8c23d7b3327e2619	18f3ba87d778ce101acb657bd6c4faa83d6f7eb57e5332ac8c23d7b3327e2619
+analysis/tmp/records/2026-11-11/c0-mixedn-full-context.md	tmp/records/2026-11-11/c0-mixedn-full-context.md	de4a74bb9080c9aa042aed43feae3a6cc97da31cdef3104aff5313419e3aa3aa	de4a74bb9080c9aa042aed43feae3a6cc97da31cdef3104aff5313419e3aa3aa
+analysis/tmp/records/2026-11-13/code-review-fixes-20261113.md	tmp/records/2026-11-13/code-review-fixes-20261113.md	aaf5750de182dc4db052fdeff705cc014267f557d0aacce3ca5ca5146cfba3bb	aaf5750de182dc4db052fdeff705cc014267f557d0aacce3ca5ca5146cfba3bb
+code/tmp/scripts/inject_value_discrete_v2.py	tmp/scripts/inject_value_discrete_v2.py	144af1f25d438aecbbf5d5fdc04596f5b2db042da1dbea9baf68fdce583b2db3	144af1f25d438aecbbf5d5fdc04596f5b2db042da1dbea9baf68fdce583b2db3

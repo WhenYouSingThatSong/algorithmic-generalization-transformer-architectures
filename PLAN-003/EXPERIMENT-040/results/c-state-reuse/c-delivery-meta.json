@@ -1,0 +1,15 @@
+{
+  "status": "complete",
+  "protocol": "state_reuse_delivery_v1",
+  "source_summary": "/workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/analysis/state-reuse-exec-20261119/C-main/C-summary",
+  "summary_meta_sha256": "b607e5cf19836c23833d501865e500bca6f08585cc2a553cc0a9ad6d09b3f58e",
+  "summary_csv_sha256": "463e75eec84a3e40df5c36dd45cf0d874f04326fc89ca5a323bfeaf791df65e2",
+  "script_sha256": "e4f1f850731a21415a5009e7006eb6966d3fd22dc60527be83c1aa7f1bd40761",
+  "rows": 480,
+  "files": {
+    "examples.jsonl": "25f7e0214d7680768c07a5bab49fbb94d4fb9f662704364417fd3cca7c596f3d",
+    "report.md": "45ebbd36970ba7fce9f634db21db5e80567693b5151a2777d3f0520fab2bb40f",
+    "key-results.csv": "6d004148539b4eecdc39e7c15163e7097ee9c9f87bdbf5a852e28ec5cceed19e"
+  },
+  "note": "No new experiments. Illustrations conditioned on outcomes, not a prevalence sample."
+}

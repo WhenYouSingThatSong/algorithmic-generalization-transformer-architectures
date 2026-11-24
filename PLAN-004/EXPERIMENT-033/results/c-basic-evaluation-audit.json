@@ -1,0 +1,178 @@
+{
+  "status": "audit_summary",
+  "report": "docs/records/2026-11-15/c-basic-evaluation.md",
+  "code_commit": "7f25a42",
+  "models": [
+    {
+      "arm": "initial",
+      "path": "/workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/runs/oldC0-newseed-150ep/checkpoints/Nodes32-ADD - L4H16D384_DeBERTa-seed-2026 - 2026-11-14-10:12:43/epoch=143-val_loss=0.0000.ckpt",
+      "sha256": "40babb206b1393d0892b047202b9d6469cd140c82f3ba82c96a466fa3c76e780"
+    },
+    {
+      "arm": "hold",
+      "path": "tmp/analysis/c-corruption-pilot-20261115/hold/final.ckpt",
+      "sha256": "24f6b0715cb5d76775a9c93fd4a466b75b69d5c7e949f8d681d9062d79dc3aee"
+    },
+    {
+      "arm": "noise",
+      "path": "tmp/analysis/c-corruption-pilot-20261115/noise/final.ckpt",
+      "sha256": "cdf398a7ff407a60fc9a7548cc651df1b420daf3a3626871cc9c14616da4cf9a"
+    },
+    {
+      "arm": "semantic",
+      "path": "tmp/analysis/c-corruption-pilot-20261115/semantic/final.ckpt",
+      "sha256": "559fed2b0665164671e0176ee5b7ec1fde5682b328741d73fe78d8aa758fd9be"
+    }
+  ],
+  "data": {
+    "clean_data_hashes": {
+      "N32_shallow": "4f60cb963748806a37557ac9df2abaa3d555a39024168a6db8c85535c4ddf049",
+      "N32_deep": "d9d5bdf3e8ed27ce8c41b5bdf26814f1556725a65686ac769c4ba80b5c2962f2",
+      "N64_shallow": "69996b8056c4447f1a1ef23d86fee2e9847a53b4be546e28e64b33885817a94a",
+      "N64_deep": "a9f60bbc54d12244069c9cd33cdc14ecf977f9b477d1523e64769d88c41fb44a",
+      "N128_shallow": "a35aa44021ab867f49d440a2c0a94cb75efd42b50be1992c6086f65c9a8b13b2",
+      "N128_deep": "37b0026e9c2039f6e61224eed63570827cfbd95dfa081c314512c9613c78c18a"
+    },
+    "pair_val_sha256": "676aabd2173d007b9c70c1e044ed69b7afe26d1f88e6bfcfd842778af3bcf66f",
+    "pair_plan_sha256": "1971a635f0c572abbcb88de440fc844c593ab9f8199e82fe331299f938e8c24f",
+    "pilot_data_manifest_sha256": "551163f5947bf25197696a1a8c993a4e5e7c7fc1b96c5f25363d59b9b22b5649"
+  },
+  "runs": {
+    "clean": {
+      "meta_sha256": "c3914aa2a83ca3769ceb86fa5782399e8edfb52dbc4b16c2c1f609b611768d94",
+      "status": "complete",
+      "cohort": "main",
+      "graphs": 64,
+      "batch_size": 4,
+      "code_hashes": {
+        "run_clean.py": "554c90e60aea197b4e128edf01a1e064d508475921ab398dad9e103d173390c9",
+        "suite_core.py": "5bb3244666ebc4c042a1a57749724c815685bfa55f741cf644d5efa6b7e69b8b"
+      }
+    },
+    "pair": {
+      "meta_sha256": "82a408adbb60f4f052622566b5d330e4fbdda1b6b940ad01254c092a02cf0c43",
+      "status": "complete",
+      "cohort": "main",
+      "graphs": 128,
+      "horizon": 16,
+      "code_hashes": {
+        "run_pair.py": "e731009ee8279a9ac211ffece69131b3d4e1b515750ea8dc220545bae2a666cb",
+        "suite_core.py": "5bb3244666ebc4c042a1a57749724c815685bfa55f741cf644d5efa6b7e69b8b"
+      }
+    }
+  },
+  "summary_sources": {
+    "clean_accuracy": "2f7e9b43ff7e8d1ebfc57f118bdb0b02aeb986460bd76ff22ae7bf8881003a06",
+    "clean_curves": "372ece441a6f994491d2fb8e2684dd7a5a67ae4780ee020147cc6b218a33d466",
+    "clean_stability": "51c48886ba2eb44759ead9077437fb3b564e6c4a4a91866657f799630844b29e",
+    "pair_accuracy": "6c178368e8ef5480777e45178f39bcad5d1acd1a1c5ed83f52b19a1110cc9bbc",
+    "pair_events": "42b8b1d90fcf7d5b48f03e92217d90ae0f75dc1ac7916909ab52e24a94d77333",
+    "pair_coverage": "8a7a1eb1dcf69c607ab5acf8adbce85800d204c3ad05e33c75fa6a56e9bc5a71",
+    "pair_dose": "5717d22295f213b257fd2f5cd8d388d42245b7705462104874401c37d6dbf83d",
+    "existing_joint": "16ffa8b3d78fc621eaaec9cb3736c5e9541c1b92b3138c4ef2860f12392ba269",
+    "existing_paired": "0d93ad7dee09a02b5e151db4c5649f4f8ca47b379237da96b71dea1e99cb41eb"
+  },
+  "exports": [
+    {
+      "name": "clean_accuracy",
+      "source_path": "tmp/analysis/c-evaluation-suite-20261115/clean-summary/accuracy.csv",
+      "source_sha256": "2f7e9b43ff7e8d1ebfc57f118bdb0b02aeb986460bd76ff22ae7bf8881003a06",
+      "export_path": "docs/records/2026-11-15/c-basic-clean-accuracy.csv",
+      "export_sha256": "88ca66b2bff98885a4a5565d8546fcf356f180fe967b985e5b32f84d71e470cd",
+      "filter": "time in D/2D/3D/D+16/32/64/absolute_8/16/32/64; group in all/leaf/internal/sink; metric in value/first4/syntax/variable/operation"
+    },
+    {
+      "name": "clean_curves",
+      "source_path": "tmp/analysis/c-evaluation-suite-20261115/clean-summary/curves.csv",
+      "source_sha256": "372ece441a6f994491d2fb8e2684dd7a5a67ae4780ee020147cc6b218a33d466",
+      "export_path": "docs/records/2026-11-15/c-basic-clean-curves.csv",
+      "export_sha256": "86636890d97a3b26dc70e38b7ba3ffc4a11a38e5679ff0a56d08d19498264949",
+      "filter": "group=all; metric in value/first4"
+    },
+    {
+      "name": "clean_stability",
+      "source_path": "tmp/analysis/c-evaluation-suite-20261115/clean-summary/stability.csv",
+      "source_sha256": "51c48886ba2eb44759ead9077437fb3b564e6c4a4a91866657f799630844b29e",
+      "export_path": "docs/records/2026-11-15/c-basic-clean-stability.csv",
+      "export_sha256": "51c48886ba2eb44759ead9077437fb3b564e6c4a4a91866657f799630844b29e",
+      "filter": "none (full summary)"
+    },
+    {
+      "name": "clean_depth_fanin",
+      "source_path": "tmp/analysis/c-evaluation-suite-20261115/clean-summary/accuracy.csv",
+      "source_sha256": "2f7e9b43ff7e8d1ebfc57f118bdb0b02aeb986460bd76ff22ae7bf8881003a06",
+      "export_path": "docs/records/2026-11-15/c-basic-clean-depth-fanin.csv",
+      "export_sha256": "464c04498c43d66ccd8f4a58ccf9eb7705c904201200f2fa8397d1120c7e007c",
+      "filter": "time in D/D+64; group depth_* or fanin_*; metric in value/first4"
+    },
+    {
+      "name": "pair_accuracy",
+      "source_path": "tmp/analysis/c-evaluation-suite-20261115/pair-summary/accuracy.csv",
+      "source_sha256": "6c178368e8ef5480777e45178f39bcad5d1acd1a1c5ed83f52b19a1110cc9bbc",
+      "export_path": "docs/records/2026-11-15/c-basic-pair-accuracy.csv",
+      "export_sha256": "6c178368e8ef5480777e45178f39bcad5d1acd1a1c5ed83f52b19a1110cc9bbc",
+      "filter": "cohort in all_fixed/common_value/common_strict; group u/q/other_children/descendants/unrelated/all; metric value/first4; rounds1/2/4/8/16"
+    },
+    {
+      "name": "pair_events",
+      "source_path": "tmp/analysis/c-evaluation-suite-20261115/pair-summary/events.csv",
+      "source_sha256": "42b8b1d90fcf7d5b48f03e92217d90ae0f75dc1ac7916909ab52e24a94d77333",
+      "export_path": "docs/records/2026-11-15/c-basic-pair-events.csv",
+      "export_sha256": "42b8b1d90fcf7d5b48f03e92217d90ae0f75dc1ac7916909ab52e24a94d77333",
+      "filter": "same cohort/group/metric filter; all available rounds/events"
+    },
+    {
+      "name": "pair_coverage",
+      "source_path": "tmp/analysis/c-evaluation-suite-20261115/pair-summary/coverage.csv",
+      "source_sha256": "8a7a1eb1dcf69c607ab5acf8adbce85800d204c3ad05e33c75fa6a56e9bc5a71",
+      "export_path": "docs/records/2026-11-15/c-basic-pair-coverage.csv",
+      "export_sha256": "8a7a1eb1dcf69c607ab5acf8adbce85800d204c3ad05e33c75fa6a56e9bc5a71",
+      "filter": "none (full summary)"
+    },
+    {
+      "name": "pair_dose",
+      "source_path": "tmp/analysis/c-evaluation-suite-20261115/pair-summary/dose.csv",
+      "source_sha256": "5717d22295f213b257fd2f5cd8d388d42245b7705462104874401c37d6dbf83d",
+      "export_path": "docs/records/2026-11-15/c-basic-pair-dose.csv",
+      "export_sha256": "ebbe42a76eab7a611cf6f21e61a220a90c135e6d0e8d863dbbaf947004009e9a",
+      "filter": "aggregated by arm/timing/branch from full dose"
+    },
+    {
+      "name": "existing_joint",
+      "source_path": "tmp/analysis/c-evaluation-suite-20261115/existing-joint/joint_summary.csv",
+      "source_sha256": "16ffa8b3d78fc621eaaec9cb3736c5e9541c1b92b3138c4ef2860f12392ba269",
+      "export_path": "docs/records/2026-11-15/c-basic-existing-joint-summary.csv",
+      "export_sha256": "16ffa8b3d78fc621eaaec9cb3736c5e9541c1b92b3138c4ef2860f12392ba269",
+      "filter": "none (full source)"
+    },
+    {
+      "name": "existing_paired",
+      "source_path": "tmp/analysis/c-evaluation-suite-20261115/existing-joint/paired_models.csv",
+      "source_sha256": "0d93ad7dee09a02b5e151db4c5649f4f8ca47b379237da96b71dea1e99cb41eb",
+      "export_path": "docs/records/2026-11-15/c-basic-existing-paired-models.csv",
+      "export_sha256": "0d93ad7dee09a02b5e151db4c5649f4f8ca47b379237da96b71dea1e99cb41eb",
+      "filter": "none (full source)"
+    },
+    {
+      "name": "pair_example_values",
+      "source_path": "tmp/analysis/c-evaluation-suite-20261115/pair/records.jsonl",
+      "source_sha256": "07640fea7acfaae1479b9f92514895cafa291b83ad99b0617b8200544717ea74",
+      "export_path": "docs/records/2026-11-15/c-basic-pair-example-values.csv",
+      "export_sha256": "a14538824319c4facae1e18fbe07c91eb0b325b9f1fb1f06c8c6cb2ea858c82d",
+      "filter": "graphs68/89 late; branches all; u/q nodes; all arms"
+    },
+    {
+      "name": "pair_example_expressions",
+      "source_path": "tmp/analysis/c-long-pilot-20261115/data/val.pt",
+      "source_sha256": "676aabd2173d007b9c70c1e044ed69b7afe26d1f88e6bfcfd842778af3bcf66f",
+      "export_path": "docs/records/2026-11-15/c-basic-pair-example-expressions.json",
+      "export_sha256": "37ec47bb252286df9a74f62b227888faf4485a803413df451503e76f424aa9cd",
+      "filter": "derived u/q immediate/expanded expressions for graphs68/89"
+    }
+  ],
+  "notes": [
+    "No weights/raw tensors copied.",
+    "Clean tables are filtered exports from clean-summary; pair tables are filtered from pair-summary.",
+    "All 128 validation graphs were retained; no candidate failures in pair main."
+  ]
+}

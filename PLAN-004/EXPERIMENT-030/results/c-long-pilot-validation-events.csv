@@ -1,0 +1,15 @@
+arm,endpoint,metric,graphs,completed,post_observed,degraded,ever_recovered,reerror,final_two_graph
+base,equal_compute,first4,128,128,128,128,0,0,0
+base,equal_compute,value,128,128,128,85,2,1,44
+base,same_exposure,first4,128,128,128,128,0,0,0
+base,same_exposure,value,128,128,128,53,1,0,75
+initial,initial,first4,128,128,128,128,0,0,0
+initial,initial,value,128,128,128,72,1,0,57
+plus_2d,equal_compute,first4,128,128,128,128,0,0,0
+plus_2d,equal_compute,value,128,128,128,3,0,0,125
+plus_2d,same_exposure,first4,128,128,128,128,0,0,0
+plus_2d,same_exposure,value,128,128,128,3,0,0,125
+plus_d,equal_compute,first4,128,128,128,128,0,0,0
+plus_d,equal_compute,value,128,128,128,4,0,0,124
+plus_d,same_exposure,first4,128,128,128,128,0,0,0
+plus_d,same_exposure,value,128,128,128,14,1,0,115

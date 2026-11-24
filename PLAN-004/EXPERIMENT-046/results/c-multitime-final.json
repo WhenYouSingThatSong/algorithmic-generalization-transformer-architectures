@@ -1,0 +1,79 @@
+{
+ "date": "2026-11-21",
+ "protocol": "c_multitime_process_update_v1",
+ "status": "training_complete_dev_degraded",
+ "run_root": "tmp/analysis/c-multitime-20261120-run/train",
+ "identity": {
+  "model": "C_s2026",
+  "source_sha256": "40babb206b1393d0892b047202b9d6469cd140c82f3ba82c96a466fa3c76e780",
+  "plan_sha256": "b3c4b1be9325dd37aefc2004dc19b6e5ee6d82c6ff097c25c072d3f39038bc24",
+  "seed": 4216695006,
+  "epochs": 50,
+  "steps": 78200,
+  "presentations": 2500000,
+  "micro_batch": 32,
+  "donor_batch": 32,
+  "gpu": 5,
+  "peak_allocated_bytes": 45829254144
+ },
+ "artifacts": {
+  "final_ckpt": {
+   "path": "tmp/analysis/c-multitime-20261120-run/train/final.ckpt",
+   "sha256": "c4c8b3c84fcf74f2990b1c1e40d51eb33176d715c04efda6bc358d96ddfa18cd",
+   "bytes": 96512010,
+   "step": 78200
+  },
+  "meta": {
+   "path": "tmp/analysis/c-multitime-20261120-run/train/meta.json",
+   "sha256": "02a6cb8351cbd19790acfd641dd41a03906ae4a7a0559fc038d48caa7f6eeaf6",
+   "status": "complete"
+  },
+  "last_ckpt": {
+   "path": "tmp/analysis/c-multitime-20261120-run/train/last.ckpt",
+   "sha256": "11e63ccc8a7d848f5274b20cc0d6c2a6d6882a639889dc992e04bdfd7fb678a7"
+  },
+  "dev_50": {
+   "path": "tmp/analysis/c-multitime-20261120-run/train/dev-50.json",
+   "sha256": "fe37d8138a21417578404bac76456327ca91f38c2febdcf564a339b2571edaf2"
+  },
+  "dev_50_complete": {
+   "path": "tmp/analysis/c-multitime-20261120-run/train/dev-50.complete.json",
+   "sha256": "e2a1192f9a360a9d33e2da8940b8bbdf3e922c59283f6366db0af197d20f2938"
+  }
+ },
+ "dev_clean": {
+  "graphs": 128,
+  "selection_score": 0.9189453125,
+  "best": {"epoch": 1, "score": 1.0},
+  "horizons": {
+   "D": {"graph_value_all": 0.5625, "graph_first4_all": 0.5625, "mean_value": 0.9189453125, "mean_variable": 1.0, "mean_operation": 1.0},
+   "D+4": {"graph_value_all": 0.4609375, "graph_first4_all": 0.4609375, "mean_value": 0.82958984375, "mean_variable": 1.0, "mean_operation": 1.0},
+   "D+16": {"graph_value_all": 0.4375, "graph_first4_all": 0.40625, "mean_value": 0.807373046875, "mean_variable": 0.998291015625, "mean_operation": 1.0}
+  },
+  "trajectory_graph_value_all_D": {
+   "1": 1.0, "5": 0.3046875, "10": 0.1953125, "25": 0.5703125,
+   "30": 0.8359375, "35": 0.78125, "40": 0.53125, "45": 0.5625, "50": 0.5625
+  },
+  "note": "Clean forward on dev; whole-graph VALUE all-correct. e50 is not best-dev."
+ },
+ "dose": {
+  "steps": 78200,
+  "enabled_steps": 3975,
+  "enabled_rate": 0.05083120102250639,
+  "attempts": 1724888,
+  "accepted": 1549584,
+  "source_acceptance": 0.8983678363099729,
+  "actual_value_changed": 1530149,
+  "modes": {
+   "frontier": {"enabled": 1363, "attempts": 697818, "accepted": 661529, "changed": 645571},
+   "middle": {"enabled": 1321, "attempts": 366507, "accepted": 357880, "changed": 357324},
+   "late_budget": {"enabled": 1291, "attempts": 660563, "accepted": 530175, "changed": 527254}
+  }
+ },
+ "boundaries": [
+  "Dev only; formal test belongs to Agent B.",
+  "e50 is the protocol final but is far below epoch-1/best-dev clean accuracy.",
+  "The long-window recipe differs from the normal-window recipe in modes, rounds and losses; no single-factor attribution.",
+  "Raw steps/injections/weights remain in tmp."
+ ]
+}

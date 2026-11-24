@@ -1,0 +1,8 @@
+# Preserve archived bytes, including historical CRLF data used by SHA-256 manifests.
+PLAN-*/shared/** -text
+PLAN-*/sources/** -text
+PLAN-*/EXPERIMENT-*/analysis/** -text
+PLAN-*/EXPERIMENT-*/code/** -text
+PLAN-*/EXPERIMENT-*/config/** -text
+PLAN-*/EXPERIMENT-*/logs/** -text
+PLAN-*/EXPERIMENT-*/results/** -text

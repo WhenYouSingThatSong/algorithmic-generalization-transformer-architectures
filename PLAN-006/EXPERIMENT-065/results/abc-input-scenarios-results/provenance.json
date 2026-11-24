@@ -1,0 +1,49 @@
+{
+  "status": "four-model formal raw complete; abc_scene_report.py exit 0",
+  "date": "2026-11-22",
+  "code_commit": "cd89e47f9c7ea702d5b34d06a814f1f49d3f3aaf",
+  "code_commit_note": "tools and experiment code unchanged since 78be8b10ce306fe3d1f432b2d1979273fd7d107e; cd89e47 adds docs/raw only",
+  "plan_sha256": "b3c4b1be9325dd37aefc2004dc19b6e5ee6d82c6ff097c25c072d3f39038bc24",
+  "data_root": "/workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures",
+  "run": {
+    "command": "CUDA_VISIBLE_DEVICES=2 python -u tools/c_hard_graphs/abc_scene_queue.py --models A_s42 B_s42 --data-root /workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures",
+    "log": "tmp/analysis/abc-input-scenarios-ab-formal.log",
+    "exit_code": 0,
+    "output_root": "tmp/analysis/abc-input-scenarios-v1/formal"
+  },
+  "models": {
+    "A_s42": {
+      "checkpoint_sha256": "0b66e196990af8fb8dca3fdb75f4d211fd4a4c56a8496d2a200f765470c1106a",
+      "config": "A-L4D384fast-Nodes32-ADD-L4H16D384-DeBERTa",
+      "suites": {"standard": 192, "layered": 32, "expanded": 64}
+    },
+    "B_s42": {
+      "checkpoint_sha256": "ef58ba261fd0f4677adabec3d8c978758397bb4ee536f09bb833fef8bbde0886",
+      "config": "B-M6-Nodes32-ADD-L4H16D384-DeBERTa",
+      "suites": {"standard": 192, "layered": 32, "expanded": 64}
+    },
+    "C_s42": {
+      "checkpoint_sha256": "4a00d6a21a7ed6ec9730daccf27f6077af45d2f2d7ff7376386bf0aa8903a798",
+      "standard_source": "docs/records/2026-11-22/original-c-recovery/c-only/raw/C_s42",
+      "layered_source": "docs/records/2026-11-22/c-original-layered-injection/raw-layered-16round.tar.gz",
+      "expanded_source": "docs/records/2026-11-22/abc-input-scenarios/c-only-expanded/raw/C_s42",
+      "suites": {"standard": 192, "layered": 32, "expanded": 64}
+    },
+    "C_s1234": {
+      "checkpoint_sha256": "0bca3a2b91e82d70d5808859d3a907e0b8a32e0a852ba483c208f955d7d70475",
+      "standard_source": "docs/records/2026-11-22/original-c-recovery/c-only/raw/C_s1234",
+      "layered_source": "docs/records/2026-11-22/c-original-layered-injection/raw-layered-16round.tar.gz",
+      "expanded_source": "docs/records/2026-11-22/abc-input-scenarios/c-only-expanded/raw/C_s1234",
+      "suites": {"standard": 192, "layered": 32, "expanded": 64},
+      "note": "26 complete scenes have variable token id mismatch with correct written value; report expanded path uses value_eligible"
+    }
+  },
+  "outputs": {
+    "docs/records/2026-11-22/abc-input-scenarios-results/场景对照实验报告.md": "dfe541399c5456d266f601b7562865502f19414d403813aa882eb4be43be8b32",
+    "docs/records/2026-11-22/abc-input-scenarios-results/scenes.csv": "b258702878b8442705e79a82efa30207fefb42a6cd29b4848484a59c69c7172c",
+    "docs/records/2026-11-22/abc-input-scenarios-results/same-graph-fit.csv": "bde3332052c4392bd9e8352b0822e40b5a3a582ef19916e76f37ca195fdd8ba8",
+    "docs/records/2026-11-22/abc-input-scenarios-results/natural.csv": "3ff19b0088a723f41e6a074be8b17fb222a55af4971297b422c0ee348620ec2d",
+    "docs/records/2026-11-22/abc-input-scenarios-results/abc-ab-raw.tar.gz": "6d1b738e5c39372fc06ccf35bee9598f525eed291c3df0f503322dc8e01c1b5c",
+    "docs/records/2026-11-22/abc-input-scenarios-results/abc-ab-raw-manifest.sha256": "6c558ee6731a80d4d35042a6837794bd3153a4670d86d0f673a1509732112651"
+  }
+}

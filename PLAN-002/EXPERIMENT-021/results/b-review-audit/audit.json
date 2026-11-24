@@ -1,0 +1,128 @@
+{
+  "input": "docs\\records\\2026-11-14\\b-main-review-evidence.json",
+  "input_sha256": "0ff21eec16c867f541fa89a94dd372d6d9af2bfed11f0bafe56901260c225bf5",
+  "modulus": 23,
+  "operation": "ADD (ID 0)",
+  "cases": [
+    {
+      "case": {
+        "graph_id": 142,
+        "condition": "late_u",
+        "target_index": 0
+      },
+      "checked_nodes": 32,
+      "structure_differences": [],
+      "damaged_nodes": [
+        64,
+        112,
+        128,
+        140,
+        156,
+        170,
+        182,
+        190
+      ],
+      "protected_exclusive_damaged_nodes": []
+    },
+    {
+      "case": {
+        "graph_id": 146,
+        "condition": "unrelated",
+        "target_index": 0
+      },
+      "checked_nodes": 32,
+      "structure_differences": [],
+      "damaged_nodes": [
+        58,
+        90,
+        94,
+        102,
+        120,
+        126,
+        132,
+        140,
+        144,
+        148,
+        154,
+        162,
+        170
+      ],
+      "protected_exclusive_damaged_nodes": [
+        102,
+        120,
+        126,
+        144,
+        148,
+        154,
+        170
+      ]
+    },
+    {
+      "case": {
+        "graph_id": 149,
+        "condition": "unrelated",
+        "target_index": 0
+      },
+      "checked_nodes": 32,
+      "structure_differences": [],
+      "damaged_nodes": [
+        90,
+        94,
+        118,
+        128,
+        144,
+        150,
+        162,
+        168
+      ],
+      "protected_exclusive_damaged_nodes": [
+        128,
+        150,
+        168
+      ]
+    },
+    {
+      "case": {
+        "graph_id": 275,
+        "condition": "unrelated",
+        "target_index": 0
+      },
+      "checked_nodes": 32,
+      "structure_differences": [],
+      "damaged_nodes": [
+        72,
+        94,
+        124,
+        140,
+        154,
+        160,
+        184
+      ],
+      "protected_exclusive_damaged_nodes": [
+        140
+      ]
+    },
+    {
+      "case": {
+        "graph_id": 276,
+        "condition": "unrelated",
+        "target_index": 1
+      },
+      "checked_nodes": 32,
+      "structure_differences": [],
+      "damaged_nodes": [
+        120,
+        142,
+        150,
+        160,
+        166,
+        174,
+        180
+      ],
+      "protected_exclusive_damaged_nodes": [
+        174
+      ]
+    }
+  ],
+  "damaged_node_rounds": 68
+}

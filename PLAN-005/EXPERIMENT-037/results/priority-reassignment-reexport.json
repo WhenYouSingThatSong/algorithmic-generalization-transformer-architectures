@@ -1,0 +1,35 @@
+{
+  "protocol": "reassignment_reexport_check_v1",
+  "old_dir": "docs/records/2026-11-18",
+  "new_dir": "tmp/analysis/priority-pilots-20261118/report-tables-review",
+  "csv_byte_identical": {
+    "priority-reassignment-coverage.csv": true,
+    "priority-reassignment-last-two.csv": true,
+    "priority-reassignment-curves.csv": true,
+    "priority-reassignment-constant-drift.csv": true,
+    "priority-reassignment-damage.csv": true,
+    "priority-reassignment-warm-scratch.csv": true
+  },
+  "old_sha256": {
+    "priority-reassignment-coverage.csv": "46d541649335fc7ffe007a1180facccdd1c2896d9e852cfa2f8e714de762b622",
+    "priority-reassignment-last-two.csv": "c0c624a5100096ee56eab873ef2f96d6c84039614c4fe16bbd3ed9df1866c603",
+    "priority-reassignment-curves.csv": "6e1be3ddbb032dfd377a400d946e20a065cf1e70c3488e305b7e63d0925db962",
+    "priority-reassignment-constant-drift.csv": "bd5192bbaae91bacf852c6406f2a1fe372881c29710d8883493b96f380c4cc9a",
+    "priority-reassignment-damage.csv": "daa6a1558f2084bff8974dde29ae48888549661c67bf31b01e9e9aee12f4a480",
+    "priority-reassignment-warm-scratch.csv": "4a055bb50cb3e3b9dece792e1a90969dbda92684b94c2a5ee8997ea8cc374410"
+  },
+  "new_sha256": {
+    "priority-reassignment-coverage.csv": "46d541649335fc7ffe007a1180facccdd1c2896d9e852cfa2f8e714de762b622",
+    "priority-reassignment-last-two.csv": "c0c624a5100096ee56eab873ef2f96d6c84039614c4fe16bbd3ed9df1866c603",
+    "priority-reassignment-curves.csv": "6e1be3ddbb032dfd377a400d946e20a065cf1e70c3488e305b7e63d0925db962",
+    "priority-reassignment-constant-drift.csv": "bd5192bbaae91bacf852c6406f2a1fe372881c29710d8883493b96f380c4cc9a",
+    "priority-reassignment-damage.csv": "daa6a1558f2084bff8974dde29ae48888549661c67bf31b01e9e9aee12f4a480",
+    "priority-reassignment-warm-scratch.csv": "4a055bb50cb3e3b9dece792e1a90969dbda92684b94c2a5ee8997ea8cc374410"
+  },
+  "old_audit_sha256": "fd135df102da31208bedc2a1740108dd5a08aa7af2694e8c68c2d3f1040dba3b",
+  "new_audit_sha256": "e43f97f8e4472e465628d99c29350ed9ad35350cb5ee9009adb664766429f456",
+  "old_audit_note": "ad0315e historical exporter; retained",
+  "new_audit": "priority-reassignment-audit-reexport.json",
+  "new_exporter_sha256": "62bf095d4819f4b5923481107ed0d96facc155867473170e3513f22f28a00278",
+  "note": "fixed exporter re-exported existing records; CSV bytes unchanged; audit now records observed outcome flags and does not claim scratch/aux checks"
+}
