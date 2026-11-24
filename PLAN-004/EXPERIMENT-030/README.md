@@ -1,6 +1,6 @@
 # EXPERIMENT-030　延长求解监督的后训练
 
-所属计划 [PLAN-004](../../Research%20Record.md#plan-004)。旧台账 30。
+所属计划 [PLAN-004](../../Research%20Record.md#plan-004)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-030)
 

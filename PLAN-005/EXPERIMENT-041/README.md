@@ -1,6 +1,6 @@
 # EXPERIMENT-041　A/B/C 共用的多阶段赋值任务
 
-所属计划 [PLAN-005](../../Research%20Record.md#plan-005)。旧台账 41。
+所属计划 [PLAN-005](../../Research%20Record.md#plan-005)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-041)
 

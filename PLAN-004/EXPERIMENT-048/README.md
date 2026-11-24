@@ -1,6 +1,6 @@
 # EXPERIMENT-048　正常窗口 C 的正式六项评测
 
-所属计划 [PLAN-004](../../Research%20Record.md#plan-004)。旧台账 48、49、50、51、52、53。
+所属计划 [PLAN-004](../../Research%20Record.md#plan-004)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-048)
 

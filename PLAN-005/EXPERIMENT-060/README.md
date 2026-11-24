@@ -1,6 +1,6 @@
 # EXPERIMENT-060　工作空间中的重新绑定与保存结果读取
 
-所属计划 [PLAN-005](../../Research%20Record.md#plan-005)。旧台账 65。
+所属计划 [PLAN-005](../../Research%20Record.md#plan-005)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-060)
 

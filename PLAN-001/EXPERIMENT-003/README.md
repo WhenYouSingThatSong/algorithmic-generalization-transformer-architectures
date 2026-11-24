@@ -1,6 +1,6 @@
 # EXPERIMENT-003　两层离散 A 的训练与规模评测
 
-所属计划 [PLAN-001](../../Research%20Record.md#plan-001)。旧台账 03。
+所属计划 [PLAN-001](../../Research%20Record.md#plan-001)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-003)
 

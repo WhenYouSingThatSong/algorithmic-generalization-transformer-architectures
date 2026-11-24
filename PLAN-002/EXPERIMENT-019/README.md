@@ -1,6 +1,6 @@
 # EXPERIMENT-019　A′/B 长观察窗口预试
 
-所属计划 [PLAN-002](../../Research%20Record.md#plan-002)。旧台账 19。
+所属计划 [PLAN-002](../../Research%20Record.md#plan-002)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-019)
 

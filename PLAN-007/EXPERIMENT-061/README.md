@@ -1,6 +1,6 @@
 # EXPERIMENT-061　循环、固定计算量、固定参数量与写出中间结果的架构原型
 
-所属计划 [PLAN-007](../../Research%20Record.md#plan-007)。旧台账 66。
+所属计划 [PLAN-007](../../Research%20Record.md#plan-007)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-061)
 

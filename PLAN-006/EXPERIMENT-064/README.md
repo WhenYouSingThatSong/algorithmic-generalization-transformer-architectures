@@ -1,6 +1,6 @@
 # EXPERIMENT-064　原始 C 分层注错及第三种子补测
 
-所属计划 [PLAN-006](../../Research%20Record.md#plan-006)。旧台账 69。
+所属计划 [PLAN-006](../../Research%20Record.md#plan-006)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-064)
 

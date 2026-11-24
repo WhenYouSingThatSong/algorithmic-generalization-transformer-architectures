@@ -1,6 +1,6 @@
 # EXPERIMENT-053　变量身份替换与两个新读者
 
-所属计划 [PLAN-006](../../Research%20Record.md#plan-006)。旧台账 58。
+所属计划 [PLAN-006](../../Research%20Record.md#plan-006)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-053)
 

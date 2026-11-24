@@ -1,6 +1,6 @@
 # EXPERIMENT-026　原始 C 自然错误现场的单处替换
 
-所属计划 [PLAN-003](../../Research%20Record.md#plan-003)。旧台账 26。
+所属计划 [PLAN-003](../../Research%20Record.md#plan-003)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-026)
 

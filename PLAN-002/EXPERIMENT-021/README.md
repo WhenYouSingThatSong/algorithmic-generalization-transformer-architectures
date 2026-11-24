@@ -1,6 +1,6 @@
 # EXPERIMENT-021　整图完成后注错正式批（B 线 M2）
 
-所属计划 [PLAN-002](../../Research%20Record.md#plan-002)。旧台账 21。
+所属计划 [PLAN-002](../../Research%20Record.md#plan-002)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-021)
 

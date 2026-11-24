@@ -1,6 +1,6 @@
 # EXPERIMENT-068　同一正确读数、不同历史的新读者测试
 
-所属计划 [PLAN-006](../../Research%20Record.md#plan-006)。旧台账 73。
+所属计划 [PLAN-006](../../Research%20Record.md#plan-006)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-068)
 

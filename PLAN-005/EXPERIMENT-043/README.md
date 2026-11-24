@@ -1,6 +1,6 @@
 # EXPERIMENT-043　同一窗口边界的重置诊断
 
-所属计划 [PLAN-005](../../Research%20Record.md#plan-005)。旧台账 43。
+所属计划 [PLAN-005](../../Research%20Record.md#plan-005)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-043)
 

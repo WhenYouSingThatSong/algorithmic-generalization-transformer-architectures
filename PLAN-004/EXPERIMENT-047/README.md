@@ -1,6 +1,6 @@
 # EXPERIMENT-047　多时点纠错加第二层监督，正常窗口三种子
 
-所属计划 [PLAN-004](../../Research%20Record.md#plan-004)。旧台账 47。
+所属计划 [PLAN-004](../../Research%20Record.md#plan-004)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-047)
 

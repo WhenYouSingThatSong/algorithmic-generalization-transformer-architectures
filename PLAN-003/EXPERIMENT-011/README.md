@@ -1,6 +1,6 @@
 # EXPERIMENT-011　固定规模原始 C 的训练与检查点评测
 
-所属计划 [PLAN-003](../../Research%20Record.md#plan-003)。旧台账 11。
+所属计划 [PLAN-003](../../Research%20Record.md#plan-003)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-011)
 

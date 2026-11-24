@@ -1,6 +1,6 @@
 # EXPERIMENT-050　难图：上游替换与早期读数
 
-所属计划 [PLAN-006](../../Research%20Record.md#plan-006)。旧台账 55。
+所属计划 [PLAN-006](../../Research%20Record.md#plan-006)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-050)
 

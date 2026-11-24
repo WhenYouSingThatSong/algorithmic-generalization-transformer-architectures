@@ -1,6 +1,6 @@
 # EXPERIMENT-038　A/B 连续多次改同一输入
 
-所属计划 [PLAN-005](../../Research%20Record.md#plan-005)。旧台账 38。
+所属计划 [PLAN-005](../../Research%20Record.md#plan-005)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-038)
 

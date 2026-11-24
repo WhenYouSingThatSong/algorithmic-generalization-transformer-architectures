@@ -1,6 +1,6 @@
 # EXPERIMENT-024　A′/B 已填位置的改数与清空
 
-所属计划 [PLAN-002](../../Research%20Record.md#plan-002)。旧台账 24。
+所属计划 [PLAN-002](../../Research%20Record.md#plan-002)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-024)
 

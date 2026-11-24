@@ -1,6 +1,6 @@
 # EXPERIMENT-062　跨任务评分器验收
 
-所属计划 [PLAN-007](../../Research%20Record.md#plan-007)。旧台账 67。
+所属计划 [PLAN-007](../../Research%20Record.md#plan-007)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-062)
 

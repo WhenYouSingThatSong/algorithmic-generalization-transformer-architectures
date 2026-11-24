@@ -1,6 +1,6 @@
 # EXPERIMENT-029　目标与全部直接父节点联合替换
 
-所属计划 [PLAN-003](../../Research%20Record.md#plan-003)。旧台账 29。
+所属计划 [PLAN-003](../../Research%20Record.md#plan-003)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-029)
 

@@ -1,6 +1,6 @@
 # EXPERIMENT-040　C 修回的状态还能否供下游使用
 
-所属计划 [PLAN-003](../../Research%20Record.md#plan-003)。旧台账 40。
+所属计划 [PLAN-003](../../Research%20Record.md#plan-003)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-040)
 

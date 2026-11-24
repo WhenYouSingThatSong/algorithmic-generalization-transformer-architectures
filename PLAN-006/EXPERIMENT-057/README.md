@@ -1,6 +1,6 @@
 # EXPERIMENT-057　四种模型条件的同题注错
 
-所属计划 [PLAN-006](../../Research%20Record.md#plan-006)。旧台账 62。
+所属计划 [PLAN-006](../../Research%20Record.md#plan-006)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-057)
 

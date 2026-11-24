@@ -1,6 +1,6 @@
 # EXPERIMENT-017　限定错值与时机的复验（P1）
 
-所属计划 [PLAN-002](../../Research%20Record.md#plan-002)。旧台账 16。
+所属计划 [PLAN-002](../../Research%20Record.md#plan-002)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-017)
 

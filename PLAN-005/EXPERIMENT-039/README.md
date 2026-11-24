@@ -1,6 +1,6 @@
 # EXPERIMENT-039　A/B 复用两个已释放的结果位置
 
-所属计划 [PLAN-005](../../Research%20Record.md#plan-005)。旧台账 39。
+所属计划 [PLAN-005](../../Research%20Record.md#plan-005)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-039)
 

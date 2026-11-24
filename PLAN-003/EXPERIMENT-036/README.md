@@ -1,6 +1,6 @@
 # EXPERIMENT-036　C 父子状态的输入轮次对齐（已有轨迹重分析）
 
-所属计划 [PLAN-003](../../Research%20Record.md#plan-003)。旧台账 36。
+所属计划 [PLAN-003](../../Research%20Record.md#plan-003)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-036)
 

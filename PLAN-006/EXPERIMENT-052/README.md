@@ -1,6 +1,6 @@
 # EXPERIMENT-052　置信程度、连续相同读数与更新标记
 
-所属计划 [PLAN-006](../../Research%20Record.md#plan-006)。旧台账 57。
+所属计划 [PLAN-006](../../Research%20Record.md#plan-006)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-052)
 

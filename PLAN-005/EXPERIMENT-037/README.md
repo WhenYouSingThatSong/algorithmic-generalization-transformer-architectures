@@ -1,6 +1,6 @@
 # EXPERIMENT-037　A/B 合法重新赋值
 
-所属计划 [PLAN-005](../../Research%20Record.md#plan-005)。旧台账 37。
+所属计划 [PLAN-005](../../Research%20Record.md#plan-005)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-037)
 

@@ -1,6 +1,6 @@
 # EXPERIMENT-027　原始 C 同值与异值来源对照
 
-所属计划 [PLAN-003](../../Research%20Record.md#plan-003)。旧台账 27。
+所属计划 [PLAN-003](../../Research%20Record.md#plan-003)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-027)
 

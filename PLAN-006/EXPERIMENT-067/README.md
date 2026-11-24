@@ -1,6 +1,6 @@
 # EXPERIMENT-067　自然错态与同错数人工供体交叉回放
 
-所属计划 [PLAN-006](../../Research%20Record.md#plan-006)。旧台账 72。
+所属计划 [PLAN-006](../../Research%20Record.md#plan-006)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-067)
 

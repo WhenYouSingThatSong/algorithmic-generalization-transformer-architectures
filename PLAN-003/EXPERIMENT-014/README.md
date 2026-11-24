@@ -1,6 +1,6 @@
 # EXPERIMENT-014　反事实题的连续向量互换（早期 C4）
 
-所属计划 [PLAN-003](../../Research%20Record.md#plan-003)。旧台账 14。
+所属计划 [PLAN-003](../../Research%20Record.md#plan-003)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-014)
 

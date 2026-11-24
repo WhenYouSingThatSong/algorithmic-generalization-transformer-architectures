@@ -1,6 +1,6 @@
 # EXPERIMENT-059　目标、父值、祖先与题面来源对照
 
-所属计划 [PLAN-006](../../Research%20Record.md#plan-006)。旧台账 64。
+所属计划 [PLAN-006](../../Research%20Record.md#plan-006)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-059)
 

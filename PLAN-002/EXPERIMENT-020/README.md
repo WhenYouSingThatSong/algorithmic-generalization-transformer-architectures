@@ -1,6 +1,6 @@
 # EXPERIMENT-020　早期注错正式批（B 线 M1）
 
-所属计划 [PLAN-002](../../Research%20Record.md#plan-002)。旧台账 20。
+所属计划 [PLAN-002](../../Research%20Record.md#plan-002)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-020)
 

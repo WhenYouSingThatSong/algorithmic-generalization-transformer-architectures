@@ -1,6 +1,6 @@
 # EXPERIMENT-013　原始 C 自然续算与失分分解
 
-所属计划 [PLAN-003](../../Research%20Record.md#plan-003)。旧台账 12。
+所属计划 [PLAN-003](../../Research%20Record.md#plan-003)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-013)
 

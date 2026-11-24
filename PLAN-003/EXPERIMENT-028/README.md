@@ -1,6 +1,6 @@
 # EXPERIMENT-028　原始 C 在不同求解阶段换入同一类状态
 
-所属计划 [PLAN-003](../../Research%20Record.md#plan-003)。旧台账 28。
+所属计划 [PLAN-003](../../Research%20Record.md#plan-003)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-028)
 

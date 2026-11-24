@@ -1,6 +1,6 @@
 # EXPERIMENT-046　多时点纠错加第二层监督，延长窗口版本
 
-所属计划 [PLAN-004](../../Research%20Record.md#plan-004)。旧台账 46。
+所属计划 [PLAN-004](../../Research%20Record.md#plan-004)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-046)
 

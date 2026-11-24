@@ -1,6 +1,6 @@
 # EXPERIMENT-025　多父节点、多错值与残留链回查
 
-所属计划 [PLAN-002](../../Research%20Record.md#plan-002)。旧台账 25。
+所属计划 [PLAN-002](../../Research%20Record.md#plan-002)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-025)
 

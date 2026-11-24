@@ -1,6 +1,6 @@
 # EXPERIMENT-012　沿数值输出头方向改连续向量
 
-所属计划 [PLAN-003](../../Research%20Record.md#plan-003)。旧台账 13。
+所属计划 [PLAN-003](../../Research%20Record.md#plan-003)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-012)
 

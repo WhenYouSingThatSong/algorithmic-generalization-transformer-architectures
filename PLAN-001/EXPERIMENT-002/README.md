@@ -1,6 +1,6 @@
 # EXPERIMENT-002　本地显存与连续更新验收
 
-所属计划 [PLAN-001](../../Research%20Record.md#plan-001)。旧台账 02。
+所属计划 [PLAN-001](../../Research%20Record.md#plan-001)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-002)
 

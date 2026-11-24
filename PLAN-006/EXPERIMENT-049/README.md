@@ -1,6 +1,6 @@
 # EXPERIMENT-049　难图：形状、宽深与重复命名
 
-所属计划 [PLAN-006](../../Research%20Record.md#plan-006)。旧台账 54。
+所属计划 [PLAN-006](../../Research%20Record.md#plan-006)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-049)
 

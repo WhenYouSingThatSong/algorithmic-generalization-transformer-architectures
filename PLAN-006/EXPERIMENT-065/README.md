@@ -1,6 +1,6 @@
 # EXPERIMENT-065　A′、B 与两份原始 C 的标准、分层及扩展场景
 
-所属计划 [PLAN-006](../../Research%20Record.md#plan-006)。旧台账 70。
+所属计划 [PLAN-006](../../Research%20Record.md#plan-006)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-065)
 

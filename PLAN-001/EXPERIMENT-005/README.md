@@ -1,6 +1,6 @@
 # EXPERIMENT-005　规模与深度压力测试
 
-所属计划 [PLAN-001](../../Research%20Record.md#plan-001)。旧台账 05。
+所属计划 [PLAN-001](../../Research%20Record.md#plan-001)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-005)
 

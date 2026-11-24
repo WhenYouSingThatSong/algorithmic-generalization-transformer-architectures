@@ -1,6 +1,6 @@
 # EXPERIMENT-022　B 的训练污染位置抽查
 
-所属计划 [PLAN-002](../../Research%20Record.md#plan-002)。旧台账 22。
+所属计划 [PLAN-002](../../Research%20Record.md#plan-002)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-022)
 

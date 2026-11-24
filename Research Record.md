@@ -2,7 +2,7 @@
 
 记录规范 v0.1 · 事后审计整理日 2026-11-24 · 实验范围 2026-11-03 至 2026-11-23 · 基线 `reproduction@6dbd2c78b58688de3cb4cbdacf426c7967aee4ee`。可逐项追溯的活动始于 11 月 6 日。11 月 24 日的研究者答复与归档操作单记。
 
-[1　使用说明](#instructions)　·　[2　当前全局情况](#full-picture)　·　[3　逐日研究日志](#research-log)　·　[旧台账编号对照](#crosswalk)
+[1　使用说明](#instructions)　·　[2　当前全局情况](#full-picture)　·　[3　逐日研究日志](#research-log)
 
 <a id="instructions"></a>
 
@@ -447,7 +447,7 @@ PLAN-001/EXPERIMENT-001/results/
 
 ### 2.2 研究思路与框架
 
-离散模型把字段预测送回下一轮；连续模型 C 则传回隐藏向量，用输出头读取其中的字段。早期两层 A 是复现用的小模型。后续 A′ 与 B 的主体架构相配，B 在训练中接受数值污染。原始 C 有求解监督；后训练 C 再注明污染位置、时点、第二层监督与续算窗口。训练周期描述权重经历了多少训练，推理轮次描述固定权重在一道题上算了多久。[模型与配方称呼](docs/model-names.md) · [EXPERIMENT-009](#experiment-009) · [EXPERIMENT-044](#experiment-044) · [EXPERIMENT-047](#experiment-047)
+离散模型把字段预测送回下一轮；连续模型 C 则传回隐藏向量，用输出头读取其中的字段。早期两层 A 是复现用的小模型。后续 A′ （四层与B对齐超参数）与 B 的主体架构相配，B 在训练中接受数值污染。原始 C 有求解监督；后训练 C 再注明污染位置、时点、第二层监督与续算窗口。训练周期描述权重经历了多少训练，推理轮次描述固定权重在一道题上算了多久。[模型与配方称呼](docs/model-names.md) · [EXPERIMENT-009](#experiment-009) · [EXPERIMENT-044](#experiment-044) · [EXPERIMENT-047](#experiment-047)
 
 干预前复制同一轮状态，一份照常续算，另一份只作指定操作。例：若 q=(u+9) mod 23，原题 u=4、q=13，临时把 u 写成 5，可以追踪 q 是否采用特定错值 14。若改的是题面常数，使新题的 u 本应为 5，则 14 是新题的正确结果。前者测扰动传播，后者测合法改题后的状态更新。[EXPERIMENT-010](#experiment-010) · [EXPERIMENT-037](#experiment-037)
 
@@ -498,53 +498,6 @@ PLAN-001/EXPERIMENT-001/results/
 | 待远程执行的服务器整理要求 | [转交远程 agent](PLAN-001/%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%A4%A7%E6%95%B0%E6%8D%AE%E6%95%B4%E7%90%86%E4%BA%A4%E6%8E%A5.md) |
 
 全仓文件清单覆盖基线 Git 树的全部跟踪文件，副本按基线 Git 原件逐字节核验。另行引入的本地资料见原始材料目录和各实验文件清单。仓库中带 `tmp/analysis/` 或集群路径的引用可帮助远程执行者定位，其目标是否还在服务器上需现场确认。本次未重训或重放权重。
-
-<a id="crosswalk"></a>
-
-### 旧台账编号对照
-
-沿用前一版的 75 个查询编号，共对应 70 个实验单元（含接口验收、原型与已有轨迹重分析）。旧 48–53 属同一正式六表评测。编号数量不能用作独立训练数。
-
-| 旧项 | 实验与内容 | 旧项 | 实验与内容 |
-|---|---|---|---|
-| 01 | [EXPERIMENT-001](#experiment-001) 六种方法的最小运行验收 | 39 | [EXPERIMENT-039](#experiment-039) A/B 复用两个已释放的结果位置 |
-| 02 | [EXPERIMENT-002](#experiment-002) 本地显存与连续更新验收 | 40 | [EXPERIMENT-040](#experiment-040) C 修回的状态还能否供下游使用 |
-| 03 | [EXPERIMENT-003](#experiment-003) 两层离散 A 的训练与规模评测 | 41 | [EXPERIMENT-041](#experiment-041) A/B/C 共用的多阶段赋值任务 |
-| 04 | [EXPERIMENT-004](#experiment-004) 离散辅助字段回灌对照 | 42 | [EXPERIMENT-042](#experiment-042) 固定工作空间的长程序 |
-| 05 | [EXPERIMENT-005](#experiment-005) 规模与深度压力测试 | 43 | [EXPERIMENT-043](#experiment-043) 同一窗口边界的重置诊断 |
-| 06 | [EXPERIMENT-006](#experiment-006) B 的保存点筛查与外部复现权重对照 | 44 | [EXPERIMENT-044](#experiment-044) 只在新可算位置污染的普通纠错后训练 |
-| 07 | [EXPERIMENT-007](#experiment-007) 四层模型、快速训练路径与输出分数间隔 | 45 | [EXPERIMENT-045](#experiment-045) 前沿污染加第二层更新监督 |
-| 08 | [EXPERIMENT-008](#experiment-008) 快慢训练路径的单批梯度核对 | 46 | [EXPERIMENT-046](#experiment-046) 多时点纠错加第二层监督，延长窗口版本 |
-| 09 | [EXPERIMENT-009](#experiment-009) 同架构无纠错 A′ 的三种子训练与评测 | 47 | [EXPERIMENT-047](#experiment-047) 多时点纠错加第二层监督，正常窗口三种子 |
-| 10 | [EXPERIMENT-010](#experiment-010) 离散单点注错与扩样 | 48 | [EXPERIMENT-048](#experiment-048) 正式六档评测①：未注错求解与长程保持 |
-| 11 | [EXPERIMENT-011](#experiment-011) 固定规模原始 C 的训练与检查点评测 | 49 | [EXPERIMENT-048](#experiment-048) 正式评测②：第二层是否标出应更新的位置 |
-| 12 | [EXPERIMENT-013](#experiment-013) 原始 C 自然续算与失分分解 | 50 | [EXPERIMENT-048](#experiment-048) 正式评测③：末层实际执行了什么 |
-| 13 | [EXPERIMENT-012](#experiment-012) 沿数值输出头方向改连续向量 | 51 | [EXPERIMENT-048](#experiment-048) 正式评测④：注错后的目标与下游 |
-| 14 | [EXPERIMENT-014](#experiment-014) 反事实题的连续向量互换（早期 C4） | 52 | [EXPERIMENT-048](#experiment-048) 正式评测⑤：同图同时有空位、错值与健康位置 |
-| 15 | [EXPERIMENT-015](#experiment-015) 父节点与目标节点四条件干预 | 53 | [EXPERIMENT-048](#experiment-048) 正式评测⑥：修回后的新计算与冻结接收模型 |
-| 16 | [EXPERIMENT-017](#experiment-017) 限定错值与时机的复验（P1） | 54 | [EXPERIMENT-049](#experiment-049) 难图：形状、宽深与重复命名 |
-| 17 | [EXPERIMENT-016](#experiment-016) 混合节点数训练的首版、重建与续训 | 55 | [EXPERIMENT-050](#experiment-050) 难图：上游替换与早期读数 |
-| 18 | [EXPERIMENT-018](#experiment-018) 修正词表、双验证集的混合规模 C | 56 | [EXPERIMENT-051](#experiment-051) 相邻两轮的状态转移（已有难图轨迹重分析） |
-| 19 | [EXPERIMENT-019](#experiment-019) A′/B 长观察窗口预试 | 57 | [EXPERIMENT-052](#experiment-052) 置信程度、连续相同读数与更新标记 |
-| 20 | [EXPERIMENT-020](#experiment-020) 早期注错正式批（B 线 M1） | 58 | [EXPERIMENT-053](#experiment-053) 变量身份替换与两个新读者 |
-| 21 | [EXPERIMENT-021](#experiment-021) 整图完成后注错正式批（B 线 M2） | 59 | [EXPERIMENT-054](#experiment-054) 固定汇合结构，改变受影响分支数 |
-| 22 | [EXPERIMENT-022](#experiment-022) B 的训练污染位置抽查 | 60 | [EXPERIMENT-055](#experiment-055) 同名变量究竟用了哪个版本 |
-| 23 | [EXPERIMENT-023](#experiment-023) 原始 C 六档能力与长程保持 | 61 | [EXPERIMENT-056](#experiment-056) 上游回正后，旧子节点和新子节点能否使用 |
-| 24 | [EXPERIMENT-024](#experiment-024) A′/B 已填位置的改数与清空 | 62 | [EXPERIMENT-057](#experiment-057) 四种模型条件的同题注错 |
-| 25 | [EXPERIMENT-025](#experiment-025) 多父节点、多错值与残留链回查 | 63 | [EXPERIMENT-058](#experiment-058) 父位置屏蔽 |
-| 26 | [EXPERIMENT-026](#experiment-026) 原始 C 自然错误现场的单处替换 | 64 | [EXPERIMENT-059](#experiment-059) 目标、父值、祖先与题面来源对照 |
-| 27 | [EXPERIMENT-027](#experiment-027) 原始 C 同值与异值来源对照 | 65 | [EXPERIMENT-060](#experiment-060) 工作空间中的重新绑定与保存结果读取 |
-| 28 | [EXPERIMENT-028](#experiment-028) 原始 C 在不同求解阶段换入同一类状态 | 66 | [EXPERIMENT-061](#experiment-061) 循环、固定计算量、固定参数量与写出中间结果的架构原型 |
-| 29 | [EXPERIMENT-029](#experiment-029) 目标与全部直接父节点联合替换 | 67 | [EXPERIMENT-062](#experiment-062) 跨任务评分器验收 |
-| 30 | [EXPERIMENT-030](#experiment-030) 延长求解监督的后训练 | 68 | [EXPERIMENT-063](#experiment-063) 原始 C 标准场景与自然轨迹基线 |
-| 31 | [EXPERIMENT-031](#experiment-031) 仅保持、随机噪声、语义污染的后训练 | 69 | [EXPERIMENT-064](#experiment-064) 原始 C 分层注错及第三种子补测 |
-| 32 | [EXPERIMENT-032](#experiment-032) 后训练权重的干净保持评测 | 70 | [EXPERIMENT-065](#experiment-065) A′、B 与两份原始 C 的标准、分层及扩展场景 |
-| 33 | [EXPERIMENT-033](#experiment-033) 父错、子错、父子同错的配对评测 | 71 | [EXPERIMENT-066](#experiment-066) 后训练前后的同题场景重放 |
-| 34 | [EXPERIMENT-034](#experiment-034) 持续强制错父值及释放 | 72 | [EXPERIMENT-067](#experiment-067) 自然错态与同错数人工供体交叉回放 |
-| 35 | [EXPERIMENT-035](#experiment-035) 随机噪声剂量校准 | 73 | [EXPERIMENT-068](#experiment-068) 同一正确读数、不同历史的新读者测试 |
-| 36 | [EXPERIMENT-036](#experiment-036) C 父子状态的输入轮次对齐（已有轨迹重分析） | 74 | [EXPERIMENT-069](#experiment-069) 多子节点传播的跨模型重放 |
-| 37 | [EXPERIMENT-037](#experiment-037) A/B 合法重新赋值 | 75 | [EXPERIMENT-070](#experiment-070) 更新监督在训练早、中、末期的定位检查 |
-| 38 | [EXPERIMENT-038](#experiment-038) A/B 连续多次改同一输入 |  |  |
 
 <a id="research-log"></a>
 
@@ -606,7 +559,7 @@ PLAN-001/EXPERIMENT-001/results/
 
 **补充**
 
-旧台账 01。[实验目录及文件来源](PLAN-001/EXPERIMENT-001/README.md)。 [six-methods-core-01.json](PLAN-001/EXPERIMENT-001/results/six-methods-core-01.json) · [check_six_methods.py](PLAN-001/EXPERIMENT-001/code/check_six_methods.py)
+[实验目录及文件来源](PLAN-001/EXPERIMENT-001/README.md)。 [six-methods-core-01.json](PLAN-001/EXPERIMENT-001/results/six-methods-core-01.json) · [check_six_methods.py](PLAN-001/EXPERIMENT-001/code/check_six_methods.py)
 
 <a id="experiment-002"></a>
 
@@ -626,7 +579,7 @@ PLAN-001/EXPERIMENT-001/results/
 
 **补充**
 
-旧台账 02。[实验目录及文件来源](PLAN-001/EXPERIMENT-002/README.md)。 [six-methods-memory-20261106T082947_499701Z.json](PLAN-001/EXPERIMENT-002/results/six-methods-memory-20261106T082947_499701Z.json) · [audit_gpu_memory.py](PLAN-001/EXPERIMENT-002/code/audit_gpu_memory.py)
+[实验目录及文件来源](PLAN-001/EXPERIMENT-002/README.md)。 [six-methods-memory-20261106T082947_499701Z.json](PLAN-001/EXPERIMENT-002/results/six-methods-memory-20261106T082947_499701Z.json) · [audit_gpu_memory.py](PLAN-001/EXPERIMENT-002/code/audit_gpu_memory.py)
 
 ### 2026 年 11 月 7–8 日（阶段报告截至 8 日）
 
@@ -648,7 +601,7 @@ PLAN-001/EXPERIMENT-001/results/
 
 **补充**
 
-旧台账 03。[实验目录及文件来源](PLAN-001/EXPERIMENT-003/README.md)。 [递归潜空间推理论文复现_阶段实验报告_修订版.md](PLAN-001/EXPERIMENT-003/analysis/%E9%80%92%E5%BD%92%E6%BD%9C%E7%A9%BA%E9%97%B4%E6%8E%A8%E7%90%86%E8%AE%BA%E6%96%87%E5%A4%8D%E7%8E%B0_%E9%98%B6%E6%AE%B5%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A_%E4%BF%AE%E8%AE%A2%E7%89%88.md) · [A-M5-Nodes32-ADD-L2H16D256-DeBERTa](experiments/configs/A-M5-Nodes32-ADD-L2H16D256-DeBERTa)
+[实验目录及文件来源](PLAN-001/EXPERIMENT-003/README.md)。 [递归潜空间推理论文复现_阶段实验报告_修订版.md](PLAN-001/EXPERIMENT-003/analysis/%E9%80%92%E5%BD%92%E6%BD%9C%E7%A9%BA%E9%97%B4%E6%8E%A8%E7%90%86%E8%AE%BA%E6%96%87%E5%A4%8D%E7%8E%B0_%E9%98%B6%E6%AE%B5%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A_%E4%BF%AE%E8%AE%A2%E7%89%88.md) · [A-M5-Nodes32-ADD-L2H16D256-DeBERTa](experiments/configs/A-M5-Nodes32-ADD-L2H16D256-DeBERTa)
 
 <a id="experiment-004"></a>
 
@@ -668,7 +621,7 @@ PLAN-001/EXPERIMENT-001/results/
 
 **补充**
 
-旧台账 04。[实验目录及文件来源](PLAN-001/EXPERIMENT-004/README.md)。 [递归潜空间推理论文复现_阶段实验报告_修订版.md](PLAN-001/EXPERIMENT-004/analysis/%E9%80%92%E5%BD%92%E6%BD%9C%E7%A9%BA%E9%97%B4%E6%8E%A8%E7%90%86%E8%AE%BA%E6%96%87%E5%A4%8D%E7%8E%B0_%E9%98%B6%E6%AE%B5%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A_%E4%BF%AE%E8%AE%A2%E7%89%88.md) · [raw-aux-bug-review.md](PLAN-001/EXPERIMENT-004/analysis/raw-aux-bug-review.md)
+[实验目录及文件来源](PLAN-001/EXPERIMENT-004/README.md)。 [递归潜空间推理论文复现_阶段实验报告_修订版.md](PLAN-001/EXPERIMENT-004/analysis/%E9%80%92%E5%BD%92%E6%BD%9C%E7%A9%BA%E9%97%B4%E6%8E%A8%E7%90%86%E8%AE%BA%E6%96%87%E5%A4%8D%E7%8E%B0_%E9%98%B6%E6%AE%B5%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A_%E4%BF%AE%E8%AE%A2%E7%89%88.md) · [raw-aux-bug-review.md](PLAN-001/EXPERIMENT-004/analysis/raw-aux-bug-review.md)
 
 <a id="experiment-005"></a>
 
@@ -688,7 +641,7 @@ PLAN-001/EXPERIMENT-001/results/
 
 **补充**
 
-旧台账 05。[实验目录及文件来源](PLAN-001/EXPERIMENT-005/README.md)。 [递归潜空间推理论文复现_阶段实验报告_修订版.md](PLAN-001/EXPERIMENT-005/analysis/%E9%80%92%E5%BD%92%E6%BD%9C%E7%A9%BA%E9%97%B4%E6%8E%A8%E7%90%86%E8%AE%BA%E6%96%87%E5%A4%8D%E7%8E%B0_%E9%98%B6%E6%AE%B5%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A_%E4%BF%AE%E8%AE%A2%E7%89%88.md) · [递归潜空间推理论文复现_数据与结论.md](PLAN-001/EXPERIMENT-005/analysis/%E9%80%92%E5%BD%92%E6%BD%9C%E7%A9%BA%E9%97%B4%E6%8E%A8%E7%90%86%E8%AE%BA%E6%96%87%E5%A4%8D%E7%8E%B0_%E6%95%B0%E6%8D%AE%E4%B8%8E%E7%BB%93%E8%AE%BA.md)
+[实验目录及文件来源](PLAN-001/EXPERIMENT-005/README.md)。 [递归潜空间推理论文复现_阶段实验报告_修订版.md](PLAN-001/EXPERIMENT-005/analysis/%E9%80%92%E5%BD%92%E6%BD%9C%E7%A9%BA%E9%97%B4%E6%8E%A8%E7%90%86%E8%AE%BA%E6%96%87%E5%A4%8D%E7%8E%B0_%E9%98%B6%E6%AE%B5%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A_%E4%BF%AE%E8%AE%A2%E7%89%88.md) · [递归潜空间推理论文复现_数据与结论.md](PLAN-001/EXPERIMENT-005/analysis/%E9%80%92%E5%BD%92%E6%BD%9C%E7%A9%BA%E9%97%B4%E6%8E%A8%E7%90%86%E8%AE%BA%E6%96%87%E5%A4%8D%E7%8E%B0_%E6%95%B0%E6%8D%AE%E4%B8%8E%E7%BB%93%E8%AE%BA.md)
 
 <a id="experiment-006"></a>
 
@@ -708,7 +661,7 @@ PLAN-001/EXPERIMENT-001/results/
 
 **补充**
 
-旧台账 06。[实验目录及文件来源](PLAN-001/EXPERIMENT-006/README.md)。 [递归潜空间推理论文复现_数据与结论.md](PLAN-001/EXPERIMENT-006/analysis/%E9%80%92%E5%BD%92%E6%BD%9C%E7%A9%BA%E9%97%B4%E6%8E%A8%E7%90%86%E8%AE%BA%E6%96%87%E5%A4%8D%E7%8E%B0_%E6%95%B0%E6%8D%AE%E4%B8%8E%E7%BB%93%E8%AE%BA.md) · [c0-mixedn-full-context.md](PLAN-001/EXPERIMENT-006/analysis/tmp/records/2026-11-11/c0-mixedn-full-context.md)（[原版第 81 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/tmp/records/2026-11-11/c0-mixedn-full-context.md#L81)）
+[实验目录及文件来源](PLAN-001/EXPERIMENT-006/README.md)。 [递归潜空间推理论文复现_数据与结论.md](PLAN-001/EXPERIMENT-006/analysis/%E9%80%92%E5%BD%92%E6%BD%9C%E7%A9%BA%E9%97%B4%E6%8E%A8%E7%90%86%E8%AE%BA%E6%96%87%E5%A4%8D%E7%8E%B0_%E6%95%B0%E6%8D%AE%E4%B8%8E%E7%BB%93%E8%AE%BA.md) · [c0-mixedn-full-context.md](PLAN-001/EXPERIMENT-006/analysis/tmp/records/2026-11-11/c0-mixedn-full-context.md)（[原版第 81 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/tmp/records/2026-11-11/c0-mixedn-full-context.md#L81)）
 
 <a id="experiment-007"></a>
 
@@ -728,7 +681,7 @@ PLAN-001/EXPERIMENT-001/results/
 
 **补充**
 
-旧台账 07。[实验目录及文件来源](PLAN-001/EXPERIMENT-007/README.md)。 [递归潜空间推理论文复现_阶段实验报告_修订版.md](PLAN-001/EXPERIMENT-007/analysis/%E9%80%92%E5%BD%92%E6%BD%9C%E7%A9%BA%E9%97%B4%E6%8E%A8%E7%90%86%E8%AE%BA%E6%96%87%E5%A4%8D%E7%8E%B0_%E9%98%B6%E6%AE%B5%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A_%E4%BF%AE%E8%AE%A2%E7%89%88.md) · [c0-mixedn-full-context.md](PLAN-001/EXPERIMENT-007/analysis/tmp/records/2026-11-11/c0-mixedn-full-context.md)（[原版第 167 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/tmp/records/2026-11-11/c0-mixedn-full-context.md#L167)）
+[实验目录及文件来源](PLAN-001/EXPERIMENT-007/README.md)。 [递归潜空间推理论文复现_阶段实验报告_修订版.md](PLAN-001/EXPERIMENT-007/analysis/%E9%80%92%E5%BD%92%E6%BD%9C%E7%A9%BA%E9%97%B4%E6%8E%A8%E7%90%86%E8%AE%BA%E6%96%87%E5%A4%8D%E7%8E%B0_%E9%98%B6%E6%AE%B5%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A_%E4%BF%AE%E8%AE%A2%E7%89%88.md) · [c0-mixedn-full-context.md](PLAN-001/EXPERIMENT-007/analysis/tmp/records/2026-11-11/c0-mixedn-full-context.md)（[原版第 167 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/tmp/records/2026-11-11/c0-mixedn-full-context.md#L167)）
 
 <a id="experiment-008"></a>
 
@@ -748,7 +701,7 @@ PLAN-001/EXPERIMENT-001/results/
 
 **补充**
 
-旧台账 08。[实验目录及文件来源](PLAN-001/EXPERIMENT-008/README.md)。 [递归潜空间推理论文复现_阶段实验报告_修订版.md](PLAN-001/EXPERIMENT-008/analysis/%E9%80%92%E5%BD%92%E6%BD%9C%E7%A9%BA%E9%97%B4%E6%8E%A8%E7%90%86%E8%AE%BA%E6%96%87%E5%A4%8D%E7%8E%B0_%E9%98%B6%E6%AE%B5%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A_%E4%BF%AE%E8%AE%A2%E7%89%88.md) · [model.py](PLAN-001/EXPERIMENT-008/code/experiments/model.py)
+[实验目录及文件来源](PLAN-001/EXPERIMENT-008/README.md)。 [递归潜空间推理论文复现_阶段实验报告_修订版.md](PLAN-001/EXPERIMENT-008/analysis/%E9%80%92%E5%BD%92%E6%BD%9C%E7%A9%BA%E9%97%B4%E6%8E%A8%E7%90%86%E8%AE%BA%E6%96%87%E5%A4%8D%E7%8E%B0_%E9%98%B6%E6%AE%B5%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A_%E4%BF%AE%E8%AE%A2%E7%89%88.md) · [model.py](PLAN-001/EXPERIMENT-008/code/experiments/model.py)
 
 ### 2026 年 11 月 8–9 日（A′ 至迟已用于 9 日注错）
 
@@ -790,7 +743,7 @@ PLAN-001/EXPERIMENT-001/results/
 
 **补充**
 
-旧台账 09。[实验目录及文件来源](PLAN-002/EXPERIMENT-009/README.md)。 [all-experiments-synthesis.md](PLAN-002/EXPERIMENT-009/analysis/tmp/records/2026-11-10/all-experiments-synthesis.md) · [A-L4D384fast-Nodes32-ADD-L4H16D384-DeBERTa](experiments/configs/A-L4D384fast-Nodes32-ADD-L4H16D384-DeBERTa) · [操作细节](PLAN-002/EXPERIMENT-009/analysis/tmp/records/2026-11-11/c0-mixedn-full-context.md)（[原版第 133 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/tmp/records/2026-11-11/c0-mixedn-full-context.md#L133)）
+[实验目录及文件来源](PLAN-002/EXPERIMENT-009/README.md)。 [all-experiments-synthesis.md](PLAN-002/EXPERIMENT-009/analysis/tmp/records/2026-11-10/all-experiments-synthesis.md) · [A-L4D384fast-Nodes32-ADD-L4H16D384-DeBERTa](experiments/configs/A-L4D384fast-Nodes32-ADD-L4H16D384-DeBERTa) · [操作细节](PLAN-002/EXPERIMENT-009/analysis/tmp/records/2026-11-11/c0-mixedn-full-context.md)（[原版第 133 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/tmp/records/2026-11-11/c0-mixedn-full-context.md#L133)）
 
 ### 2026 年 11 月 9–10 日
 
@@ -812,7 +765,7 @@ PLAN-001/EXPERIMENT-001/results/
 
 **补充**
 
-旧台账 10。[实验目录及文件来源](PLAN-002/EXPERIMENT-010/README.md)。 [all-experiments-synthesis.md](PLAN-002/EXPERIMENT-010/analysis/tmp/records/2026-11-10/all-experiments-synthesis.md) · [code-review-fixes-20261113.md](PLAN-002/EXPERIMENT-010/analysis/tmp/records/2026-11-13/code-review-fixes-20261113.md) · [inject_value_discrete_v2.py](PLAN-002/EXPERIMENT-010/code/tmp/scripts/inject_value_discrete_v2.py) · [操作细节](PLAN-002/EXPERIMENT-010/analysis/tmp/records/2026-11-11/c0-mixedn-full-context.md)（[原版第 194 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/tmp/records/2026-11-11/c0-mixedn-full-context.md#L194)）
+[实验目录及文件来源](PLAN-002/EXPERIMENT-010/README.md)。 [all-experiments-synthesis.md](PLAN-002/EXPERIMENT-010/analysis/tmp/records/2026-11-10/all-experiments-synthesis.md) · [code-review-fixes-20261113.md](PLAN-002/EXPERIMENT-010/analysis/tmp/records/2026-11-13/code-review-fixes-20261113.md) · [inject_value_discrete_v2.py](PLAN-002/EXPERIMENT-010/code/tmp/scripts/inject_value_discrete_v2.py) · [操作细节](PLAN-002/EXPERIMENT-010/analysis/tmp/records/2026-11-11/c0-mixedn-full-context.md)（[原版第 194 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/tmp/records/2026-11-11/c0-mixedn-full-context.md#L194)）
 
 <a id="plan-003"></a>
 
@@ -852,7 +805,7 @@ PLAN-001/EXPERIMENT-001/results/
 
 **补充**
 
-旧台账 11。[实验目录及文件来源](PLAN-003/EXPERIMENT-011/README.md)。 [c0-mixedn-full-context.md](PLAN-003/EXPERIMENT-011/analysis/tmp/records/2026-11-11/c0-mixedn-full-context.md)（[原版第 314 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/tmp/records/2026-11-11/c0-mixedn-full-context.md#L314)） · [project-status-overview.md](PLAN-003/EXPERIMENT-011/analysis/project-status-overview.md)
+[实验目录及文件来源](PLAN-003/EXPERIMENT-011/README.md)。 [c0-mixedn-full-context.md](PLAN-003/EXPERIMENT-011/analysis/tmp/records/2026-11-11/c0-mixedn-full-context.md)（[原版第 314 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/tmp/records/2026-11-11/c0-mixedn-full-context.md#L314)） · [project-status-overview.md](PLAN-003/EXPERIMENT-011/analysis/project-status-overview.md)
 
 <a id="experiment-012"></a>
 
@@ -872,7 +825,7 @@ PLAN-001/EXPERIMENT-001/results/
 
 **补充**
 
-旧台账 13。[实验目录及文件来源](PLAN-003/EXPERIMENT-012/README.md)。 [c0-mixedn-full-context.md](PLAN-003/EXPERIMENT-012/analysis/tmp/records/2026-11-11/c0-mixedn-full-context.md)（[原版第 292 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/tmp/records/2026-11-11/c0-mixedn-full-context.md#L292)） · [day-summary.md](PLAN-003/EXPERIMENT-012/analysis/tmp/records/2026-11-11/day-summary.md)
+[实验目录及文件来源](PLAN-003/EXPERIMENT-012/README.md)。 [c0-mixedn-full-context.md](PLAN-003/EXPERIMENT-012/analysis/tmp/records/2026-11-11/c0-mixedn-full-context.md)（[原版第 292 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/tmp/records/2026-11-11/c0-mixedn-full-context.md#L292)） · [day-summary.md](PLAN-003/EXPERIMENT-012/analysis/tmp/records/2026-11-11/day-summary.md)
 
 ### 2026 年 11 月 10 日
 
@@ -894,7 +847,7 @@ PLAN-001/EXPERIMENT-001/results/
 
 **补充**
 
-旧台账 12。[实验目录及文件来源](PLAN-003/EXPERIMENT-013/README.md)。 [all-experiments-synthesis.md](PLAN-003/EXPERIMENT-013/analysis/tmp/records/2026-11-10/all-experiments-synthesis.md) · [c0-mixedn-full-context.md](PLAN-003/EXPERIMENT-013/analysis/tmp/records/2026-11-11/c0-mixedn-full-context.md)（[原版第 437 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/tmp/records/2026-11-11/c0-mixedn-full-context.md#L437)）
+[实验目录及文件来源](PLAN-003/EXPERIMENT-013/README.md)。 [all-experiments-synthesis.md](PLAN-003/EXPERIMENT-013/analysis/tmp/records/2026-11-10/all-experiments-synthesis.md) · [c0-mixedn-full-context.md](PLAN-003/EXPERIMENT-013/analysis/tmp/records/2026-11-11/c0-mixedn-full-context.md)（[原版第 437 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/tmp/records/2026-11-11/c0-mixedn-full-context.md#L437)）
 
 <a id="experiment-014"></a>
 
@@ -914,7 +867,7 @@ PLAN-001/EXPERIMENT-001/results/
 
 **补充**
 
-旧台账 14。[实验目录及文件来源](PLAN-003/EXPERIMENT-014/README.md)。 [c0-mixedn-full-context.md](PLAN-003/EXPERIMENT-014/analysis/tmp/records/2026-11-11/c0-mixedn-full-context.md)（[原版第 497 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/tmp/records/2026-11-11/c0-mixedn-full-context.md#L497)） · [c-source-control.md](PLAN-003/EXPERIMENT-014/analysis/c-source-control.md)
+[实验目录及文件来源](PLAN-003/EXPERIMENT-014/README.md)。 [c0-mixedn-full-context.md](PLAN-003/EXPERIMENT-014/analysis/tmp/records/2026-11-11/c0-mixedn-full-context.md)（[原版第 497 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/tmp/records/2026-11-11/c0-mixedn-full-context.md#L497)） · [c-source-control.md](PLAN-003/EXPERIMENT-014/analysis/c-source-control.md)
 
 <a id="experiment-015"></a>
 
@@ -934,7 +887,7 @@ PLAN-001/EXPERIMENT-001/results/
 
 **补充**
 
-旧台账 15。[实验目录及文件来源](PLAN-002/EXPERIMENT-015/README.md)。 [parent-2x2-finding.md](PLAN-002/EXPERIMENT-015/analysis/tmp/records/2026-11-10/parent-2x2-finding.md) · [code-review-fixes-20261113.md](PLAN-002/EXPERIMENT-015/analysis/tmp/records/2026-11-13/code-review-fixes-20261113.md) · [parent_corruption_2x2.py](PLAN-002/EXPERIMENT-015/code/tmp/scripts/parent_corruption_2x2.py)
+[实验目录及文件来源](PLAN-002/EXPERIMENT-015/README.md)。 [parent-2x2-finding.md](PLAN-002/EXPERIMENT-015/analysis/tmp/records/2026-11-10/parent-2x2-finding.md) · [code-review-fixes-20261113.md](PLAN-002/EXPERIMENT-015/analysis/tmp/records/2026-11-13/code-review-fixes-20261113.md) · [parent_corruption_2x2.py](PLAN-002/EXPERIMENT-015/code/tmp/scripts/parent_corruption_2x2.py)
 
 ### 2026 年 11 月 11–12 日
 
@@ -956,7 +909,7 @@ PLAN-001/EXPERIMENT-001/results/
 
 **补充**
 
-旧台账 17。[实验目录及文件来源](PLAN-003/EXPERIMENT-016/README.md)。 [c0-mixedn-full-context.md](PLAN-003/EXPERIMENT-016/analysis/tmp/records/2026-11-11/c0-mixedn-full-context.md)（[原版第 574 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/tmp/records/2026-11-11/c0-mixedn-full-context.md#L574)） · [project-status-overview.md](PLAN-003/EXPERIMENT-016/analysis/project-status-overview.md)
+[实验目录及文件来源](PLAN-003/EXPERIMENT-016/README.md)。 [c0-mixedn-full-context.md](PLAN-003/EXPERIMENT-016/analysis/tmp/records/2026-11-11/c0-mixedn-full-context.md)（[原版第 574 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/tmp/records/2026-11-11/c0-mixedn-full-context.md#L574)） · [project-status-overview.md](PLAN-003/EXPERIMENT-016/analysis/project-status-overview.md)
 
 ### 2026 年 11 月 13 日及随后阶段清点
 
@@ -978,7 +931,7 @@ PLAN-001/EXPERIMENT-001/results/
 
 **补充**
 
-旧台账 16。[实验目录及文件来源](PLAN-002/EXPERIMENT-017/README.md)。 [p1-pilot-20261113.md](PLAN-002/EXPERIMENT-017/analysis/tmp/records/2026-11-13/p1-pilot-20261113.md) · [code-review-fixes-20261113.md](PLAN-002/EXPERIMENT-017/analysis/tmp/records/2026-11-13/code-review-fixes-20261113.md)
+[实验目录及文件来源](PLAN-002/EXPERIMENT-017/README.md)。 [p1-pilot-20261113.md](PLAN-002/EXPERIMENT-017/analysis/tmp/records/2026-11-13/p1-pilot-20261113.md) · [code-review-fixes-20261113.md](PLAN-002/EXPERIMENT-017/analysis/tmp/records/2026-11-13/code-review-fixes-20261113.md)
 
 <a id="experiment-018"></a>
 
@@ -998,7 +951,7 @@ PLAN-001/EXPERIMENT-001/results/
 
 **补充**
 
-旧台账 18。[实验目录及文件来源](PLAN-003/EXPERIMENT-018/README.md)。 [p1-pilot-20261113.md](PLAN-003/EXPERIMENT-018/analysis/tmp/records/2026-11-13/p1-pilot-20261113.md) · [project-status-overview.md](PLAN-003/EXPERIMENT-018/analysis/project-status-overview.md) · [C0-M4-MixedN8-32-D12-Vocab128-2Val-L4H16D384-DeBERTa-100ep](experiments/configs/C0-M4-MixedN8-32-D12-Vocab128-2Val-L4H16D384-DeBERTa-100ep) · [操作细节](PLAN-003/EXPERIMENT-018/config/C0-M4-MixedN8-32-D12-Vocab128-2Val-L4H16D384-DeBERTa-100ep/data_config.yaml)（[原版第 40 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/experiments/configs/C0-M4-MixedN8-32-D12-Vocab128-2Val-L4H16D384-DeBERTa-100ep/data_config.yaml#L40)）
+[实验目录及文件来源](PLAN-003/EXPERIMENT-018/README.md)。 [p1-pilot-20261113.md](PLAN-003/EXPERIMENT-018/analysis/tmp/records/2026-11-13/p1-pilot-20261113.md) · [project-status-overview.md](PLAN-003/EXPERIMENT-018/analysis/project-status-overview.md) · [C0-M4-MixedN8-32-D12-Vocab128-2Val-L4H16D384-DeBERTa-100ep](experiments/configs/C0-M4-MixedN8-32-D12-Vocab128-2Val-L4H16D384-DeBERTa-100ep) · [操作细节](PLAN-003/EXPERIMENT-018/config/C0-M4-MixedN8-32-D12-Vocab128-2Val-L4H16D384-DeBERTa-100ep/data_config.yaml)（[原版第 40 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/experiments/configs/C0-M4-MixedN8-32-D12-Vocab128-2Val-L4H16D384-DeBERTa-100ep/data_config.yaml#L40)）
 
 <a id="discussion-002"></a>
 
@@ -1034,7 +987,7 @@ PLAN-001/EXPERIMENT-001/results/
 
 **补充**
 
-旧台账 19。[实验目录及文件来源](PLAN-002/EXPERIMENT-019/README.md)。 [b-horizon-pilot.md](PLAN-002/EXPERIMENT-019/analysis/b-horizon-pilot.md) · [b_long_window.py](PLAN-002/EXPERIMENT-019/code/b_mechanism/b_long_window.py)
+[实验目录及文件来源](PLAN-002/EXPERIMENT-019/README.md)。 [b-horizon-pilot.md](PLAN-002/EXPERIMENT-019/analysis/b-horizon-pilot.md) · [b_long_window.py](PLAN-002/EXPERIMENT-019/code/b_mechanism/b_long_window.py)
 
 <a id="experiment-020"></a>
 
@@ -1054,7 +1007,7 @@ PLAN-001/EXPERIMENT-001/results/
 
 **补充**
 
-旧台账 20。[实验目录及文件来源](PLAN-002/EXPERIMENT-020/README.md)。 [b-main-m1-report.md](PLAN-002/EXPERIMENT-020/analysis/b-main-m1-report.md) · [b-main-m1-teacher-vs-own.csv](PLAN-002/EXPERIMENT-020/results/b-main-m1-teacher-vs-own.csv)
+[实验目录及文件来源](PLAN-002/EXPERIMENT-020/README.md)。 [b-main-m1-report.md](PLAN-002/EXPERIMENT-020/analysis/b-main-m1-report.md) · [b-main-m1-teacher-vs-own.csv](PLAN-002/EXPERIMENT-020/results/b-main-m1-teacher-vs-own.csv)
 
 <a id="experiment-021"></a>
 
@@ -1074,7 +1027,7 @@ PLAN-001/EXPERIMENT-001/results/
 
 **补充**
 
-旧台账 21。[实验目录及文件来源](PLAN-002/EXPERIMENT-021/README.md)。 [b-main-m2-report.md](PLAN-002/EXPERIMENT-021/analysis/b-main-m2-report.md) · [b-review-evidence-audit.md](PLAN-002/EXPERIMENT-021/analysis/b-review-evidence-audit.md)
+[实验目录及文件来源](PLAN-002/EXPERIMENT-021/README.md)。 [b-main-m2-report.md](PLAN-002/EXPERIMENT-021/analysis/b-main-m2-report.md) · [b-review-evidence-audit.md](PLAN-002/EXPERIMENT-021/analysis/b-review-evidence-audit.md)
 
 <a id="experiment-022"></a>
 
@@ -1094,7 +1047,7 @@ PLAN-001/EXPERIMENT-001/results/
 
 **补充**
 
-旧台账 22。[实验目录及文件来源](PLAN-002/EXPERIMENT-022/README.md)。 [project-status-overview.md](PLAN-002/EXPERIMENT-022/analysis/project-status-overview.md) · [b_corruption_audit.py](PLAN-002/EXPERIMENT-022/code/b_mechanism/b_corruption_audit.py)
+[实验目录及文件来源](PLAN-002/EXPERIMENT-022/README.md)。 [project-status-overview.md](PLAN-002/EXPERIMENT-022/analysis/project-status-overview.md) · [b_corruption_audit.py](PLAN-002/EXPERIMENT-022/code/b_mechanism/b_corruption_audit.py)
 
 <a id="experiment-023"></a>
 
@@ -1114,7 +1067,7 @@ PLAN-001/EXPERIMENT-001/results/
 
 **补充**
 
-旧台账 23。[实验目录及文件来源](PLAN-003/EXPERIMENT-023/README.md)。 [c0-capability-report.md](PLAN-003/EXPERIMENT-023/analysis/c0-capability-report.md) · [c0-capability-s2026.md](PLAN-003/EXPERIMENT-023/analysis/c0-capability-s2026.md) · [artifacts](ai-collab/artifacts)
+[实验目录及文件来源](PLAN-003/EXPERIMENT-023/README.md)。 [c0-capability-report.md](PLAN-003/EXPERIMENT-023/analysis/c0-capability-report.md) · [c0-capability-s2026.md](PLAN-003/EXPERIMENT-023/analysis/c0-capability-s2026.md) · [artifacts](ai-collab/artifacts)
 
 ### 2026 年 11 月 15–16 日
 
@@ -1136,7 +1089,7 @@ PLAN-001/EXPERIMENT-001/results/
 
 **补充**
 
-旧台账 24。[实验目录及文件来源](PLAN-002/EXPERIMENT-024/README.md)。 [b-value-update.md](PLAN-002/EXPERIMENT-024/analysis/b-value-update.md) · [run_b.py](PLAN-002/EXPERIMENT-024/code/repair_study/run_b.py)
+[实验目录及文件来源](PLAN-002/EXPERIMENT-024/README.md)。 [b-value-update.md](PLAN-002/EXPERIMENT-024/analysis/b-value-update.md) · [run_b.py](PLAN-002/EXPERIMENT-024/code/repair_study/run_b.py)
 
 <a id="experiment-025"></a>
 
@@ -1156,7 +1109,7 @@ PLAN-001/EXPERIMENT-001/results/
 
 **补充**
 
-旧台账 25。[实验目录及文件来源](PLAN-002/EXPERIMENT-025/README.md)。 [b-multiparent.md](PLAN-002/EXPERIMENT-025/analysis/b-multiparent.md) · [b-multiparent-residual-summary.csv](PLAN-002/EXPERIMENT-025/results/b-multiparent-residual-summary.csv)
+[实验目录及文件来源](PLAN-002/EXPERIMENT-025/README.md)。 [b-multiparent.md](PLAN-002/EXPERIMENT-025/analysis/b-multiparent.md) · [b-multiparent-residual-summary.csv](PLAN-002/EXPERIMENT-025/results/b-multiparent-residual-summary.csv)
 
 <a id="experiment-026"></a>
 
@@ -1176,7 +1129,7 @@ PLAN-001/EXPERIMENT-001/results/
 
 **补充**
 
-旧台账 26。[实验目录及文件来源](PLAN-003/EXPERIMENT-026/README.md)。 [c-local-repair.md](PLAN-003/EXPERIMENT-026/analysis/c-local-repair.md) · [run_c.py](PLAN-003/EXPERIMENT-026/code/repair_study/run_c.py)
+[实验目录及文件来源](PLAN-003/EXPERIMENT-026/README.md)。 [c-local-repair.md](PLAN-003/EXPERIMENT-026/analysis/c-local-repair.md) · [run_c.py](PLAN-003/EXPERIMENT-026/code/repair_study/run_c.py)
 
 <a id="experiment-027"></a>
 
@@ -1196,7 +1149,7 @@ PLAN-001/EXPERIMENT-001/results/
 
 **补充**
 
-旧台账 27。[实验目录及文件来源](PLAN-003/EXPERIMENT-027/README.md)。 [c-source-control.md](PLAN-003/EXPERIMENT-027/analysis/c-source-control.md) · [run.py](PLAN-003/EXPERIMENT-027/code/counterfactual_control/run.py)
+[实验目录及文件来源](PLAN-003/EXPERIMENT-027/README.md)。 [c-source-control.md](PLAN-003/EXPERIMENT-027/analysis/c-source-control.md) · [run.py](PLAN-003/EXPERIMENT-027/code/counterfactual_control/run.py)
 
 <a id="experiment-028"></a>
 
@@ -1216,7 +1169,7 @@ PLAN-001/EXPERIMENT-001/results/
 
 **补充**
 
-旧台账 28。[实验目录及文件来源](PLAN-003/EXPERIMENT-028/README.md)。 [c-stages.md](PLAN-003/EXPERIMENT-028/analysis/c-stages.md) · [stages.py](PLAN-003/EXPERIMENT-028/code/counterfactual_control/stages.py)
+[实验目录及文件来源](PLAN-003/EXPERIMENT-028/README.md)。 [c-stages.md](PLAN-003/EXPERIMENT-028/analysis/c-stages.md) · [stages.py](PLAN-003/EXPERIMENT-028/code/counterfactual_control/stages.py)
 
 <a id="experiment-029"></a>
 
@@ -1236,7 +1189,7 @@ PLAN-001/EXPERIMENT-001/results/
 
 **补充**
 
-旧台账 29。[实验目录及文件来源](PLAN-003/EXPERIMENT-029/README.md)。 [c-joint-repair.md](PLAN-003/EXPERIMENT-029/analysis/c-joint-repair.md) · [run_c_joint.py](PLAN-003/EXPERIMENT-029/code/repair_study/run_c_joint.py)
+[实验目录及文件来源](PLAN-003/EXPERIMENT-029/README.md)。 [c-joint-repair.md](PLAN-003/EXPERIMENT-029/analysis/c-joint-repair.md) · [run_c_joint.py](PLAN-003/EXPERIMENT-029/code/repair_study/run_c_joint.py)
 
 <a id="plan-004"></a>
 
@@ -1276,7 +1229,7 @@ PLAN-001/EXPERIMENT-001/results/
 
 **补充**
 
-旧台账 30。[实验目录及文件来源](PLAN-004/EXPERIMENT-030/README.md)。 [c-long-pilot.md](PLAN-004/EXPERIMENT-030/analysis/c-long-pilot.md) · [c-long-pilot-budget.csv](PLAN-004/EXPERIMENT-030/results/c-long-pilot-budget.csv)
+[实验目录及文件来源](PLAN-004/EXPERIMENT-030/README.md)。 [c-long-pilot.md](PLAN-004/EXPERIMENT-030/analysis/c-long-pilot.md) · [c-long-pilot-budget.csv](PLAN-004/EXPERIMENT-030/results/c-long-pilot-budget.csv)
 
 <a id="experiment-031"></a>
 
@@ -1296,7 +1249,7 @@ PLAN-001/EXPERIMENT-001/results/
 
 **补充**
 
-旧台账 31。[实验目录及文件来源](PLAN-004/EXPERIMENT-031/README.md)。 [c-corruption-pilot.md](PLAN-004/EXPERIMENT-031/analysis/c-corruption-pilot.md) · [c-corruption-training-dose.csv](PLAN-004/EXPERIMENT-031/results/c-corruption-training-dose.csv)
+[实验目录及文件来源](PLAN-004/EXPERIMENT-031/README.md)。 [c-corruption-pilot.md](PLAN-004/EXPERIMENT-031/analysis/c-corruption-pilot.md) · [c-corruption-training-dose.csv](PLAN-004/EXPERIMENT-031/results/c-corruption-training-dose.csv)
 
 <a id="experiment-032"></a>
 
@@ -1316,7 +1269,7 @@ PLAN-001/EXPERIMENT-001/results/
 
 **补充**
 
-旧台账 32。[实验目录及文件来源](PLAN-004/EXPERIMENT-032/README.md)。 [c-basic-evaluation.md](PLAN-004/EXPERIMENT-032/analysis/c-basic-evaluation.md) · [run_clean.py](PLAN-004/EXPERIMENT-032/code/c_evaluation_suite/run_clean.py)
+[实验目录及文件来源](PLAN-004/EXPERIMENT-032/README.md)。 [c-basic-evaluation.md](PLAN-004/EXPERIMENT-032/analysis/c-basic-evaluation.md) · [run_clean.py](PLAN-004/EXPERIMENT-032/code/c_evaluation_suite/run_clean.py)
 
 <a id="experiment-033"></a>
 
@@ -1336,7 +1289,7 @@ PLAN-001/EXPERIMENT-001/results/
 
 **补充**
 
-旧台账 33。[实验目录及文件来源](PLAN-004/EXPERIMENT-033/README.md)。 [c-basic-evaluation.md](PLAN-004/EXPERIMENT-033/analysis/c-basic-evaluation.md) · [run_pair.py](PLAN-004/EXPERIMENT-033/code/c_evaluation_suite/run_pair.py)
+[实验目录及文件来源](PLAN-004/EXPERIMENT-033/README.md)。 [c-basic-evaluation.md](PLAN-004/EXPERIMENT-033/analysis/c-basic-evaluation.md) · [run_pair.py](PLAN-004/EXPERIMENT-033/code/c_evaluation_suite/run_pair.py)
 
 <a id="experiment-034"></a>
 
@@ -1356,7 +1309,7 @@ PLAN-001/EXPERIMENT-001/results/
 
 **补充**
 
-旧台账 34。[实验目录及文件来源](PLAN-004/EXPERIMENT-034/README.md)。 [c-stress.md](PLAN-004/EXPERIMENT-034/analysis/c-stress.md) · [c-stress-sustained-events.csv](PLAN-004/EXPERIMENT-034/results/c-stress-sustained-events.csv)
+[实验目录及文件来源](PLAN-004/EXPERIMENT-034/README.md)。 [c-stress.md](PLAN-004/EXPERIMENT-034/analysis/c-stress.md) · [c-stress-sustained-events.csv](PLAN-004/EXPERIMENT-034/results/c-stress-sustained-events.csv)
 
 <a id="experiment-035"></a>
 
@@ -1376,7 +1329,7 @@ PLAN-001/EXPERIMENT-001/results/
 
 **补充**
 
-旧台账 35。[实验目录及文件来源](PLAN-004/EXPERIMENT-035/README.md)。 [c-stress.md](PLAN-004/EXPERIMENT-035/analysis/c-stress.md) · [c-stress-noise-dose.csv](PLAN-004/EXPERIMENT-035/results/c-stress-noise-dose.csv)
+[实验目录及文件来源](PLAN-004/EXPERIMENT-035/README.md)。 [c-stress.md](PLAN-004/EXPERIMENT-035/analysis/c-stress.md) · [c-stress-noise-dose.csv](PLAN-004/EXPERIMENT-035/results/c-stress-noise-dose.csv)
 
 ### 2026 年 11 月 18 日
 
@@ -1398,7 +1351,7 @@ PLAN-001/EXPERIMENT-001/results/
 
 **补充**
 
-旧台账 36。[实验目录及文件来源](PLAN-003/EXPERIMENT-036/README.md)。 [priority-function-audit.md](PLAN-003/EXPERIMENT-036/analysis/priority-function-audit.md) · [function-audit-v2](PLAN-003/EXPERIMENT-036/results/function-audit-v2)
+[实验目录及文件来源](PLAN-003/EXPERIMENT-036/README.md)。 [priority-function-audit.md](PLAN-003/EXPERIMENT-036/analysis/priority-function-audit.md) · [function-audit-v2](PLAN-003/EXPERIMENT-036/results/function-audit-v2)
 
 <a id="plan-005"></a>
 
@@ -1438,7 +1391,7 @@ A/B 与 C 先分开试验，后有共同任务交付。长程序使用显式窗�
 
 **补充**
 
-旧台账 37。[实验目录及文件来源](PLAN-005/EXPERIMENT-037/README.md)。 [priority-reassignment.md](PLAN-005/EXPERIMENT-037/analysis/priority-reassignment.md) · [run_reassignment.py](PLAN-005/EXPERIMENT-037/code/priority_pilots/run_reassignment.py)
+[实验目录及文件来源](PLAN-005/EXPERIMENT-037/README.md)。 [priority-reassignment.md](PLAN-005/EXPERIMENT-037/analysis/priority-reassignment.md) · [run_reassignment.py](PLAN-005/EXPERIMENT-037/code/priority_pilots/run_reassignment.py)
 
 <a id="discussion-003"></a>
 
@@ -1474,7 +1427,7 @@ A/B 与 C 先分开试验，后有共同任务交付。长程序使用显式窗�
 
 **补充**
 
-旧台账 38。[实验目录及文件来源](PLAN-005/EXPERIMENT-038/README.md)。 [repeat-delivery-report.md](PLAN-005/EXPERIMENT-038/analysis/ab-state-reuse/repeat-delivery-report.md) · [ab-state-reuse.md](PLAN-005/EXPERIMENT-038/analysis/ab-state-reuse.md)
+[实验目录及文件来源](PLAN-005/EXPERIMENT-038/README.md)。 [repeat-delivery-report.md](PLAN-005/EXPERIMENT-038/analysis/ab-state-reuse/repeat-delivery-report.md) · [ab-state-reuse.md](PLAN-005/EXPERIMENT-038/analysis/ab-state-reuse.md)
 
 <a id="experiment-039"></a>
 
@@ -1494,7 +1447,7 @@ A/B 与 C 先分开试验，后有共同任务交付。长程序使用显式窗�
 
 **补充**
 
-旧台账 39。[实验目录及文件来源](PLAN-005/EXPERIMENT-039/README.md)。 [reuse-delivery-report.md](PLAN-005/EXPERIMENT-039/analysis/ab-state-reuse/reuse-delivery-report.md) · [ab-state-reuse.md](PLAN-005/EXPERIMENT-039/analysis/ab-state-reuse.md)
+[实验目录及文件来源](PLAN-005/EXPERIMENT-039/README.md)。 [reuse-delivery-report.md](PLAN-005/EXPERIMENT-039/analysis/ab-state-reuse/reuse-delivery-report.md) · [ab-state-reuse.md](PLAN-005/EXPERIMENT-039/analysis/ab-state-reuse.md)
 
 <a id="experiment-040"></a>
 
@@ -1514,7 +1467,7 @@ A/B 与 C 先分开试验，后有共同任务交付。长程序使用显式窗�
 
 **补充**
 
-旧台账 40。[实验目录及文件来源](PLAN-003/EXPERIMENT-040/README.md)。 [c-functional-reuse.md](PLAN-003/EXPERIMENT-040/analysis/c-state-reuse/c-functional-reuse.md) · [run_c_function.py](PLAN-003/EXPERIMENT-040/code/state_reuse/run_c_function.py)
+[实验目录及文件来源](PLAN-003/EXPERIMENT-040/README.md)。 [c-functional-reuse.md](PLAN-003/EXPERIMENT-040/analysis/c-state-reuse/c-functional-reuse.md) · [run_c_function.py](PLAN-003/EXPERIMENT-040/code/state_reuse/run_c_function.py)
 
 <a id="experiment-041"></a>
 
@@ -1534,7 +1487,7 @@ A/B 与 C 先分开试验，后有共同任务交付。长程序使用显式窗�
 
 **补充**
 
-旧台账 41。[实验目录及文件来源](PLAN-005/EXPERIMENT-041/README.md)。 [abc-workspace.md](PLAN-005/EXPERIMENT-041/analysis/abc-workspace.md) · [abc-coverage.csv](PLAN-005/EXPERIMENT-041/results/abc-workspace/abc-coverage.csv)
+[实验目录及文件来源](PLAN-005/EXPERIMENT-041/README.md)。 [abc-workspace.md](PLAN-005/EXPERIMENT-041/analysis/abc-workspace.md) · [abc-coverage.csv](PLAN-005/EXPERIMENT-041/results/abc-workspace/abc-coverage.csv)
 
 <a id="experiment-042"></a>
 
@@ -1554,7 +1507,7 @@ A/B 与 C 先分开试验，后有共同任务交付。长程序使用显式窗�
 
 **补充**
 
-旧台账 42。[实验目录及文件来源](PLAN-005/EXPERIMENT-042/README.md)。 [abc-workspace.md](PLAN-005/EXPERIMENT-042/analysis/abc-workspace.md) · [abc-programs.csv](PLAN-005/EXPERIMENT-042/results/abc-workspace/abc-programs.csv)
+[实验目录及文件来源](PLAN-005/EXPERIMENT-042/README.md)。 [abc-workspace.md](PLAN-005/EXPERIMENT-042/analysis/abc-workspace.md) · [abc-programs.csv](PLAN-005/EXPERIMENT-042/results/abc-workspace/abc-programs.csv)
 
 <a id="experiment-043"></a>
 
@@ -1574,7 +1527,7 @@ A/B 与 C 先分开试验，后有共同任务交付。长程序使用显式窗�
 
 **补充**
 
-旧台账 43。[实验目录及文件来源](PLAN-005/EXPERIMENT-043/README.md)。 [abc-workspace.md](PLAN-005/EXPERIMENT-043/analysis/abc-workspace.md) · [abc-probe-pairs.csv](PLAN-005/EXPERIMENT-043/results/abc-workspace/abc-probe-pairs.csv)
+[实验目录及文件来源](PLAN-005/EXPERIMENT-043/README.md)。 [abc-workspace.md](PLAN-005/EXPERIMENT-043/analysis/abc-workspace.md) · [abc-probe-pairs.csv](PLAN-005/EXPERIMENT-043/results/abc-workspace/abc-probe-pairs.csv)
 
 ### 2026 年 11 月 19–21 日
 
@@ -1596,7 +1549,7 @@ A/B 与 C 先分开试验，后有共同任务交付。长程序使用显式窗�
 
 **补充**
 
-旧台账 44。[实验目录及文件来源](PLAN-004/EXPERIMENT-044/README.md)。 [c-update-training-handoff.md](PLAN-004/EXPERIMENT-044/analysis/c-update-training-handoff.md) · [c-update-training-handoff.json](PLAN-004/EXPERIMENT-044/results/c-update-training-handoff.json) · [操作细节](PLAN-004/EXPERIMENT-044/analysis/c_update/README.md)（[原版第 25 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/tools/c_update/README.md#L25)）
+[实验目录及文件来源](PLAN-004/EXPERIMENT-044/README.md)。 [c-update-training-handoff.md](PLAN-004/EXPERIMENT-044/analysis/c-update-training-handoff.md) · [c-update-training-handoff.json](PLAN-004/EXPERIMENT-044/results/c-update-training-handoff.json) · [操作细节](PLAN-004/EXPERIMENT-044/analysis/c_update/README.md)（[原版第 25 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/tools/c_update/README.md#L25)）
 
 <a id="experiment-045"></a>
 
@@ -1616,7 +1569,7 @@ A/B 与 C 先分开试验，后有共同任务交付。长程序使用显式窗�
 
 **补充**
 
-旧台账 45。[实验目录及文件来源](PLAN-004/EXPERIMENT-045/README.md)。 [c-update-small-test.md](PLAN-004/EXPERIMENT-045/analysis/c-update-small-test.md) · [c-update-training-handoff.json](PLAN-004/EXPERIMENT-045/results/c-update-training-handoff.json) · [操作细节](PLAN-004/EXPERIMENT-045/analysis/c_update/README.md)（[原版第 54 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/tools/c_update/README.md#L54)）
+[实验目录及文件来源](PLAN-004/EXPERIMENT-045/README.md)。 [c-update-small-test.md](PLAN-004/EXPERIMENT-045/analysis/c-update-small-test.md) · [c-update-training-handoff.json](PLAN-004/EXPERIMENT-045/results/c-update-training-handoff.json) · [操作细节](PLAN-004/EXPERIMENT-045/analysis/c_update/README.md)（[原版第 54 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/tools/c_update/README.md#L54)）
 
 <a id="experiment-046"></a>
 
@@ -1636,7 +1589,7 @@ A/B 与 C 先分开试验，后有共同任务交付。长程序使用显式窗�
 
 **补充**
 
-旧台账 46。[实验目录及文件来源](PLAN-004/EXPERIMENT-046/README.md)。 [c-multitime-final.md](PLAN-004/EXPERIMENT-046/analysis/c-multitime-final.md) · [c-multitime-final.json](PLAN-004/EXPERIMENT-046/results/c-multitime-final.json) · [操作细节](PLAN-004/EXPERIMENT-046/analysis/c-identity-and-multitime-design.md)（[原版第 43 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-20/c-identity-and-multitime-design.md#L43)）
+[实验目录及文件来源](PLAN-004/EXPERIMENT-046/README.md)。 [c-multitime-final.md](PLAN-004/EXPERIMENT-046/analysis/c-multitime-final.md) · [c-multitime-final.json](PLAN-004/EXPERIMENT-046/results/c-multitime-final.json) · [操作细节](PLAN-004/EXPERIMENT-046/analysis/c-identity-and-multitime-design.md)（[原版第 43 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-20/c-identity-and-multitime-design.md#L43)）
 
 <a id="experiment-047"></a>
 
@@ -1656,7 +1609,7 @@ A/B 与 C 先分开试验，后有共同任务交付。长程序使用显式窗�
 
 **补充**
 
-旧台账 47。[实验目录及文件来源](PLAN-004/EXPERIMENT-047/README.md)。 [c-local-update-finals.md](PLAN-004/EXPERIMENT-047/analysis/c-local-update-finals.md) · [fit-history](PLAN-004/EXPERIMENT-047/results/fit-history)
+[实验目录及文件来源](PLAN-004/EXPERIMENT-047/README.md)。 [c-local-update-finals.md](PLAN-004/EXPERIMENT-047/analysis/c-local-update-finals.md) · [fit-history](PLAN-004/EXPERIMENT-047/results/fit-history)
 
 <a id="experiment-048"></a>
 
@@ -1668,35 +1621,35 @@ A/B 与 C 先分开试验，后有共同任务交付。长程序使用显式窗�
 
 使用正常窗口后训练的第 50 周期权重。按先前开发集拟合选择种子 42 与 1234，种子 2026 的训练和开发集结果保留在前项。六项共用这次正式评测。
 
-- **旧 48 · 未注错求解与长程保持**　固定种子 42、1234 正常窗口后训练第 50 周期的权重。将 32、64、128 节点各分为浅图和深图，让两份模型做相同未注错的题；先在按每图最大依赖深度给定的标准轮数评分，再从标准轮数起点额外运行 16 轮。逐图核对数值、变量名和四字段，区分原先没算完、完成后又失分，以及只有身份字段变化。
+- **未注错求解与长程保持**　固定种子 42、1234 正常窗口后训练第 50 周期的权重。将 32、64、128 节点各分为浅图和深图，让两份模型做相同未注错的题；先在按每图最大依赖深度给定的标准轮数评分，再从标准轮数起点额外运行 16 轮。逐图核对数值、变量名和四字段，区分原先没算完、完成后又失分，以及只有身份字段变化。
 
-- **旧 49 · 第二层是否标出应更新的位置**　从四种时刻取状态：结构上刚可算、求解中途、首次实际整图完成，以及标准轮数的完成检查。对每个受测位置先查当前父值是否齐、局部算式是否冲突，再看第二层有没有标出它。用已填但与父值冲突、局部一致、父值未齐等位置作为不同组，分别统计应标者中标了多少、已标者中多少确有目标情况。
+- **第二层是否标出应更新的位置**　从四种时刻取状态：结构上刚可算、求解中途、首次实际整图完成，以及标准轮数的完成检查。对每个受测位置先查当前父值是否齐、局部算式是否冲突，再看第二层有没有标出它。用已填但与父值冲突、局部一致、父值未齐等位置作为不同组，分别统计应标者中标了多少、已标者中多少确有目标情况。
 
-- **旧 50 · 末层实际执行了什么**　沿用同一模型、题目、节点和轮次，将第二层标记与末层真正写出的数配起来。为每次写回计算两个参照答案：按这一刻模型可读的父值算应得什么，以及按原题常数和依赖图应得什么。父值被改错时两者可能不同。逐位置记录有无标记、数值动没动、改完分别符合哪个参照。
+- **末层实际执行了什么**　沿用同一模型、题目、节点和轮次，将第二层标记与末层真正写出的数配起来。为每次写回计算两个参照答案：按这一刻模型可读的父值算应得什么，以及按原题常数和依赖图应得什么。父值被改错时两者可能不同。逐位置记录有无标记、数值动没动、改完分别符合哪个参照。
 
-- **旧 51 · 注错后的目标与下游**　从每个已核实实际写入的受扰快照和同一份干净快照并行续算。逐轮跟踪被改目标、直接子节点、更远后代和无关位置。先看目标下一轮是否回正，再对确实受损的位置追踪首次回正、回正后再错以及第 15、16 轮是否连续正确；同轮干净分支本已出错的位置不能直接算成新增损伤。
+- **注错后的目标与下游**　从每个已核实实际写入的受扰快照和同一份干净快照并行续算。逐轮跟踪被改目标、直接子节点、更远后代和无关位置。先看目标下一轮是否回正，再对确实受损的位置追踪首次回正、回正后再错以及第 15、16 轮是否连续正确；同轮干净分支本已出错的位置不能直接算成新增损伤。
 
-- **旧 52 · 同图同时有空位、错值与健康位置**　等到整图实际算对，在同一张图的不同位置安排两种操作：一处换回该位置较早的空状态，另一处写入错数。从同一快照跑四条分支：都不动、只清空、只写错、两者一起做。只在四条都有合格起点的同题上检查模型能否在同一轮填空、修错并保住其余健康位置，分别给三类位置和整图计分。
+- **同图同时有空位、错值与健康位置**　等到整图实际算对，在同一张图的不同位置安排两种操作：一处换回该位置较早的空状态，另一处写入错数。从同一快照跑四条分支：都不动、只清空、只写错、两者一起做。只在四条都有合格起点的同题上检查模型能否在同一轮填空、修错并保住其余健康位置，分别给三类位置和整图计分。
 
-- **旧 53 · 修回后的新计算与冻结接收模型**　做两种功能检查。第一种在原有状态后追加一个引用目标的新算式，改变追加前额外等待的轮数，分开记录目标读数与新下游末两轮的答案。第二种把供体向量移入冻结的原始 C，先核对接收位置是否仍读成预定字段，再看直接子节点有没有算出该值对应的结果。两种检查分别检验本模型后续使用与跨权重传递。
+- **修回后的新计算与冻结接收模型**　做两种功能检查。第一种在原有状态后追加一个引用目标的新算式，改变追加前额外等待的轮数，分开记录目标读数与新下游末两轮的答案。第二种把供体向量移入冻结的原始 C，先核对接收位置是否仍读成预定字段，再看直接子节点有没有算出该值对应的结果。两种检查分别检验本模型后续使用与跨权重传递。
 
 **执行与结果分析**
 
-- **旧 48**　两份权重在标准轮大多能完成；额外续算时，大而深的图更易失分。 **当时的分析**　这批用开发集预先确定受测权重，2026 只进入训练拟合记录。以下五项共用这次评测，无新增训练。
+- **未注错求解与长程保持**　两份权重在标准轮大多能完成；额外续算时，大而深的图更易失分。 **当时的分析**　这批用开发集预先确定受测权重，2026 只进入训练拟合记录。以下五项共用这次评测，无新增训练。
 
-- **旧 49**　有实际冲突而未被标记的记录；部分条件没有可用于该指标的合格位置。 **当时的分析**　当时以干预前的状态定义资格，分别看漏标与误标，空分母单独保留。
+- **第二层是否标出应更新的位置**　有实际冲突而未被标记的记录；部分条件没有可用于该指标的合格位置。 **当时的分析**　当时以干预前的状态定义资格，分别看漏标与误标，空分母单独保留。
 
-- **旧 50**　标记与实际改动有不一致的记录；按当前父值算对和符合原题是两项独立可查的结果。 **当时的分析**　当时用这些列拆分三个问题：该不该改、改动有没有发生、改完是否有利于整题。
+- **末层实际执行了什么**　标记与实际改动有不一致的记录；按当前父值算对和符合原题是两项独立可查的结果。 **当时的分析**　当时用这些列拆分三个问题：该不该改、改动有没有发生、改完是否有利于整题。
 
-- **旧 51**　同一次干预可以同时留下首轮修回和下游额外错误；部分位置还会回正后再错。 **当时的分析**　当时按实际写入、确有损伤和是否仍有足够后续轮次分别统计，避免把未受损位置算作恢复。
+- **注错后的目标与下游**　同一次干预可以同时留下首轮修回和下游额外错误；部分位置还会回正后再错。 **当时的分析**　当时按实际写入、确有损伤和是否仍有足够后续轮次分别统计，避免把未受损位置算作恢复。
 
-- **旧 52**　混合条件中有局部位置处理正确、整图却没有同时满足要求的题。 **当时的分析**　当时专门设这一项，检验单一位置上有效的做法能否在一张图中同时成立。
+- **同图同时有空位、错值与健康位置**　混合条件中有局部位置处理正确、整图却没有同时满足要求的题。 **当时的分析**　当时专门设这一项，检验单一位置上有效的做法能否在一张图中同时成立。
 
-- **旧 53**　有接收位置读到预期字段、下游却没有给出对应结果的组合；部分条件覆盖有限。 **当时的分析**　当时把向量在原模型中读对、移入另一权重后仍能读对、足以支持新计算分作三步查验。
+- **修回后的新计算与冻结接收模型**　有接收位置读到预期字段、下游却没有给出对应结果的组合；部分条件覆盖有限。 **当时的分析**　当时把向量在原模型中读对、移入另一权重后仍能读对、足以支持新计算分作三步查验。
 
 **补充**
 
-旧台账 48–53。[实验目录及文件来源](PLAN-004/EXPERIMENT-048/README.md)。 [评测设计](docs/records/2026-11-21/c-selected-evaluation.md) · [六表交付](docs/records/2026-11-21/c-selected-eval-results.md) · [逐项结果表](docs/records/2026-11-21/selected-tables)
+[实验目录及文件来源](PLAN-004/EXPERIMENT-048/README.md)。 [评测设计](docs/records/2026-11-21/c-selected-evaluation.md) · [六表交付](docs/records/2026-11-21/c-selected-eval-results.md) · [逐项结果表](docs/records/2026-11-21/selected-tables)
 
 <a id="plan-006"></a>
 
@@ -1736,7 +1689,7 @@ A/B 与 C 先分开试验，后有共同任务交付。长程序使用显式窗�
 
 **补充**
 
-旧台账 54。[实验目录及文件来源](PLAN-006/EXPERIMENT-049/README.md)。 [c-hard-graphs-results.md](PLAN-006/EXPERIMENT-049/analysis/c-hard-graphs-results.md) · [paired-naming-summary.csv](PLAN-006/EXPERIMENT-049/results/hard-graphs/paired-naming-summary.csv) · [操作细节](PLAN-006/EXPERIMENT-049/analysis/c-hard-graphs.md)（[原版第 12 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-21/c-hard-graphs.md#L12)）
+[实验目录及文件来源](PLAN-006/EXPERIMENT-049/README.md)。 [c-hard-graphs-results.md](PLAN-006/EXPERIMENT-049/analysis/c-hard-graphs-results.md) · [paired-naming-summary.csv](PLAN-006/EXPERIMENT-049/results/hard-graphs/paired-naming-summary.csv) · [操作细节](PLAN-006/EXPERIMENT-049/analysis/c-hard-graphs.md)（[原版第 12 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-21/c-hard-graphs.md#L12)）
 
 <a id="experiment-050"></a>
 
@@ -1756,7 +1709,7 @@ A/B 与 C 先分开试验，后有共同任务交付。长程序使用显式窗�
 
 **补充**
 
-旧台账 55。[实验目录及文件来源](PLAN-006/EXPERIMENT-050/README.md)。 [c-hard-graphs-results.md](PLAN-006/EXPERIMENT-050/analysis/c-hard-graphs-results.md) · [propagation-summary.csv](PLAN-006/EXPERIMENT-050/results/hard-graphs/propagation-summary.csv) · [操作细节](PLAN-006/EXPERIMENT-050/analysis/c-hard-graphs.md)（[原版第 23 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-21/c-hard-graphs.md#L23)）
+[实验目录及文件来源](PLAN-006/EXPERIMENT-050/README.md)。 [c-hard-graphs-results.md](PLAN-006/EXPERIMENT-050/analysis/c-hard-graphs-results.md) · [propagation-summary.csv](PLAN-006/EXPERIMENT-050/results/hard-graphs/propagation-summary.csv) · [操作细节](PLAN-006/EXPERIMENT-050/analysis/c-hard-graphs.md)（[原版第 23 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-21/c-hard-graphs.md#L23)）
 
 <a id="convention-001"></a>
 
@@ -1792,7 +1745,7 @@ A/B 与 C 先分开试验，后有共同任务交付。长程序使用显式窗�
 
 **补充**
 
-旧台账 56。[实验目录及文件来源](PLAN-006/EXPERIMENT-051/README.md)。 [c-research-sequence.md](PLAN-006/EXPERIMENT-051/analysis/c-research-sequence.md)（[原版第 10 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-21/c-research-sequence.md#L10)） · [contrasts.csv](PLAN-006/EXPERIMENT-051/results/attribution/c-research-sequence/transitions/contrasts.csv)
+[实验目录及文件来源](PLAN-006/EXPERIMENT-051/README.md)。 [c-research-sequence.md](PLAN-006/EXPERIMENT-051/analysis/c-research-sequence.md)（[原版第 10 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-21/c-research-sequence.md#L10)） · [contrasts.csv](PLAN-006/EXPERIMENT-051/results/attribution/c-research-sequence/transitions/contrasts.csv)
 
 <a id="experiment-052"></a>
 
@@ -1812,7 +1765,7 @@ A/B 与 C 先分开试验，后有共同任务交付。长程序使用显式窗�
 
 **补充**
 
-旧台账 57。[实验目录及文件来源](PLAN-006/EXPERIMENT-052/README.md)。 [c-research-sequence.md](PLAN-006/EXPERIMENT-052/analysis/c-research-sequence.md)（[原版第 11 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-21/c-research-sequence.md#L11)） · [contrasts.csv](PLAN-006/EXPERIMENT-052/results/attribution/c-research-sequence/signals/contrasts.csv)
+[实验目录及文件来源](PLAN-006/EXPERIMENT-052/README.md)。 [c-research-sequence.md](PLAN-006/EXPERIMENT-052/analysis/c-research-sequence.md)（[原版第 11 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-21/c-research-sequence.md#L11)） · [contrasts.csv](PLAN-006/EXPERIMENT-052/results/attribution/c-research-sequence/signals/contrasts.csv)
 
 <a id="experiment-053"></a>
 
@@ -1832,7 +1785,7 @@ A/B 与 C 先分开试验，后有共同任务交付。长程序使用显式窗�
 
 **补充**
 
-旧台账 58。[实验目录及文件来源](PLAN-006/EXPERIMENT-053/README.md)。 [c-research-sequence.md](PLAN-006/EXPERIMENT-053/analysis/c-research-sequence.md)（[原版第 12 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-21/c-research-sequence.md#L12)） · [contrasts.csv](PLAN-006/EXPERIMENT-053/results/attribution/c-research-sequence/identity/contrasts.csv)
+[实验目录及文件来源](PLAN-006/EXPERIMENT-053/README.md)。 [c-research-sequence.md](PLAN-006/EXPERIMENT-053/analysis/c-research-sequence.md)（[原版第 12 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-21/c-research-sequence.md#L12)） · [contrasts.csv](PLAN-006/EXPERIMENT-053/results/attribution/c-research-sequence/identity/contrasts.csv)
 
 <a id="experiment-054"></a>
 
@@ -1852,7 +1805,7 @@ A/B 与 C 先分开试验，后有共同任务交付。长程序使用显式窗�
 
 **补充**
 
-旧台账 59。[实验目录及文件来源](PLAN-006/EXPERIMENT-054/README.md)。 [c-research-sequence.md](PLAN-006/EXPERIMENT-054/analysis/c-research-sequence.md)（[原版第 13 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-21/c-research-sequence.md#L13)） · [paired-fanout.csv](PLAN-006/EXPERIMENT-054/results/attribution/c-research-sequence/fanout/paired-fanout.csv)
+[实验目录及文件来源](PLAN-006/EXPERIMENT-054/README.md)。 [c-research-sequence.md](PLAN-006/EXPERIMENT-054/analysis/c-research-sequence.md)（[原版第 13 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-21/c-research-sequence.md#L13)） · [paired-fanout.csv](PLAN-006/EXPERIMENT-054/results/attribution/c-research-sequence/fanout/paired-fanout.csv)
 
 ### 2026 年 11 月 22 日
 
@@ -1874,7 +1827,7 @@ A/B 与 C 先分开试验，后有共同任务交付。长程序使用显式窗�
 
 **补充**
 
-旧台账 60。[实验目录及文件来源](PLAN-006/EXPERIMENT-055/README.md)。 [c-reader-continuation.md](PLAN-006/EXPERIMENT-055/analysis/c-reader-continuation.md)（[原版第 7 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-22/c-reader-continuation.md#L7)） · [summary.csv](PLAN-006/EXPERIMENT-055/results/attribution/c-reader-continuation/versions/summary.csv)
+[实验目录及文件来源](PLAN-006/EXPERIMENT-055/README.md)。 [c-reader-continuation.md](PLAN-006/EXPERIMENT-055/analysis/c-reader-continuation.md)（[原版第 7 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-22/c-reader-continuation.md#L7)） · [summary.csv](PLAN-006/EXPERIMENT-055/results/attribution/c-reader-continuation/versions/summary.csv)
 
 <a id="experiment-056"></a>
 
@@ -1894,7 +1847,7 @@ A/B 与 C 先分开试验，后有共同任务交付。长程序使用显式窗�
 
 **补充**
 
-旧台账 61。[实验目录及文件来源](PLAN-006/EXPERIMENT-056/README.md)。 [c-reader-continuation.md](PLAN-006/EXPERIMENT-056/analysis/c-reader-continuation.md)（[原版第 17 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-22/c-reader-continuation.md#L17)） · [summary.csv](PLAN-006/EXPERIMENT-056/results/attribution/c-reader-continuation/readers/summary.csv)
+[实验目录及文件来源](PLAN-006/EXPERIMENT-056/README.md)。 [c-reader-continuation.md](PLAN-006/EXPERIMENT-056/analysis/c-reader-continuation.md)（[原版第 17 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-22/c-reader-continuation.md#L17)） · [summary.csv](PLAN-006/EXPERIMENT-056/results/attribution/c-reader-continuation/readers/summary.csv)
 
 <a id="experiment-057"></a>
 
@@ -1914,7 +1867,7 @@ A/B 与 C 先分开试验，后有共同任务交付。长程序使用显式窗�
 
 **补充**
 
-旧台账 62。[实验目录及文件来源](PLAN-006/EXPERIMENT-057/README.md)。 [c-attribution-delivery.md](PLAN-006/EXPERIMENT-057/analysis/c-attribution-delivery.md) · [attribution-b-review.md](PLAN-006/EXPERIMENT-057/analysis/attribution-b-review.md) · [four_conditions](PLAN-006/EXPERIMENT-057/results/attribution/c-attribution/four_conditions) · [操作细节](PLAN-006/EXPERIMENT-057/analysis/state-repair-attribution.md)（[原版第 18 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-22/state-repair-attribution.md#L18)）
+[实验目录及文件来源](PLAN-006/EXPERIMENT-057/README.md)。 [c-attribution-delivery.md](PLAN-006/EXPERIMENT-057/analysis/c-attribution-delivery.md) · [attribution-b-review.md](PLAN-006/EXPERIMENT-057/analysis/attribution-b-review.md) · [four_conditions](PLAN-006/EXPERIMENT-057/results/attribution/c-attribution/four_conditions) · [操作细节](PLAN-006/EXPERIMENT-057/analysis/state-repair-attribution.md)（[原版第 18 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-22/state-repair-attribution.md#L18)）
 
 <a id="experiment-058"></a>
 
@@ -1934,7 +1887,7 @@ A/B 与 C 先分开试验，后有共同任务交付。长程序使用显式窗�
 
 **补充**
 
-旧台账 63。[实验目录及文件来源](PLAN-006/EXPERIMENT-058/README.md)。 [c-attribution-delivery.md](PLAN-006/EXPERIMENT-058/analysis/c-attribution-delivery.md) · [key-comparison.csv](PLAN-006/EXPERIMENT-058/results/attribution/c-attribution/pathway/key-comparison.csv) · [操作细节](PLAN-006/EXPERIMENT-058/analysis/state-repair-attribution.md)（[原版第 19 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-22/state-repair-attribution.md#L19)）
+[实验目录及文件来源](PLAN-006/EXPERIMENT-058/README.md)。 [c-attribution-delivery.md](PLAN-006/EXPERIMENT-058/analysis/c-attribution-delivery.md) · [key-comparison.csv](PLAN-006/EXPERIMENT-058/results/attribution/c-attribution/pathway/key-comparison.csv) · [操作细节](PLAN-006/EXPERIMENT-058/analysis/state-repair-attribution.md)（[原版第 19 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-22/state-repair-attribution.md#L19)）
 
 <a id="experiment-059"></a>
 
@@ -1954,7 +1907,7 @@ A/B 与 C 先分开试验，后有共同任务交付。长程序使用显式窗�
 
 **补充**
 
-旧台账 64。[实验目录及文件来源](PLAN-006/EXPERIMENT-059/README.md)。 [state-repair-attribution.md](PLAN-006/EXPERIMENT-059/analysis/state-repair-attribution.md)（[原版第 20 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-22/state-repair-attribution.md#L20)） · [sources](PLAN-006/EXPERIMENT-059/results/attribution/c-attribution/sources)
+[实验目录及文件来源](PLAN-006/EXPERIMENT-059/README.md)。 [state-repair-attribution.md](PLAN-006/EXPERIMENT-059/analysis/state-repair-attribution.md)（[原版第 20 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-22/state-repair-attribution.md#L20)） · [sources](PLAN-006/EXPERIMENT-059/results/attribution/c-attribution/sources)
 
 <a id="experiment-060"></a>
 
@@ -1974,7 +1927,7 @@ A/B 与 C 先分开试验，后有共同任务交付。长程序使用显式窗�
 
 **补充**
 
-旧台账 65。[实验目录及文件来源](PLAN-005/EXPERIMENT-060/README.md)。 [c-attribution-delivery.md](PLAN-005/EXPERIMENT-060/analysis/c-attribution-delivery.md) · [graph-counts.csv](PLAN-005/EXPERIMENT-060/results/attribution/c-attribution/workspace/graph-counts.csv) · [操作细节](PLAN-005/EXPERIMENT-060/analysis/state-repair-attribution.md)（[原版第 21 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-22/state-repair-attribution.md#L21)）
+[实验目录及文件来源](PLAN-005/EXPERIMENT-060/README.md)。 [c-attribution-delivery.md](PLAN-005/EXPERIMENT-060/analysis/c-attribution-delivery.md) · [graph-counts.csv](PLAN-005/EXPERIMENT-060/results/attribution/c-attribution/workspace/graph-counts.csv) · [操作细节](PLAN-005/EXPERIMENT-060/analysis/state-repair-attribution.md)（[原版第 21 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-22/state-repair-attribution.md#L21)）
 
 <a id="plan-007"></a>
 
@@ -2014,7 +1967,7 @@ A/B 与 C 先分开试验，后有共同任务交付。长程序使用显式窗�
 
 **补充**
 
-旧台账 66。[实验目录及文件来源](PLAN-007/EXPERIMENT-061/README.md)。 [architecture_controls.py](PLAN-007/EXPERIMENT-061/code/c_hard_graphs/architecture_controls.py) · [architecture-controls](PLAN-007/EXPERIMENT-061/results/attribution/architecture-controls) · [操作细节](PLAN-007/EXPERIMENT-061/analysis/state-repair-attribution.md)（[原版第 38 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-22/state-repair-attribution.md#L38)）
+[实验目录及文件来源](PLAN-007/EXPERIMENT-061/README.md)。 [architecture_controls.py](PLAN-007/EXPERIMENT-061/code/c_hard_graphs/architecture_controls.py) · [architecture-controls](PLAN-007/EXPERIMENT-061/results/attribution/architecture-controls) · [操作细节](PLAN-007/EXPERIMENT-061/analysis/state-repair-attribution.md)（[原版第 38 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-22/state-repair-attribution.md#L38)）
 
 <a id="experiment-062"></a>
 
@@ -2034,7 +1987,7 @@ A/B 与 C 先分开试验，后有共同任务交付。长程序使用显式窗�
 
 **补充**
 
-旧台账 67。[实验目录及文件来源](PLAN-007/EXPERIMENT-062/README.md)。 [transfer_tasks.py](PLAN-007/EXPERIMENT-062/code/c_hard_graphs/transfer_tasks.py) · [transfer-clean-check.json](PLAN-007/EXPERIMENT-062/results/attribution/transfer-clean-check.json) · [transfer-forced-check.json](PLAN-007/EXPERIMENT-062/results/attribution/transfer-forced-check.json)
+[实验目录及文件来源](PLAN-007/EXPERIMENT-062/README.md)。 [transfer_tasks.py](PLAN-007/EXPERIMENT-062/code/c_hard_graphs/transfer_tasks.py) · [transfer-clean-check.json](PLAN-007/EXPERIMENT-062/results/attribution/transfer-clean-check.json) · [transfer-forced-check.json](PLAN-007/EXPERIMENT-062/results/attribution/transfer-forced-check.json)
 
 <a id="experiment-063"></a>
 
@@ -2054,7 +2007,7 @@ A/B 与 C 先分开试验，后有共同任务交付。长程序使用显式窗�
 
 **补充**
 
-旧台账 68。[实验目录及文件来源](PLAN-006/EXPERIMENT-063/README.md)。 [original-c-recovery.md](PLAN-006/EXPERIMENT-063/analysis/original-c-recovery.md) · [c-only](PLAN-006/EXPERIMENT-063/results/original-c-recovery/c-only) · [操作细节](PLAN-006/EXPERIMENT-063/analysis/original-c-recovery/c-only/README.md)（[原版第 8 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-22/original-c-recovery/c-only/README.md#L8)）
+[实验目录及文件来源](PLAN-006/EXPERIMENT-063/README.md)。 [original-c-recovery.md](PLAN-006/EXPERIMENT-063/analysis/original-c-recovery.md) · [c-only](PLAN-006/EXPERIMENT-063/results/original-c-recovery/c-only) · [操作细节](PLAN-006/EXPERIMENT-063/analysis/original-c-recovery/c-only/README.md)（[原版第 8 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-22/original-c-recovery/c-only/README.md#L8)）
 
 <a id="experiment-064"></a>
 
@@ -2074,7 +2027,7 @@ A/B 与 C 先分开试验，后有共同任务交付。长程序使用显式窗�
 
 **补充**
 
-旧台账 69。[实验目录及文件来源](PLAN-006/EXPERIMENT-064/README.md)。 [c-original-layered-injection.md](PLAN-006/EXPERIMENT-064/analysis/c-original-layered-injection.md) · [c-s2026-original-injection](PLAN-006/EXPERIMENT-064/results/c-s2026-original-injection)
+[实验目录及文件来源](PLAN-006/EXPERIMENT-064/README.md)。 [c-original-layered-injection.md](PLAN-006/EXPERIMENT-064/analysis/c-original-layered-injection.md) · [c-s2026-original-injection](PLAN-006/EXPERIMENT-064/results/c-s2026-original-injection)
 
 <a id="experiment-065"></a>
 
@@ -2094,7 +2047,7 @@ A/B 与 C 先分开试验，后有共同任务交付。长程序使用显式窗�
 
 **补充**
 
-旧台账 70。[实验目录及文件来源](PLAN-006/EXPERIMENT-065/README.md)。 [场景对照实验报告.md](PLAN-006/EXPERIMENT-065/analysis/abc-input-scenarios-results/%E5%9C%BA%E6%99%AF%E5%AF%B9%E7%85%A7%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A.md) · [abc-input-scenarios-results](PLAN-006/EXPERIMENT-065/results/abc-input-scenarios-results) · [abc_scene_queue.py](PLAN-006/EXPERIMENT-065/code/c_hard_graphs/abc_scene_queue.py) · [操作细节](PLAN-006/EXPERIMENT-065/analysis/abc-input-scenarios.md)（[原版第 5 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-22/abc-input-scenarios.md#L5)）
+[实验目录及文件来源](PLAN-006/EXPERIMENT-065/README.md)。 [场景对照实验报告.md](PLAN-006/EXPERIMENT-065/analysis/abc-input-scenarios-results/%E5%9C%BA%E6%99%AF%E5%AF%B9%E7%85%A7%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A.md) · [abc-input-scenarios-results](PLAN-006/EXPERIMENT-065/results/abc-input-scenarios-results) · [abc_scene_queue.py](PLAN-006/EXPERIMENT-065/code/c_hard_graphs/abc_scene_queue.py) · [操作细节](PLAN-006/EXPERIMENT-065/analysis/abc-input-scenarios.md)（[原版第 5 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-22/abc-input-scenarios.md#L5)）
 
 <a id="convention-002"></a>
 
@@ -2130,7 +2083,7 @@ A/B 与 C 先分开试验，后有共同任务交付。长程序使用显式窗�
 
 **补充**
 
-旧台账 71。[实验目录及文件来源](PLAN-006/EXPERIMENT-066/README.md)。 [README.md](PLAN-006/EXPERIMENT-066/analysis/first-batch-b-trained/README.md) · [scenes-paired.csv](PLAN-006/EXPERIMENT-066/results/first-batch-b-trained/tables/scenes-paired.csv) · [操作细节](PLAN-006/EXPERIMENT-066/analysis/first-batch.md)（[原版第 11 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-23/first-batch.md#L11)）
+[实验目录及文件来源](PLAN-006/EXPERIMENT-066/README.md)。 [README.md](PLAN-006/EXPERIMENT-066/analysis/first-batch-b-trained/README.md) · [scenes-paired.csv](PLAN-006/EXPERIMENT-066/results/first-batch-b-trained/tables/scenes-paired.csv) · [操作细节](PLAN-006/EXPERIMENT-066/analysis/first-batch.md)（[原版第 11 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-23/first-batch.md#L11)）
 
 <a id="experiment-067"></a>
 
@@ -2150,7 +2103,7 @@ A/B 与 C 先分开试验，后有共同任务交付。长程序使用显式窗�
 
 **补充**
 
-旧台账 72。[实验目录及文件来源](PLAN-006/EXPERIMENT-067/README.md)。 [README.md](PLAN-006/EXPERIMENT-067/analysis/first-batch-c/README.md)（[原版第 17 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-23/first-batch-c/README.md#L17)） · [natural-pairs.csv](PLAN-006/EXPERIMENT-067/results/first-batch-c/tables/natural-pairs.csv)
+[实验目录及文件来源](PLAN-006/EXPERIMENT-067/README.md)。 [README.md](PLAN-006/EXPERIMENT-067/analysis/first-batch-c/README.md)（[原版第 17 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-23/first-batch-c/README.md#L17)） · [natural-pairs.csv](PLAN-006/EXPERIMENT-067/results/first-batch-c/tables/natural-pairs.csv)
 
 <a id="experiment-068"></a>
 
@@ -2170,7 +2123,7 @@ A/B 与 C 先分开试验，后有共同任务交付。长程序使用显式窗�
 
 **补充**
 
-旧台账 73。[实验目录及文件来源](PLAN-006/EXPERIMENT-068/README.md)。 [README.md](PLAN-006/EXPERIMENT-068/analysis/first-batch-c/README.md) · [same-value-new-reader.csv](PLAN-006/EXPERIMENT-068/results/first-batch-c/tables/same-value-new-reader.csv) · [操作细节](PLAN-006/EXPERIMENT-068/analysis/first-batch.md)（[原版第 10 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-23/first-batch.md#L10)）
+[实验目录及文件来源](PLAN-006/EXPERIMENT-068/README.md)。 [README.md](PLAN-006/EXPERIMENT-068/analysis/first-batch-c/README.md) · [same-value-new-reader.csv](PLAN-006/EXPERIMENT-068/results/first-batch-c/tables/same-value-new-reader.csv) · [操作细节](PLAN-006/EXPERIMENT-068/analysis/first-batch.md)（[原版第 10 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-23/first-batch.md#L10)）
 
 <a id="experiment-069"></a>
 
@@ -2190,7 +2143,7 @@ A/B 与 C 先分开试验，后有共同任务交付。长程序使用显式窗�
 
 **补充**
 
-旧台账 74。[实验目录及文件来源](PLAN-006/EXPERIMENT-069/README.md)。 [fanout-counts.csv](PLAN-006/EXPERIMENT-069/results/first-batch-b-trained/tables/fanout-counts.csv) · [verification.md](PLAN-006/EXPERIMENT-069/analysis/first-batch-c/verification.md) · [操作细节](PLAN-006/EXPERIMENT-069/analysis/first-batch.md)（[原版第 12 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-23/first-batch.md#L12)）
+[实验目录及文件来源](PLAN-006/EXPERIMENT-069/README.md)。 [fanout-counts.csv](PLAN-006/EXPERIMENT-069/results/first-batch-b-trained/tables/fanout-counts.csv) · [verification.md](PLAN-006/EXPERIMENT-069/analysis/first-batch-c/verification.md) · [操作细节](PLAN-006/EXPERIMENT-069/analysis/first-batch.md)（[原版第 12 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-23/first-batch.md#L12)）
 
 <a id="experiment-070"></a>
 
@@ -2210,7 +2163,7 @@ A/B 与 C 先分开试验，后有共同任务交付。长程序使用显式窗�
 
 **补充**
 
-旧台账 75。[实验目录及文件来源](PLAN-004/EXPERIMENT-070/README.md)。 [README.md](PLAN-004/EXPERIMENT-070/analysis/first-batch-b-trained/README.md) · [mark-counts.csv](PLAN-004/EXPERIMENT-070/results/first-batch-b-trained/tables/mark-counts.csv) · [操作细节](PLAN-004/EXPERIMENT-070/analysis/first-batch.md)（[原版第 13 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-23/first-batch.md#L13)）
+[实验目录及文件来源](PLAN-004/EXPERIMENT-070/README.md)。 [README.md](PLAN-004/EXPERIMENT-070/analysis/first-batch-b-trained/README.md) · [mark-counts.csv](PLAN-004/EXPERIMENT-070/results/first-batch-b-trained/tables/mark-counts.csv) · [操作细节](PLAN-004/EXPERIMENT-070/analysis/first-batch.md)（[原版第 13 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/docs/records/2026-11-23/first-batch.md#L13)）
 
 <a id="convention-003"></a>
 

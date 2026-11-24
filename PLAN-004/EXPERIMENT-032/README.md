@@ -1,6 +1,6 @@
 # EXPERIMENT-032　后训练权重的干净保持评测
 
-所属计划 [PLAN-004](../../Research%20Record.md#plan-004)。旧台账 32。
+所属计划 [PLAN-004](../../Research%20Record.md#plan-004)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-032)
 

@@ -1,6 +1,6 @@
 # EXPERIMENT-056　上游回正后，旧子节点和新子节点能否使用
 
-所属计划 [PLAN-006](../../Research%20Record.md#plan-006)。旧台账 61。
+所属计划 [PLAN-006](../../Research%20Record.md#plan-006)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-056)
 

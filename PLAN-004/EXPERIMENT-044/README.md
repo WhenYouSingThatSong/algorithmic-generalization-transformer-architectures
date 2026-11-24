@@ -1,6 +1,6 @@
 # EXPERIMENT-044　只在新可算位置污染的普通纠错后训练
 
-所属计划 [PLAN-004](../../Research%20Record.md#plan-004)。旧台账 44。
+所属计划 [PLAN-004](../../Research%20Record.md#plan-004)。
 
 [主文档中的实验设计、结果及当时分析](../../Research%20Record.md#experiment-044)
 
