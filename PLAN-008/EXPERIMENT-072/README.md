@@ -15,3 +15,15 @@ python PLAN-008/EXPERIMENT-072/run.py
 ```
 
 交付 tmp/analysis/plan008-exp072/formal 中的五份逐题轨迹、两张宽图表、逐节点表、两张恢复表和固定示例。验收时每份权重应有 72 次干净求解、36 个干预候选图；每个时点均列候选、达到起点、可比较分母。按种子分别报告下一轮回正、同轮干净子节点正确而干预分支跟随特定错值，以及发生该传播且留足末两轮后目标与子节点都持续正确。末两轮正确只描述观察窗口。三个 C 的共同合格集按图号、时点和分支取交集，仍须查看各自实际起始轮。将两种排列视为配对观测。
+
+## 归档结果
+
+2026-11-26 执行正式批次（GPU 2，`CUDA_VISIBLE_DEVICES=2`），exit 0，用时 80 秒。产出按上节口径归档在 [results/formal](results/formal)，逐文件来源与校验值见[文件清单](files.tsv)；运行时代码为 `fcbcbc9`。
+
+- 宽图汇总与逐图：[width-summary.csv](results/formal/width-summary.csv) · [width-by-graph.csv](results/formal/width-by-graph.csv)
+- 恢复汇总与逐图：[recovery-summary.csv](results/formal/recovery-summary.csv) · [recovery-by-graph.csv](results/formal/recovery-by-graph.csv)
+- 逐节点配对：[paired-nodes.csv](results/formal/paired-nodes.csv)
+- 固定示例：[examples.md](results/formal/examples.md)
+- 五份逐题轨迹：`results/formal/<模型>.json.gz`
+
+数值读数以这些结果文件为准，主文档只记录执行状态与观察。
