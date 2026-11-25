@@ -435,6 +435,8 @@ PLAN-001/EXPERIMENT-001/results/
 
 **Agent 不仅需要完成实验任务，还必须保证实验过程和实验产物能够被追溯。**
 
+所有 agent 修改该文档都必须展示修改的内容，得到我的批准才能写进去。
+
 ---
 
 <a id="full-picture"></a>
@@ -448,6 +450,13 @@ PLAN-001/EXPERIMENT-001/results/
 ### 2.2 研究思路与框架
 
 离散模型把字段预测送回下一轮；连续模型 C 则传回隐藏向量，用输出头读取其中的字段。早期两层 A 是复现用的小模型。后续 A′ （四层与B对齐超参数）与 B 的主体架构相配，B 在训练中接受数值污染。原始 C 有求解监督；后训练 C 再注明污染位置、时点、第二层监督与续算窗口。训练周期描述权重经历了多少训练，推理轮次描述固定权重在一道题上算了多久。[模型与配方称呼](docs/model-names.md) · [EXPERIMENT-009](#experiment-009) · [EXPERIMENT-044](#experiment-044) · [EXPERIMENT-047](#experiment-047)
+
+按跨轮传递状态与是否专门纠错训练，可以把现有工作排成下表：
+
+| **跨轮传递的状态** | **无专门纠错训练** | **有专门纠错训练** |
+| :---: | :---: | :---: |
+| **离散字段** | A。读出字段后重新嵌入，供下一轮使用 | B。相同主体架构，在训练中污染新可算位置的数值，监督模型恢复 |
+| **连续向量** | C。连续隐藏向量直接反馈，已有逐轮算法状态监督 | D（C+）。合理引入自纠错的loop架构。我们已经有多种有效尝试（最新的是多时点+过程监督，未来的test time computing） |
 
 干预前复制同一轮状态，一份照常续算，另一份只作指定操作。例：若 q=(u+9) mod 23，原题 u=4、q=13，临时把 u 写成 5，可以追踪 q 是否采用特定错值 14。若改的是题面常数，使新题的 u 本应为 5，则 14 是新题的正确结果。前者测扰动传播，后者测合法改题后的状态更新。[EXPERIMENT-010](#experiment-010) · [EXPERIMENT-037](#experiment-037)
 
@@ -484,6 +493,8 @@ PLAN-001/EXPERIMENT-001/results/
 局部自洽错态协议因旁路父节点可能保持旧值而暂缓。B 的持续错父及切换协议只有有限预试和实现记录；后来合法改题有单独交付。固定题内长定义边界有交接，完整旧协议的独立结果待补。逐位置停止有方案和脚本，22 日交付注明跳过。[暂缓原因](docs/records/2026-11-14/b-local-self-consistent-deferred.md) · [分项状态](docs/records/2026-11-16/project-status-overview.md) · [定义边界交接](ai-collab/handoff/2026-11-20-inline-rebinding-and-c-local.md) · [停止小试方案](docs/records/2026-11-21/c-stop-pilot.md) · [队列交付](docs/records/2026-11-22/c-attribution-delivery.md)
 
 11 月 23 日材料提出五个可继续追的问题：何时信任已有值，恢复后的隐藏状态能否被新算式使用，自然错误为何持续，仅在新可算位置受训的模型为何也能改写已填值，以及能否按位置自适应分配计算。第一批只执行其中列明的对照。BFS 由另一位同学负责，研究者确认暂时没有可附来源。本仓库保留其叙事出处，待收到独立材料再登记结果。[DISCUSSION-004](#discussion-004) · [DISCUSSION-005](#discussion-005) · [第一批协议](docs/records/2026-11-23/first-batch.md)
+
+两项先用三张可手算的示例图做逐轮核查，见 [PLAN-008](#plan-008)。
 
 ### 2.7 重要资源与路径
 
@@ -1571,6 +1582,18 @@ A/B 与 C 先分开试验，后有共同任务交付。长程序使用显式窗�
 
 [实验目录及文件来源](PLAN-004/EXPERIMENT-045/README.md)。 [c-update-small-test.md](PLAN-004/EXPERIMENT-045/analysis/c-update-small-test.md) · [c-update-training-handoff.json](PLAN-004/EXPERIMENT-045/results/c-update-training-handoff.json) · [操作细节](PLAN-004/EXPERIMENT-045/analysis/c_update/README.md)（[原版第 54 行](https://github.com/WhenYouSingThatSong/algorithmic-generalization-transformer-architectures/blob/6dbd2c78b58688de3cb4cbdacf426c7967aee4ee/tools/c_update/README.md#L54)）
 
+<a id="experiment-071"></a>
+
+#### EXPERIMENT-071　11 月 20 日同一程序内重复定义变量（事后补录）
+
+所属计划　[PLAN-005](#plan-005)
+
+**实验设计**　研究者澄清目标是让已使用过的变量名在同一段程序中重新赋值并继续参与运算。整题一次输入，每个操作数应取前文最近一次定义；设每次赋值使用新名字的配对题。原始 A、B 的种子 42 和原始 C 的种子 42、1234、2026 使用同一批题。协议含 228 对配对题与 4 道仅复用题；最长 139 次定义超过 128 个独立名字，只作续算探查。
+
+**执行与结果分析**　同期交接记录产物已在服务器落盘；11 月 20 日的汇总表已补入 `docs/records/2026-11-20/inline-rebinding/`（本次整理），逐模型原始结果表仍缺。后来的 EXPERIMENT-060 使用另一批 46 次定义程序，其正确率单独报告。
+
+**补充**　[11 月 20 日实验协议](ai-collab/handoff/2026-11-20-inline-rebinding-and-c-local.md) · [汇总表](docs/records/2026-11-20/inline-rebinding/) · [交付状态](docs/records/2026-11-21/evaluation-and-attribution.md)
+
 <a id="experiment-046"></a>
 
 #### EXPERIMENT-046　多时点纠错加第二层监督，延长窗口版本
@@ -2244,3 +2267,26 @@ A/B 与 C 先分开试验，后有共同任务交付。长程序使用显式窗�
 **补充**
 
 来源为本次审计对话中的研究者指示。
+
+### 2026 年 11 月 25 日
+
+<a id="plan-008"></a>
+
+#### PLAN-008　用手工图复核原始 A′、B、C 的宽图求解与受扰恢复
+
+**描述**
+
+已有同题实验中，原始 C 在宽浅图上较早算对，A′、B 增加循环后能大幅追上。一个已算对的内部值被改错后，未经专门纠错训练的 C 有时也和 B 一样回正。先在能逐步手算的图上复核两个问题：宽图中哪些位置还在等父值，哪些位置在父值齐备后仍要等；错值被覆盖时，下游是否曾实际按该错值计算，随后又用了几轮恢复。
+
+**思路**
+
+1. 三张模 23 加法图共用六个输入和同一条四步算式，每层分别有 1、4、24 个并排的运算位置。各模型自由续算 24 轮，逐位置对照真值、父值首次全对的轮次和目标首次算对的轮次，同时记录整图首次算对的轮次。对上一轮父值全对的位置，分开看本轮算对、留空和给错数。图变宽时序列也变长，两者在这批小图上共同变化。
+2. 在共同算式中，第一步为 `3+4=7`，下一步为 `7+9=16`。分别等目标首次读出 7、整图数值首次全对，再把该目标写成 12。A′、B 改数值字段，C 换入配对题同轮、同位置且读出 12 的隐藏向量。每次都从同一起点保留干净分支，续算 16 轮；逐轮读目标和子节点，区别子节点保持 16、按错值算出 21、给出其他数或留空。逐题注明实际注错轮次和未达起点、供体不合格的情况。
+
+**完成情况与分析**
+
+三张图、算术真值与报告生成已在本地核对。2026-11-25 已在 GPU0 用现有 A′ 42（e86）、B 42（e92）、原始 C 42 和 1234（均为 e143）完成正式小验证，exit 0；无起点未达到或供体不合格。四个模型在层宽 1/4/24 均于第 2 轮读到目标 7、第 5 轮整图算完；A′ 在注错后保持 12，B/C 目标回 7 但子节点先按 12 算出 21（C_s1234 还有 3→7、5/20 等过渡），下一轮再回 16。完整逐轮结果在 `docs/records/2026-11-25/abc-readable-examples/`。
+
+**补充**
+
+[结果包](docs/records/2026-11-25/abc-readable-examples/README.md) · [逐题实测](docs/records/2026-11-25/abc-readable-examples/逐题实测.md) · [逐轮 JSON](docs/records/2026-11-25/abc-readable-examples/traces.json) · [逐轮记录脚本](tools/c_hard_graphs/readable_examples.py) · [计划目录](PLAN-008/README.md)
