@@ -1,0 +1,12 @@
+[tokenizers] tokenizer_n_vars not set; legacy fallback n_vars=128 (VARIABLE vocab=129). Set tokenizer_n_vars explicitly for full-pool-renamed data.
+ckpt loaded on cpu
+Loaded model from checkpoint: /workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/runs/A-L4D384fast/checkpoints/Nodes32-ADD - L4H16D384_DeBERTa-seed-42 - 2026-11-09-15:42:45/epoch=86-val_loss=0.0000.ckpt
+[tokenizers] tokenizer_n_vars not set; legacy fallback n_vars=128 (VARIABLE vocab=129). Set tokenizer_n_vars explicitly for full-pool-renamed data.
+ckpt loaded on cpu
+Loaded model from checkpoint: /workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/runs/B-M6/checkpoints/Nodes32-ADD - L4H16D384_DeBERTa_recorrection-seed-42 - 2026-11-07-17:47:37/epoch=92-val_loss=0.0000.ckpt
+[tokenizers] tokenizer_n_vars not set; legacy fallback n_vars=128 (VARIABLE vocab=129). Set tokenizer_n_vars explicitly for full-pool-renamed data.
+ckpt loaded on cpu
+Loaded model from checkpoint: /workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/runs/oldC0-resume-150ep/checkpoints/Nodes32-ADD - L4H16D384_DeBERTa-seed-42 - 2026-11-14-02:35:10/epoch=143-val_loss=0.0000.ckpt
+[tokenizers] tokenizer_n_vars not set; legacy fallback n_vars=128 (VARIABLE vocab=129). Set tokenizer_n_vars explicitly for full-pool-renamed data.
+ckpt loaded on cpu
+Loaded model from checkpoint: /workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/runs/oldC0-resume-150ep/checkpoints/Nodes32-ADD - L4H16D384_DeBERTa-seed-1234 - 2026-11-14-02:38:10/epoch=143-val_loss=0.0000.ckpt
