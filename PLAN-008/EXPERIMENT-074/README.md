@@ -53,3 +53,16 @@ python PLAN-008/EXPERIMENT-074/allbad.py
 - 五份压缩逐题轨迹：`results/formal/<模型>.jsonl.gz`
 
 数值读数以这些结果文件为准，主文档只记录执行状态与观察。
+
+## 数据结构（供复算）
+
+`results/formal/<模型>.jsonl.gz` 每行一个 JSON，一个 `(size, gid, order)` 下有 13 行 = 1 行全空对照 + 4 种条件 × 3 次抽样。
+
+- **`condition="empty"` 的行**：含 `nodes` 与 `tokens`。`nodes` 每项有 `name`、`pos`、`truth`、`parents`（节点下标）、`depth`、`slot`、`stale`、`version`。同一 `(size, gid, order)` 的其余各行共用这份 `nodes`。
+- **`condition="empty0"/"empty25"/"empty50"/"empty75"` 的行**：含 `draw`、`blank_count`、`initial`、`trace`，**不含 `nodes`**；须按 `(size, gid, order)` 与上面那份 `nodes` 对齐后使用。
+- `initial`：长度等于节点数的初始 VALUE 数组，`24` 表示空，`0`–`22` 为写入的数值。
+- `trace`：24 轮 × 节点数 的数值读出，`trace[t-1][i]` 为第 `t` 轮节点 `i` 读出。
+- 各行另有 `model`、`sha256`（对应 checkpoint）、`size`、`gid`、`order`、`draw`。
+
+`results/formal/<模型>-strata.csv`：按 `(size, gid, order, condition, draw, depth, role, initial_class, parent_evidence)` 的原始计数。
+`results/formal/summary.csv`：按 `(model, size, order, condition, initial_class, depth)` 汇总，`correct_r{1,2,3,5,9,24}` 为对应轮次的正确比例，`same_initial_wrong_r24`、`correct_last_two`、`clean_correct_r*` 等见列名。
