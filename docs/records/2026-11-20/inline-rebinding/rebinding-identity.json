@@ -1,0 +1,73 @@
+{
+  "plan_sha256": "b3c4b1be9325dd37aefc2004dc19b6e5ee6d82c6ff097c25c072d3f39038bc24",
+  "cases_sha256": "996104e673a4d27c5d91c8439881f19a09eb86a82011d250f302298b2a66b7da",
+  "cases": 232,
+  "models": {
+    "A_s42": {
+      "file": "tmp/analysis/c-local-update-normal-v1/rebinding/A_s42.json",
+      "file_sha256": "2f2fdb300bdaaddbd1c8809e379c2b6988f6b95de5577af1cb307281108beb6e",
+      "model": {
+        "id": "A_s42",
+        "family": "A",
+        "seed": 42,
+        "config": "A-L4D384fast-Nodes32-ADD-L4H16D384-DeBERTa",
+        "path": "/workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/runs/A-L4D384fast/checkpoints/Nodes32-ADD - L4H16D384_DeBERTa-seed-42 - 2026-11-09-15:42:45/epoch=86-val_loss=0.0000.ckpt",
+        "sha256": "0b66e196990af8fb8dca3fdb75f4d211fd4a4c56a8496d2a200f765470c1106a"
+      },
+      "records": 1144
+    },
+    "B_s42": {
+      "file": "tmp/analysis/c-local-update-normal-v1/rebinding/B_s42.json",
+      "file_sha256": "6d53e0d323c8837e7f8f79b1b653536a44b2bd5d5b6b3d34d4f286b334603834",
+      "model": {
+        "id": "B_s42",
+        "family": "B",
+        "seed": 42,
+        "config": "B-M6-Nodes32-ADD-L4H16D384-DeBERTa",
+        "path": "/workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/runs/B-M6/checkpoints/Nodes32-ADD - L4H16D384_DeBERTa_recorrection-seed-42 - 2026-11-07-17:47:37/epoch=92-val_loss=0.0000.ckpt",
+        "sha256": "ef58ba261fd0f4677adabec3d8c978758397bb4ee536f09bb833fef8bbde0886"
+      },
+      "records": 1144
+    },
+    "C_s42": {
+      "file": "tmp/analysis/c-local-update-normal-v1/rebinding/C_s42.json",
+      "file_sha256": "63f1be5aaabeb9c43b29fa60ce894b5267f1d729d68585a65b161f1e464ca4ac",
+      "model": {
+        "id": "C_s42",
+        "family": "C",
+        "seed": 42,
+        "config": "C0-M4-Nodes32-ADD-L4H16D384-DeBERTa",
+        "path": "/workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/runs/oldC0-resume-150ep/checkpoints/Nodes32-ADD - L4H16D384_DeBERTa-seed-42 - 2026-11-14-02:35:10/epoch=143-val_loss=0.0000.ckpt",
+        "sha256": "4a00d6a21a7ed6ec9730daccf27f6077af45d2f2d7ff7376386bf0aa8903a798"
+      },
+      "records": 1144
+    },
+    "C_s1234": {
+      "file": "tmp/analysis/c-local-update-normal-v1/rebinding/C_s1234.json",
+      "file_sha256": "47582093f8932651b1e7d2c75cd5e6fc1d0b56d07efd63064927f0a2b8d0d69a",
+      "model": {
+        "id": "C_s1234",
+        "family": "C",
+        "seed": 1234,
+        "config": "C0-M4-Nodes32-ADD-L4H16D384-DeBERTa",
+        "path": "/workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/runs/oldC0-resume-150ep/checkpoints/Nodes32-ADD - L4H16D384_DeBERTa-seed-1234 - 2026-11-14-02:38:10/epoch=143-val_loss=0.0000.ckpt",
+        "sha256": "0bca3a2b91e82d70d5808859d3a907e0b8a32e0a852ba483c208f955d7d70475"
+      },
+      "records": 1144
+    },
+    "C_s2026": {
+      "file": "tmp/analysis/c-local-update-normal-v1/rebinding/C_s2026.json",
+      "file_sha256": "c56db00a5b99b701c87f0824afaf26280cac8b75fc1894c83cf8b08339cae585",
+      "model": {
+        "id": "C_s2026",
+        "family": "C",
+        "seed": 2026,
+        "config": "C0-M4-Nodes32-ADD-L4H16D384-DeBERTa",
+        "path": "/workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures/tmp/runs/oldC0-newseed-150ep/checkpoints/Nodes32-ADD - L4H16D384_DeBERTa-seed-2026 - 2026-11-14-10:12:43/epoch=143-val_loss=0.0000.ckpt",
+        "sha256": "40babb206b1393d0892b047202b9d6469cd140c82f3ba82c96a466fa3c76e780"
+      },
+      "records": 1144
+    }
+  },
+  "note": "228 paired cases + 4 unpaired wide-33 cases; D/D+4/D+8 fixed observations; original weights only."
+}
