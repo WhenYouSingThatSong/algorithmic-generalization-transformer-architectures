@@ -7,7 +7,7 @@
 ## 1. 结论
 
 1. **三个家族用的都是原仓库里的损失函数，我们没有改动任何损失定义。**
-2. A′、B 走 `compute_batch_loss_fast`；原始 C 走 `compute_batch_loss_nointerm`。两条路径的**聚合口径不同**，`total_loss` 绝对值不可跨家族比较。
+2. A′、B 走 `compute_batch_loss_fast`，原始 C 走 `compute_batch_loss_nointerm`。真正造成不可比的是三点：**训练损失的聚合口径**（平均 vs 累加）、**回灌内容**（教师真值 vs 自己的隐藏态）、以及 **A/B 的训练与验证用的是不同函数**。
 3. 我们对 `experiments/model.py` 的改动集中在**循环上限、第二条验证流、日志频率、forward 调用路径**；对 depth≤6 的训练数据与上游行为等价。
 
 ## 2. 各家族走哪条路
@@ -24,7 +24,7 @@
 
 分流代码与原仓库一致（`upstream/main` 的 `training_step` 是同一套嵌套判断），我们没有改这段。
 
-## 3. 两条损失路径的四个差异
+## 3. 两条损失路径的差异（经复核）
 
 ### 3.1 聚合口径不同（量纲差异，最主要）
 
@@ -33,18 +33,44 @@
 
 所以 C 的 `total_loss` 大致是「每轮平均损失 × 轮数」，A/B 的是「跨深度平均」。depth≤6 的图上 loop 最多约 7 轮，**两者相差一个约 7 倍量级的系统性因子**，纯粹由聚合口径造成，与模型好坏无关。
 
-### 3.2 criterion 构造不同
+### 3.2 criterion 构造不同——但**不构成数值差异**
 
 ```python
 self.criterion      = torch.nn.CrossEntropyLoss()                  # C 用；默认 reduction='mean'
-self.fast_criterion = torch.nn.CrossEntropyLoss(reduction='none')  # A/B 用；自己再 .mean()
+self.fast_criterion = torch.nn.CrossEntropyLoss(reduction='none')  # A/B 用；随后自己 .mean()
 ```
 
-### 3.3 VALUE 项的加权不同
+`reduction='none'` 之后立刻 `.mean()`，与默认 `mean` **在数学上完全等价**。它存在的目的只是为了先把损失 reshape 成 `[n_depths, batch, seq]` 以便分层记录，以及支撑下面那条并未启用的 focus 分支。**这一条不改变损失值。**
 
-A/B 对 VALUE 用了 `value_to_compute_pos` 的 focus 加权：本批还没轮到计算的位置按 `focus_ratio` 降权。C 那段没有这个处理，是全体平均。
+### 3.3 VALUE 项的 focus 加权——**实际未启用**
 
-### 3.4 学习目标本身不同（不只是尺度）
+`compute_batch_loss_fast` 里确实有一段对 VALUE 的 focus 加权：
+
+```python
+if factor == VALUE and use_pos_focus:
+    focus_ratio = value_to_compute_pos.float().mean()
+    factor_loss_with_focus = factor_at_depth_loss[value_to_compute_pos].mean() \
+                           + (factor_at_depth_loss[~value_to_compute_pos] * focus_ratio).mean()
+```
+
+但 `use_pos_focus` 的默认值是 `False`，而全仓库**唯一**的调用点（`model.py:342`）并没有传这个参数：
+
+```python
+total_train_loss = self.compute_batch_loss_fast(batch, log_prefix='train', log=True, on_step=True, on_epoch=True)
+```
+
+因此 A/B 训练时走的是 `else` 分支（普通 `.mean()`），**这条不构成差异**。
+
+### 3.4 训练与验证用的是不同函数（A/B 独有）
+
+| | 训练 | 验证（`total_loss/val`，选检查点用） |
+|---|---|---|
+| A′/B | `compute_batch_loss_fast`：跨深度平均，一次前向 | `compute_batch_loss`（`model.py:646`）：**逐 loop 累加**，且每次验证把 `use_teacher_pred_for_next_loop` **随机取 50/50** |
+| C | `compute_batch_loss_nointerm` | 同一个函数，`max_loop=max_val_loop` |
+
+也就是说 A/B 的监控曲线 `total_loss/val` 每一步都在「教师强制」与「自由运行」两种模式之间随机跳，而 C 的监控曲线来自与训练同一个函数。**这条对"用各自曲线选检查点"影响很大。**
+
+### 3.5 学习目标本身不同（不只是尺度）
 
 A/B 是 `use_teacher_pred_for_next_loop: true`，下一轮输入的是**教师的中间状态**；C 是 `false`，输入的是**模型自己上一轮的预测**。也就是说 C 是在自己可能已经错的中间状态上被监督。这改变的是**问题难度和目标本身**，不只是数值尺度。
 
@@ -224,7 +250,7 @@ depth_batch, factor_preds = self.model(depth_batch, True)   # 喂自己的隐藏
 
 1. **不能跨家族比 loss 绝对值。** 能跨家族比的是同题节点指标：数值正确率、四字段全对率及其实际分母。
 2. **同家族内部**看 loss 的收敛、选中点与末端漂移是有效的。
-3. **选检查点**：A′/B 与 C 各自按自己家族的 `total_loss/val` 排序，不能用同一条曲线排名。
+3. **选检查点**：A′/B 与 C 各自按自己家族的 `total_loss/val` 排序，不能用同一条曲线排名；并注意 A/B 的 `total_loss/val` 本身在教师强制与自由运行之间随机跳（§3.4）。
 4. 要判断"跨家族训练是否到位"，应使用**同一套评测指标**（PLAN-009 §2 的做法），而不是 loss。
 5. 引用"原始实现"时，`upstream/main` 是干净基准；`git diff upstream/main HEAD` 就是"我们改了什么"的全量清单。
 
