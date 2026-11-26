@@ -48,16 +48,143 @@ A/B 对 VALUE 用了 `value_to_compute_pos` 的 focus 加权：本批还没轮�
 
 A/B 是 `use_teacher_pred_for_next_loop: true`，下一轮输入的是**教师的中间状态**；C 是 `false`，输入的是**模型自己上一轮的预测**。也就是说 C 是在自己可能已经错的中间状态上被监督。这改变的是**问题难度和目标本身**，不只是数值尺度。
 
-## 4. 我们相对原仓库改了哪些代码
+## 4. 真实图上的中间过程（可复现）
 
-### 4.1 总量
+[loss-paths-demo.py](loss-paths-demo.py) 在仓库根目录执行即可复现本节（只读，需要本地 `tmp/runs` 下的权重）。真图取自 `experiments/data/Tr32Test128-ADD`，C 的权重为 e143。
+
+### 4.1 同一张真图
+
+32 个结果位置，depth 0..5。`depth=-1` 的位置是题面里的字面量（例如 `18 = x_104`）；`depth>=0` 的是结果位置，输入为空、标签是真值。
+
+### 4.2 A/B：第 k 轮**输入**里的 VALUE 已经是真值
+
+```
+   node  dep   真值 |   k0   k1   k2   k3   k4   k5
+  x_104    0   18 |   18   18   18   18   18   18
+   x_19    0   10 |   10   10   10   10   10   10
+   x_75    0   20 |   20   20   20   20   20   20
+   x_51    0    0 |    0    0    0    0    0    0
+  x_100    0   11 |   11   11   11   11   11   11
+   x_80    0    6 |    6    6    6    6    6    6
+   x_15    1   18 |   空   18   18   18   18   18
+   x_10    1   18 |   空   18   18   18   18   18
+   x_70    1   10 |   空   10   10   10   10   10
+   x_27    1    7 |   空    7    7    7    7    7
+  x_123    1    0 |   空    0    0    0    0    0
+   x_50    1    0 |   空    0    0    0    0    0
+   x_16    1   11 |   空   11   11   11   11   11
+  x_118    1    3 |   空    3    3    3    3    3
+   x_72    2   18 |   空   空   18   18   18   18
+  x_110    2   18 |   空   空   18   18   18   18
+   x_92    2   18 |   空   空   18   18   18   18
+   x_26    2   16 |   空   空   16   16   16   16
+   x_98    2    1 |   空   空    1    1    1    1
+   x_54    2    7 |   空   空    7    7    7    7
+   x_68    2    1 |   空   空    1    1    1    1
+   x_14    2   21 |   空   空   21   21   21   21
+  x_101    3   12 |   空   空   空   12   12   12
+   x_95    3   12 |   空   空   空   12   12   12
+   x_87    3   14 |   空   空   空   14   14   14
+   x_82    3    7 |   空   空   空    7    7    7
+   x_81    3    8 |   空   空   空    8    8    8
+   x_20    4   15 |   空   空   空   空   15   15
+   x_31    4   14 |   空   空   空   空   14   14
+   x_97    4    8 |   空   空   空   空    8    8
+   x_90    5   14 |   空   空   空   空   空   14
+   x_77    5    8 |   空   空   空   空   空    8
+```
+
+这是 `get_teacher_batch_with_depth` 的直接产物：先算 `value_avail_pos = (depth <= k) & (depth != -1)`，再
+
+```python
+batch_ext[..., VALUE][value_avail_pos] = batch_label_ext[..., VALUE][value_avail_pos]
+```
+
+也就是说，**每个 depth 的输入都带着真值前缀**；所有 depth 拼成一个 batch 一次前向。`compute_batch_loss_fast` 的 docstring 明说：
+
+> This method always uses the teacher predictions for the next loop for parallelization. No for loop in the forward pass.
+
+### 4.3 C：第 k 轮的输入是它**自己上一轮的隐藏状态**
+
+真实跑 `compute_batch_loss_nointerm` 的循环：
+
+```
+  循环前 depth_batch=(1, 256, 384)  ← token_embedder(batch)
+  loop 0: 输出 hidden (1, 256, 384)，32 个位置对了 6 个
+  loop 1: 输出 hidden (1, 256, 384)，32 个位置对了 14 个
+  loop 2: 输出 hidden (1, 256, 384)，32 个位置对了 22 个
+  loop 3: 输出 hidden (1, 256, 384)，32 个位置对了 27 个
+  loop 4: 输出 hidden (1, 256, 384)，32 个位置对了 30 个
+  loop 5: 输出 hidden (1, 256, 384)，32 个位置对了 32 个
+```
+
+代码上只有最开始 `depth_batch = self.model.token_embedder(batch)` 用了一次离散输入，之后每轮都是
+
+```python
+depth_batch, factor_preds = self.model(depth_batch, True)   # 喂自己的隐藏输出
+```
+
+喂回去的是**自己的隐藏输出**，不重新嵌入，也没有任何真值被注入。它每轮自己读出的 VALUE：
+
+```
+   node  dep   真值 |   L0   L1   L2   L3   L4   L5
+  x_104    0   18 |   18   18   18   18   18   18
+   x_19    0   10 |   10   10   10   10   10   10
+   x_75    0   20 |   20   20   20   20   20   20
+   x_51    0    0 |    0    0    0    0    0    0
+  x_100    0   11 |   11   11   11   11   11   11
+   x_80    0    6 |    6    6    6    6    6    6
+   x_15    1   18 |   空   18   18   18   18   18
+   x_10    1   18 |   空   18   18   18   18   18
+   x_70    1   10 |   空   10   10   10   10   10
+   x_27    1    7 |   空    7    7    7    7    7
+  x_123    1    0 |   空    0    0    0    0    0
+   x_50    1    0 |   空    0    0    0    0    0
+   x_16    1   11 |   空   11   11   11   11   11
+  x_118    1    3 |   空    3    3    3    3    3
+   x_72    2   18 |   空   空   18   18   18   18
+  x_110    2   18 |   空   空   18   18   18   18
+   x_92    2   18 |   空   空   18   18   18   18
+   x_26    2   16 |   空   空   16   16   16   16
+   x_98    2    1 |   空   空    1    1    1    1
+   x_54    2    7 |   空   空    7    7    7    7
+   x_68    2    1 |   空   空    1    1    1    1
+   x_14    2   21 |   空   空   21   21   21   21
+  x_101    3   12 |   空   空   空   12   12   12
+   x_95    3   12 |   空   空   空   12   12   12
+   x_87    3   14 |   空   空   空   14   14   14
+   x_82    3    7 |   空   空   空    7    7    7
+   x_81    3    8 |   空   空   空    8    8    8
+   x_20    4   15 |   空   空   空   空   15   15
+   x_31    4   14 |   空   空   空   空   14   14
+   x_97    4    8 |   空   空   空   空    8    8
+   x_90    5   14 |   空   空   空   空   空   14
+   x_77    5    8 |   空   空   空   空   空    8
+```
+
+未算到的位置，它自己读出 `EMPTY`。
+
+### 4.4 两张表长得像，来源相反
+
+两张表都是"一层一轮"的阶梯，但阶梯的位置不同：
+
+| | 阶梯出现在 | 来源 |
+|---|---|---|
+| A/B | **输入** | 真值被注入（教师强制） |
+| C | **输出** | 模型自己的预测，被回灌 |
+
+这正对应两家族各自的名字：A/B 是**离散字段回灌**（每轮把离散字段重新嵌入），C 是**连续 hidden 回灌**（直接回灌隐藏向量，不经过离散化）。
+
+## 5. 我们相对原仓库改了哪些代码
+
+### 5.1 总量
 
 - 全仓 `git diff upstream/main HEAD`：4327 个文件，+1375592 / −384 —— 绝大部分是实验产物与记录，**不代表代码改动量**。
 - 核心训练代码：`model.py` **+29/−14**、`tokenizers.py` **+40/−1**、`train.py` **+146/−10**。
 - 数据生成相关（`utils.py`、`dag_generator.py`、`generate_data.py`）：**无改动**。
-- 两个损失函数本身：`compute_batch_loss_fast` **一字未改**；`compute_batch_loss_nointerm` 见 4.2。
+- 两个损失函数本身：`compute_batch_loss_fast` **一字未改**；`compute_batch_loss_nointerm` 见 5.2。
 
-### 4.2 `experiments/model.py`（+29/−14）逐处
+### 5.2 `experiments/model.py`（+29/−14）逐处
 
 1. 新增 `max_val_loop_n128`：给第二条验证流（N128）单独的循环上限。
 2. `validation_step` 增加 `dataloader_idx`：支持 `val` / `val_n128` 两条流，并传入 `max_loop`。
@@ -70,7 +197,7 @@ A/B 是 `use_teacher_pred_for_next_loop: true`，下一轮输入的是**教师�
 
 第 8 条是**真正的行为改动**。但对训练图 depth≤6，`max_depth_data ≈ 7 ≤ max_train_loop = 8`，`last_loop` 恰好就是最后一轮，**不触发截断**，因此对 A′/B/C 的训练结果没有影响。它只在 depth>36 的图上会截断——这正是第 3 条给 `test_step` 关掉上限的原因。
 
-### 4.3 `experiments/train.py`（+146/−10）
+### 5.3 `experiments/train.py`（+146/−10）
 
 全部与**命令行、恢复、检查点**有关，与损失定义无关：
 
@@ -81,7 +208,7 @@ A/B 是 `use_teacher_pred_for_next_loop: true`，下一轮输入的是**教师�
 - 强制保存 `final.ckpt`（`save_last` 在该 Lightning 版本只在上榜检查点写入时更新，末轮可能缺失）
 - `checkpoint_dir` 创建
 
-### 4.4 `experiments/tokenizers.py`（+40/−1，纯新增）
+### 5.4 `experiments/tokenizers.py`（+40/−1，纯新增）
 
 新增 `build_factored_tokenizer()` 与 `_cfg_get()`，把 `n_vars` 的取值优先级明确为：显式参数 → `data_config.tokenizer_n_vars` → 旧回退 `max(train.num_nodes, val.num_nodes)`。
 
@@ -93,7 +220,7 @@ A/B 是 `use_teacher_pred_for_next_loop: true`，下一轮输入的是**教师�
 
 就来自这里——说明实际走的仍是旧回退，取值与上游一致。
 
-## 5. 实践含义
+## 6. 实践含义
 
 1. **不能跨家族比 loss 绝对值。** 能跨家族比的是同题节点指标：数值正确率、四字段全对率及其实际分母。
 2. **同家族内部**看 loss 的收敛、选中点与末端漂移是有效的。
@@ -101,8 +228,9 @@ A/B 是 `use_teacher_pred_for_next_loop: true`，下一轮输入的是**教师�
 4. 要判断"跨家族训练是否到位"，应使用**同一套评测指标**（PLAN-009 §2 的做法），而不是 loss。
 5. 引用"原始实现"时，`upstream/main` 是干净基准；`git diff upstream/main HEAD` 就是"我们改了什么"的全量清单。
 
-## 6. 来源
+## 7. 来源
 
 - 代码与配置：`experiments/model.py`、`experiments/train.py`、`experiments/tokenizers.py`、`experiments/configs/{A-L4D384fast,B-M6,C0-M4}-Nodes32-ADD-L4H16D384-DeBERTa/train_config.yaml`
 - 对照基准：`git show upstream/main:experiments/model.py`
 - 相关：`docs/records/2026-11-25/seed-training-curves.md`（各家族 loss 绝对值不可横比的既有说明）
+- 复现脚本：[loss-paths-demo.py](loss-paths-demo.py)（第 4 节的全部输出由它产生；只读，需本地 `tmp/runs` 权重）
