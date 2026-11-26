@@ -1,11 +1,13 @@
 # 工作看板
 
-> 最近更新：2026-11-23 15:24 CST · [claude]
+> 最近更新：2026-11-26 12:40 CST · [claude]
 > 活看板：任务可以移动；状态变化在 `log.md` 记一行。条目格式 `[YYYY-MM-DD HH:MM][author]`。
 
 ## 当前执行 · 第一批原始 C、四模型和过程监督实验
 
-- [2026-11-26][gpt → 服务器执行] PLAN-008 收尾依次执行[宽图与三种子恢复](../PLAN-008/EXPERIMENT-072/README.md)、[初始节点随机预填](../PLAN-008/EXPERIMENT-073/README.md)，各先 smoke 再正式。交回逐题轨迹、分母和同题干净表现，原始 C 分种子列出。
+- [x] [2026-11-26][gpt → 服务器执行] PLAN-008 收尾依次执行[宽图与三种子恢复](../PLAN-008/EXPERIMENT-072/README.md)、[初始节点随机预填](../PLAN-008/EXPERIMENT-073/README.md)，各先 smoke 再正式。交回逐题轨迹、分母和同题干净表现，原始 C 分种子列出。
+  - [2026-11-26 01:07][claude] 072、073 正式批次完成（GPU 2，均 exit 0）：072 用时 80 秒、073 用时 448 秒。结果分别归档在 `PLAN-008/EXPERIMENT-072/results/formal`、`PLAN-008/EXPERIMENT-073/results/formal`，逐文件 SHA-256 见各自 `files.tsv`。
+  - [2026-11-26 02:00][claude] 另按 11-26 追加的 [EXPERIMENT-074](../PLAN-008/EXPERIMENT-074/README.md)（整图无正确值时的恢复）跑完正式批次（GPU 2，exit 0，1171 秒），结果归档在 `PLAN-008/EXPERIMENT-074/results/formal`。三项读数均已记入主文档对应条目。
 
 - [2026-11-25 19:18][gpt] 待服务器执行小验证。按[三张手工图和交付说明](../docs/records/2026-11-25/abc-readable-examples.md)用现有 A′、B、两份原始 C 跑一次，回传逐节点 Markdown 和逐轮 JSON。记录未达起点的题，注明各权重实际注错轮次。
 
