@@ -29,7 +29,7 @@
 ## 3. 运行命令
 
 ```bash
-cd /workspace/lab-xj/users/jinxi/code/yhy/well-ordered
+cd /workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures
 CUDA_VISIBLE_DEVICES=0 python tools/c_hard_graphs/readable_examples.py \
   --data-root /workspace/lab-xj/users/jinxi/code/yhy/algorithmic-generalization-transformer-architectures \
   --out docs/records/2026-11-25/abc-readable-examples \
