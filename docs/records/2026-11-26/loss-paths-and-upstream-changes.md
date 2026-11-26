@@ -93,6 +93,21 @@ A/B 是 `use_teacher_pred_for_next_loop: true`，下一轮输入的是**教师�
 
 对 A′、B、C 三个家族**同样成立**（它们共用同一份数据配置）。
 
+#### 但仓库里确实有"双验证集"的运行
+
+唯一带第二验证流的配置是 `C0-M4-MixedN8-32-D12-Vocab128-2Val-L4H16D384-DeBERTa-100ep`：
+
+| 流 | 目录 | 文件 | 实测形状 | 角色 |
+|---|---|---|---|---|
+| idx 0 → `total_loss/val` | `data/C0-MixedN8-32-D12-Vocab128-ADD` | `val_data.pt` | (2000, 256, 6)，depth≤12 | **同分布**验证 |
+| idx 1 → `total_loss/val_n128` | `data/Tr32Test128-ADD` | `val_data.pt` | (1000, 1024, 6)，depth≤18 | N128 分布外 |
+
+`train.py` 给这第二条流另建了一个检查点回调（`dirpath=checkpoint_dir+'-n128'`、`monitor='total_loss/val_n128'`），注释写着 "Main checkpoint remains total_loss/val (in-range)"。
+
+**陷阱在于：文件名 `val_data.pt` 的含义取决于配置把它放在哪个 `data_dir`。** 在 `Tr32Test128-ADD/` 里它就是 128 节点测试集；在 `C0-MixedN8-.../` 里它是同分布验证集。
+
+因此对本文关注的三份权重（A′ 42、B 42、原始 C 42）：配置指向 `Tr32Test128-ADD` 且没有 `val2_*`，**只有 N128 这一条流，没有任何同分布验证**；12 个训练日志里 `val_n128` 出现 0 次，与之一致。记忆中的"普通验证集 loss"属于 `-2Val`（MixedN8）那条线，不是主线的 A/B/C。
+
 ## 4. 真实图上的中间过程（可复现）
 
 [loss-paths-demo.py](loss-paths-demo.py) 在仓库根目录执行即可复现本节（只读，需要本地 `tmp/runs` 下的权重）。真图取自 `experiments/data/Tr32Test128-ADD`，C 的权重为 e143。
