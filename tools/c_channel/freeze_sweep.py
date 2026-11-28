@@ -10,7 +10,7 @@ import argparse, json, os, sys
 import torch
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import probe as P
+import common as P
 
 
 def main():
@@ -19,7 +19,7 @@ def main():
     ap.add_argument('--n-graphs', type=int, default=200)
     ap.add_argument('--batch-size', type=int, default=8)
     ap.add_argument('--graces', default='0,1,2,3,4')
-    ap.add_argument('--out', default='tmp/analysis/channel-probe/freeze_sweep.json')
+    ap.add_argument('--out', default='tmp/analysis/channel/freeze_sweep.json')
     a = ap.parse_args()
 
     data = torch.load(os.path.join(P.REPO, P.DATA), map_location='cpu', weights_only=True)

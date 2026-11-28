@@ -26,7 +26,7 @@ import torch
 import torch.nn.functional as F
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import probe as P
+import common as P
 
 
 def run_with_stats(rt, batch, depths, res, variant='none', grace=0):
@@ -93,7 +93,7 @@ def main():
     ap.add_argument('--seeds', default='42,1234,2026')
     ap.add_argument('--conditions', default='none,freeze0,freeze1,freeze2')
     ap.add_argument('--n-graphs', type=int, default=8)
-    ap.add_argument('--out', default='tmp/analysis/channel-probe/update_stats.json')
+    ap.add_argument('--out', default='tmp/analysis/channel/update_stats.json')
     a = ap.parse_args()
 
     data = torch.load(os.path.join(P.REPO, P.DATA), map_location='cpu', weights_only=True)

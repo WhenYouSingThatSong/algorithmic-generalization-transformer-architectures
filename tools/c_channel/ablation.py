@@ -28,7 +28,7 @@ import torch
 import torch.nn.functional as F
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import probe as P
+import common as P
 
 CONDS = {
     'A':   dict(pre=None, post=None, start=0, extra=0),
@@ -119,7 +119,7 @@ def main():
     ap.add_argument('--seeds', default='42')
     ap.add_argument('--n-graphs', type=int, default=8)
     ap.add_argument('--conds', default=','.join(CONDS))
-    ap.add_argument('--out', default='tmp/analysis/channel-probe/ablation.json')
+    ap.add_argument('--out', default='tmp/analysis/channel/ablation.json')
     a = ap.parse_args()
 
     data = torch.load(os.path.join(P.REPO, P.DATA), map_location='cpu', weights_only=True)

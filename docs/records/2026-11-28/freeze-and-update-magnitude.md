@@ -2,8 +2,8 @@
 
 - 日期：2026-11-28
 - 计划：[PLAN-010](../../../PLAN-010/README.md)，主文档记录单元 EXPERIMENT-075
-- 代码：冻结扫描 [tools/c_channel_probe/freeze_sweep.py](../../../tools/c_channel_probe/freeze_sweep.py)；更新幅度 [tools/c_channel_probe/update_stats.py](../../../tools/c_channel_probe/update_stats.py)
-- 数据归档：[json/](json/)（`probe.json`、`update_stats.json`、`update_stats_g4.json`，校验值见 [json/files.tsv](json/files.tsv)）；运行时输出在 `tmp/analysis/channel-probe/`
+- 代码：冻结扫描 [tools/c_channel/freeze_sweep.py](../../../tools/c_channel/freeze_sweep.py)；更新幅度 [tools/c_channel/update_stats.py](../../../tools/c_channel/update_stats.py)
+- 数据归档：[json/](json/)（`update_stats.json`、`update_stats_g4.json`，校验值见 [json/files.tsv](json/files.tsv)）；运行时输出在 `tmp/analysis/channel/`
 - 数据：`experiments/data/N128-heldout-ADD/testdata_N128.pt`；权重：旧 C0 三个种子 e143
 
 ## 1. 两个量
@@ -167,10 +167,10 @@ g = 0…4 时精度（node_acc）：
 
 ### 对原假设的意义（只陈述可测的部分）
 
-- 跨轮载体**确实被用到**：完全移除它模型就输出 EMPTY（见[探针结果](probe-and-channel-shutdown-results.md) §4）。
+- 跨轮载体**确实被用到**：只保留第 0 轮的写入、之后不再更新，模型仍与基线相同（§4.2、§4.10）。
 - 但**"每轮持续更新"这一步没有被用到**：把第 1 轮之后的状态全部冻住，结果不变。
 - 因此更准确的描述是：**信息在第 0 轮那次前向里被写进隐藏态，此后基本只是原样携带，而不是逐轮累积。**
-- 这**不支持**"隐藏态在未到轮次的位置上逐轮演化出结果"这一形式；至于 h₁ 里是否已经含有该节点的结果，仍需 H1 的探针来判定（线性探针未判定成功，需换非线性探针）。
+- 这**不支持**"隐藏态在未到轮次的位置上逐轮演化出结果"这一形式。至于 h₁ 里已经含有什么、以什么形式编码，本轮没有测，见[现状](channel-investigation-status.md) §7。
 
 ## 5. 限制
 
@@ -181,5 +181,5 @@ g = 0…4 时精度（node_acc）：
 
 ## 6. 待补
 
-- 200 题的 freeze_sweep（g = 0…4）待重跑：`tools/c_channel_probe/freeze_sweep.py`，输出 `tmp/analysis/channel-probe/freeze_sweep.json`。
+- 200 题的 freeze_sweep（g = 0…4）待重跑：`tools/c_channel/freeze_sweep.py`，输出 `tmp/analysis/channel/freeze_sweep.json`。
 - 若要把"预计算"与"什么时候稳定"分开，需要换一种干预：例如**从第 1 轮起**冻结（先让所有位置完成第 0 轮那次变换，再钉住），而不是从 `h_0` 起冻结。这样能区分 §4.5 里的两种可能。
