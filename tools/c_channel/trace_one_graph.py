@@ -84,6 +84,8 @@ def main():
     ap.add_argument('--intervention', choices=['none', 'correct', 'random', 'all_wrong'],
                     default='none', help='第一次前向之前如何预填结果格')
     ap.add_argument('--prefill-ratio', type=float, default=0.5, help='random 模式下预填的比例')
+    ap.add_argument('--save-vectors', action='store_true',
+                    help='额外保存原始隐藏向量（float16 npz）')
     ap.add_argument('--out', default='tmp/analysis/channel/trace')
     a = ap.parse_args()
 
@@ -126,6 +128,7 @@ def main():
     pos_of = {v: g['res_pos'][v] for v in g['res_pos']}
     order = sorted(pos_of.values(), key=lambda p: (int(dp[0, p]), p))
     rows = []
+    vec_before, vec_after, vec_read = [], [], []
     h = rt.token_embedder(b)
     L = min(int(dp.max().item()) + 1, 36)
     FN = ['SYNTAX', 'VARIABLE', 'OPERATION', 'VALUE']
@@ -134,6 +137,9 @@ def main():
             h_prev = h
             h, preds = rt(h, True)
             dec = [preds[f].argmax(-1)[0] for f in range(4)]
+            vec_before.append(h_prev[0, order].detach().to(torch.float16).cpu().numpy())
+            vec_after.append(h[0, order].detach().to(torch.float16).cpu().numpy())
+            vec_read.append(np.stack([dec[f][order].detach().cpu().numpy() for f in range(4)], -1))
             for p in order:
                 v = g['res_var_of'][p]
                 d = int(dp[0, p])
@@ -167,6 +173,19 @@ def main():
     csv_p = os.path.join(P.REPO, a.out, f'trace_{a.tag}_{a.intervention}_seed{a.seed_c}.csv')
     with open(csv_p, 'w', newline='', encoding='utf-8') as f:
         w = csv.DictWriter(f, fieldnames=list(rows[0].keys())); w.writeheader(); w.writerows(rows)
+    if a.save_vectors:
+        npz_p = os.path.join(P.REPO, a.out, f'vec_{a.tag}_{a.intervention}_seed{a.seed_c}.npz')
+        np.savez_compressed(
+            npz_p,
+            h_before=np.stack(vec_before),      # [L, P, D] float16，本轮前
+            h_after=np.stack(vec_after),        # [L, P, D] float16，本轮后
+            readouts=np.stack(vec_read),        # [L, P, 4] int16，四字段读出
+            positions=np.array(order),
+            vars=np.array([g['res_var_of'][p] for p in order]),
+            depths=np.array([int(dp[0, p]) for p in order]),
+            labels=np.array([int(label[p, P.F_VALUE]) for p in order]))
+        print(f'向量已存 -> {os.path.relpath(npz_p, P.REPO)}  '
+              f'shape [L,P,D]={np.stack(vec_before).shape}')
     print(f'图: {len(g["res_pos"])} 个结果位置，最大 depth {int(dp.max())}，标签复现失败 {bad}')
     print(f'轮数 {L}，记录 {len(rows)} 行 -> {os.path.relpath(csv_p, P.REPO)}')
     # 摘要：按是否已到轮次分组
