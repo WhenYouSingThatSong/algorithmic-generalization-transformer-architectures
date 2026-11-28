@@ -38,6 +38,10 @@ CONDS = {
     'hold_computed_after2':        dict(pre=None, post=2,    start=0, extra=0),
     'hold_unreached_from1_extra8': dict(pre=0,    post=None, start=1, extra=8),
     'baseline_extra8':             dict(pre=None, post=None, start=0, extra=8),
+    # 两个方向同时钉住：未到轮次的与已算完的都不许再更新
+    'hold_all_from0':              dict(pre=0,    post=0,    start=0, extra=0),
+    'hold_all_from1':              dict(pre=0,    post=0,    start=1, extra=0),
+    'hold_all_from1_extra8':       dict(pre=0,    post=0,    start=1, extra=8),
 }
 KEYS = ('one_minus_cos', 'norm_ratio', 'rel_l2', 'radial', 'tangential')
 

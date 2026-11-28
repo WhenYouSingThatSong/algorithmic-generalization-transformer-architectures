@@ -2,7 +2,7 @@
 
 - 整理时间：2026-11-28
 - 这是记录文件，不是主文档；主文档对应条目是 EXPERIMENT-075。
-- 分见：[讨论过程](channel-discussion-log.md) · [冻结与更新幅度](freeze-and-update-magnitude.md) · [度量与消融阶梯设计](vector-difference-and-freeze-ablation-design.md)
+- 分见：[讨论过程](channel-discussion-log.md) · [冻结与更新幅度](freeze-and-update-magnitude.md) · [单图完整追踪与完全冻结](single-graph-trace.md) · [度量与消融阶梯设计](vector-difference-and-freeze-ablation-design.md)
 - 计划：[PLAN-010](../../../PLAN-010/README.md)；数据：[json/](json/)（含 `files.tsv`）；代码：[tools/c_channel/](../../../tools/c_channel/)
 
 ## 1. 研究问题（研究者 2026-11-27 提出）
@@ -57,6 +57,9 @@
 | `hold_computed_after1` | 算完允许 1 轮再退回 | 0.9973 / 0.969 | 0.9724 / 0.250 | 1.0000 / 1.000 |
 | `hold_computed_after2` | 算完允许 2 轮再退回 | 0.9973 / 0.969 | 0.9788 / 0.312 | 1.0000 / 1.000 |
 | `hold_unreached_from1_extra8` | 同 `hold_unreached_from1`，但多跑 8 轮 | 0.9939 / 0.875 | 0.9709 / 0.188 | 0.9998 / 0.969 |
+| `hold_all_from0` | **完全冻结**：两侧都钉住，只有输入嵌入 | 0.4480 / 0 | 0.6421 / 0 | 0.3875 / 0 |
+| `hold_all_from1` | **完全冻结**，但保留第 0 轮 | 0.9973 / 0.969 | 0.9324 / 0.031 | 0.9897 / 0.656 |
+| `hold_all_from1_extra8` | 同上，多跑 8 轮 | 0.9973 / 0.969 | 0.9324 / 0.031 | 0.9897 / 0.656 |
 | `baseline_extra8` | 不冻结，多跑 8 轮 | 0.9939 / 0.875 | 0.9666 / 0.219 | 0.9998 / 0.969 |
 
 数值为 `node_acc / graph_all`。
@@ -155,6 +158,6 @@
 
 **记录**：[讨论过程](channel-discussion-log.md) · [冻结与更新幅度](freeze-and-update-magnitude.md) · [度量与消融阶梯设计](vector-difference-and-freeze-ablation-design.md)
 
-**数据**（`json/`，校验见 `files.tsv`）：`ablation_scale32.json`（32 题阶梯）、`freeze_200graphs.json`（200 题的 `hold_unreached_from0`）、`update_stats.json`、`update_stats_g4.json`
+**数据**（`json/`，校验见 `files.tsv`）：`ablation_scale32.json`（32 题阶梯）、`ablation_freezeall.json`（完全冻结）、`trace_16nodes_seed42.csv`（单图逐轮逐位置）、`freeze_200graphs.json`（200 题的 `hold_unreached_from0`）、`update_stats.json`、`update_stats_g4.json`
 
 **代码**（`tools/c_channel/`）：`common.py`（加载/解析/冻结循环/指标）、`ablation.py`（阶梯 + 五栏度量）、`freeze_sweep.py`、`update_stats.py`
