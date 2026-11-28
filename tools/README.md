@@ -16,6 +16,7 @@
 | [abc_workspace](abc_workspace/README.md) | ABC共同赋值任务、固定32位置的20窗口长程序及边界诊断 |
 | [c_update](c_update/README.md) | 11月19日：C前沿污染纠错三个种子＋过程监督UPDATE一个种子，各50epoch |
 | [c_multitime](c_multitime/README.md) | 11月20日：C多时点局部纠错＋过程监督UPDATE，GPU批量标签、默认batch32，独立训练/验收/评估 |
+| [c_channel_probe](c_channel_probe/README.md) | 11月28日：连续模型跨轮信道的线性探针、三个控制与关闭信道变体（只推理，不训练） |
 
 `c_update`已交[开发集小测](../docs/records/2026-11-20/c-update-small-test.md)，正式统一评估仍待Agent B交付。`c_multitime`是新实现，不能当成已有训练结果。Agent C负责小验证/训练，Agent B负责正式评估；同一plan，串行交接，不打断旧任务。
 
