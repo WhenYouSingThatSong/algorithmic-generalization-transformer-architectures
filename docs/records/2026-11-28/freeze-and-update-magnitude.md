@@ -3,7 +3,7 @@
 - 日期：2026-11-28
 - 计划：[PLAN-010](../../../PLAN-010/README.md)，主文档记录单元 EXPERIMENT-075
 - 代码：冻结扫描 [tools/c_channel_probe/freeze_sweep.py](../../../tools/c_channel_probe/freeze_sweep.py)；更新幅度 [tools/c_channel_probe/update_stats.py](../../../tools/c_channel_probe/update_stats.py)
-- 数据归档：[data/](data/)（`probe.json`、`update_stats.json`、`update_stats_g4.json`，校验值见 [data/files.tsv](data/files.tsv)）；运行时输出在 `tmp/analysis/channel-probe/`
+- 数据归档：[json/](json/)（`probe.json`、`update_stats.json`、`update_stats_g4.json`，校验值见 [json/files.tsv](json/files.tsv)）；运行时输出在 `tmp/analysis/channel-probe/`
 - 数据：`experiments/data/N128-heldout-ADD/testdata_N128.pt`；权重：旧 C0 三个种子 e143
 
 ## 1. 两个量

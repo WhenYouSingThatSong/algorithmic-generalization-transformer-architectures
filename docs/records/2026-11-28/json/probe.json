@@ -1,0 +1,347 @@
+{
+  "42": {
+    "ckpt": "tmp/runs/oldC0-resume-150ep/checkpoints/Nodes32-ADD - L4H16D384_DeBERTa-seed-42 - 2026-11-14-02:35:10/epoch=143-val_loss=0.0000.ckpt",
+    "baseline": {
+      "value_node_acc": 0.994296875,
+      "value_node_correct": 25454,
+      "value_node_num": 25600,
+      "value_graph_all": 0.9,
+      "graph_correct": 180,
+      "graph_n": 200,
+      "label_full_acc": 0.7099999785423279
+    },
+    "probe": {
+      "overall": 0.04026196323584133,
+      "train_acc": 0.2122021821420619,
+      "shuffled": 0.044057453300587926,
+      "majority": 0.0427922899456724,
+      "n_val": 13437,
+      "n_train": 13473,
+      "by_lead": {
+        "1": {
+          "acc": 0.03666666666666667,
+          "n": 2400
+        },
+        "2": {
+          "acc": 0.042991491267353334,
+          "n": 2233
+        },
+        "3": {
+          "acc": 0.041440552540700545,
+          "n": 2027
+        },
+        "4": {
+          "acc": 0.04055555555555555,
+          "n": 1800
+        },
+        "5": {
+          "acc": 0.03800786369593709,
+          "n": 1526
+        },
+        "6": {
+          "acc": 0.04459124690338563,
+          "n": 1211
+        },
+        "7": {
+          "acc": 0.03995680345572354,
+          "n": 926
+        },
+        "8": {
+          "acc": 0.03770491803278689,
+          "n": 610
+        },
+        "9": {
+          "acc": 0.05121293800539083,
+          "n": 371
+        },
+        "10": {
+          "acc": 0.031746031746031744,
+          "n": 189
+        },
+        "11": {
+          "acc": 0.0,
+          "n": 92
+        },
+        "12": {
+          "acc": 0.08108108108108109,
+          "n": 37
+        },
+        "13": {
+          "acc": 0.0,
+          "n": 13
+        },
+        "14": {
+          "acc": 0.0,
+          "n": 2
+        }
+      }
+    },
+    "controls": {
+      "parent_corruption": {
+        "n": 49,
+        "pred_equals_new": 0.061224489795918366,
+        "pred_equals_old": 0.02040816326530612
+      },
+      "rewrite": {
+        "value_node_acc": 0.046875,
+        "value_node_correct": 1200,
+        "value_node_num": 25600,
+        "value_graph_all": 0.0,
+        "graph_correct": 0,
+        "graph_n": 200,
+        "label_full_acc": 0.0
+      },
+      "reembed": {
+        "value_node_acc": 0.046875,
+        "value_node_correct": 1200,
+        "value_node_num": 25600,
+        "value_graph_all": 0.0,
+        "graph_correct": 0,
+        "graph_n": 200,
+        "label_full_acc": 0.0
+      },
+      "freeze": {
+        "value_node_acc": 0.501328125,
+        "value_node_correct": 12834,
+        "value_node_num": 25600,
+        "value_graph_all": 0.0,
+        "graph_correct": 0,
+        "graph_n": 200,
+        "label_full_acc": 0.0
+      }
+    },
+    "parse_failures": 0,
+    "n_graphs": 200,
+    "n_samples": 26910
+  },
+  "1234": {
+    "ckpt": "tmp/runs/oldC0-resume-150ep/checkpoints/Nodes32-ADD - L4H16D384_DeBERTa-seed-1234 - 2026-11-14-02:38:10/epoch=143-val_loss=0.0000.ckpt",
+    "baseline": {
+      "value_node_acc": 0.9771484375,
+      "value_node_correct": 25015,
+      "value_node_num": 25600,
+      "value_graph_all": 0.345,
+      "graph_correct": 69,
+      "graph_n": 200,
+      "label_full_acc": 0.014999999664723873
+    },
+    "probe": {
+      "overall": 0.04535523242673096,
+      "train_acc": 0.22128067202122173,
+      "shuffled": 0.041362163791154975,
+      "majority": 0.040156709108716944,
+      "n_val": 13273,
+      "n_train": 13571,
+      "by_lead": {
+        "1": {
+          "acc": 0.04416666666666667,
+          "n": 2400
+        },
+        "2": {
+          "acc": 0.04334085778781038,
+          "n": 2215
+        },
+        "3": {
+          "acc": 0.04393409885172242,
+          "n": 2003
+        },
+        "4": {
+          "acc": 0.04842342342342342,
+          "n": 1776
+        },
+        "5": {
+          "acc": 0.04863424383744171,
+          "n": 1501
+        },
+        "6": {
+          "acc": 0.0406301824212272,
+          "n": 1206
+        },
+        "7": {
+          "acc": 0.05142231947483589,
+          "n": 914
+        },
+        "8": {
+          "acc": 0.05057096247960848,
+          "n": 613
+        },
+        "9": {
+          "acc": 0.0453257790368272,
+          "n": 353
+        },
+        "10": {
+          "acc": 0.03954802259887006,
+          "n": 177
+        },
+        "11": {
+          "acc": 0.038461538461538464,
+          "n": 78
+        },
+        "12": {
+          "acc": 0.0,
+          "n": 28
+        },
+        "13": {
+          "acc": 0.0,
+          "n": 8
+        },
+        "14": {
+          "acc": 0.0,
+          "n": 1
+        }
+      }
+    },
+    "controls": {
+      "parent_corruption": {
+        "n": 50,
+        "pred_equals_new": 0.02,
+        "pred_equals_old": 0.12
+      },
+      "rewrite": {
+        "value_node_acc": 0.046875,
+        "value_node_correct": 1200,
+        "value_node_num": 25600,
+        "value_graph_all": 0.0,
+        "graph_correct": 0,
+        "graph_n": 200,
+        "label_full_acc": 0.0
+      },
+      "reembed": {
+        "value_node_acc": 0.046875,
+        "value_node_correct": 1200,
+        "value_node_num": 25600,
+        "value_graph_all": 0.0,
+        "graph_correct": 0,
+        "graph_n": 200,
+        "label_full_acc": 0.0
+      },
+      "freeze": {
+        "value_node_acc": 0.7784375,
+        "value_node_correct": 19928,
+        "value_node_num": 25600,
+        "value_graph_all": 0.0,
+        "graph_correct": 0,
+        "graph_n": 200,
+        "label_full_acc": 0.0
+      }
+    },
+    "parse_failures": 0,
+    "n_graphs": 200,
+    "n_samples": 26844
+  },
+  "2026": {
+    "ckpt": "tmp/runs/oldC0-newseed-150ep/checkpoints/Nodes32-ADD - L4H16D384_DeBERTa-seed-2026 - 2026-11-14-10:12:43/epoch=143-val_loss=0.0000.ckpt",
+    "baseline": {
+      "value_node_acc": 0.9998828125,
+      "value_node_correct": 25597,
+      "value_node_num": 25600,
+      "value_graph_all": 0.985,
+      "graph_correct": 197,
+      "graph_n": 200,
+      "label_full_acc": 0.675000011920929
+    },
+    "probe": {
+      "overall": 0.043375514560146364,
+      "train_acc": 0.18581106230923844,
+      "shuffled": 0.0445952126848605,
+      "majority": 0.04512883061442293,
+      "n_val": 13118,
+      "n_train": 13433,
+      "by_lead": {
+        "1": {
+          "acc": 0.043333333333333335,
+          "n": 2400
+        },
+        "2": {
+          "acc": 0.040253279059249206,
+          "n": 2211
+        },
+        "3": {
+          "acc": 0.045774647887323945,
+          "n": 1988
+        },
+        "4": {
+          "acc": 0.039058012636415854,
+          "n": 1741
+        },
+        "5": {
+          "acc": 0.04807041299932295,
+          "n": 1477
+        },
+        "6": {
+          "acc": 0.0387263339070568,
+          "n": 1162
+        },
+        "7": {
+          "acc": 0.04027617951668585,
+          "n": 869
+        },
+        "8": {
+          "acc": 0.04974271012006861,
+          "n": 583
+        },
+        "9": {
+          "acc": 0.04748603351955307,
+          "n": 358
+        },
+        "10": {
+          "acc": 0.05641025641025641,
+          "n": 195
+        },
+        "11": {
+          "acc": 0.09782608695652174,
+          "n": 92
+        },
+        "12": {
+          "acc": 0.0,
+          "n": 31
+        },
+        "13": {
+          "acc": 0.0,
+          "n": 10
+        },
+        "14": {
+          "acc": 0.0,
+          "n": 1
+        }
+      }
+    },
+    "controls": {
+      "parent_corruption": {
+        "n": 50,
+        "pred_equals_new": 0.06,
+        "pred_equals_old": 0.04
+      },
+      "rewrite": {
+        "value_node_acc": 0.046875,
+        "value_node_correct": 1200,
+        "value_node_num": 25600,
+        "value_graph_all": 0.0,
+        "graph_correct": 0,
+        "graph_n": 200,
+        "label_full_acc": 0.0
+      },
+      "reembed": {
+        "value_node_acc": 0.046875,
+        "value_node_correct": 1200,
+        "value_node_num": 25600,
+        "value_graph_all": 0.0,
+        "graph_correct": 0,
+        "graph_n": 200,
+        "label_full_acc": 0.0
+      },
+      "freeze": {
+        "value_node_acc": 0.38078125,
+        "value_node_correct": 9748,
+        "value_node_num": 25600,
+        "value_graph_all": 0.0,
+        "graph_correct": 0,
+        "graph_n": 200,
+        "label_full_acc": 0.0
+      }
+    },
+    "parse_failures": 0,
+    "n_graphs": 200,
+    "n_samples": 26551
+  }
+}
