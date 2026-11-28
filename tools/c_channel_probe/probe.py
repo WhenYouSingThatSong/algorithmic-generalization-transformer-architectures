@@ -125,10 +125,14 @@ def load_model(ckpt_path):
 
 # ---------------------------------------------------------------- forward loop
 @torch.no_grad()
-def run_loop(rt, batch, depths, want_positions=None, variant='none', L=None):
+def run_loop(rt, batch, depths, want_positions=None, variant='none', L=None, grace=0):
     """Run the continuous loop.
 
-    variant: none | reembed (V1) | freeze (V2)
+    variant: none | freeze
+      freeze holds back the hidden state of every result position whose depth is
+      more than `grace` rounds ahead, i.e. h[depth > t + grace] is reverted to the
+      previous round's value.  grace=0 is the plain freeze; grace=1..2 lets the
+      model precompute that many rounds ahead.
     Returns (rows_by_round, final_logits).
       rows_by_round[t] -> {pos: tensor[D]} for positions with depth > t
     """
@@ -150,18 +154,10 @@ def run_loop(rt, batch, depths, want_positions=None, variant='none', L=None):
                     d.setdefault((bi, pos), h[bi, pos].detach().float().cpu())
             if d:
                 rows[t] = d
-        if variant == 'reembed':
-            h = rt.token_embedder(batch)
-        elif variant == 'rewrite':
-            # keep only the discrete channel: write the decoded VALUE back into the
-            # token tensor at result positions, then re-embed (this is A/B's condition)
-            b = batch.clone()
-            vp = preds[F_VALUE].argmax(-1)
-            b[..., F_VALUE] = torch.where(depths >= 0, vp, b[..., F_VALUE])
-            h = rt.token_embedder(b)
-        elif variant == 'freeze':
+        if variant == 'freeze':
             h = h.clone()
-            h[depths > t] = h_prev[depths > t]
+            frozen = depths > (t + grace)
+            h[frozen] = h_prev[frozen]
     return rows, logits
 
 
@@ -210,6 +206,7 @@ def main():
     ap.add_argument('--out', default='tmp/analysis/channel-probe')
     ap.add_argument('--smoke', action='store_true')
     ap.add_argument('--C', type=float, default=1.0, help='inverse L2 strength for the probe')
+    ap.add_argument('--skip-probe', action='store_true', help='only run the freeze sweep')
     a = ap.parse_args()
 
     os.makedirs(os.path.join(REPO, a.out), exist_ok=True)
@@ -350,12 +347,12 @@ def main():
             ctrl['parent_corruption'] = dict(n=len(ctrl_res), pred_equals_new=hit_new / tot,
                                              pred_equals_old=hit_old / tot)
 
-        # --- V1 reembed / V2 freeze
-        for variant in ('rewrite', 'reembed', 'freeze'):
-            _, lg = run_loop(rt, batch, depths, variant=variant)
-            ctrl[variant] = metrics_from_logits(lg, label, valid)
-            print(f'  {variant}: node_acc={ctrl[variant]["value_node_acc"]:.6f} '
-                  f'graph_all={ctrl[variant]["value_graph_all"]:.6f}', flush=True)
+        # --- freeze, swept over how many rounds ahead the model may still precompute
+        for g in (0, 1, 2, 3):
+            _, lg = run_loop(rt, batch, depths, variant='freeze', grace=g)
+            ctrl[f'freeze_grace{g}'] = metrics_from_logits(lg, label, valid)
+            print(f'  freeze grace={g}: node_acc={ctrl[f"freeze_grace{g}"]["value_node_acc"]:.6f} '
+                  f'graph_all={ctrl[f"freeze_grace{g}"]["value_graph_all"]:.6f}', flush=True)
 
         results[str(seed)] = dict(ckpt=os.path.relpath(ckpt, REPO), baseline=m0, probe=probe, controls=ctrl,
                                   parse_failures=bad, n_graphs=n, n_samples=len(X))
