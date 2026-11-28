@@ -9,12 +9,12 @@
 | 文件 | 作用 |
 |---|---|
 | `common.py` | 权重加载、图解析（按“父值之和 mod 23”重算校验）、带冻结的前向循环、正式指标 |
-| `ablation.py` | 冻结阶梯 A–G + 四栏向量差异度量（含正交分解自检） |
+| `ablation.py` | 冻结阶梯（十个条件，条件名不复用字母）+ 五栏信息传递度量（含正交分解自检） |
 | `freeze_sweep.py` | 提前量 g 的精度扫描 |
 | `update_stats.py` | 逐轮更新幅度（方向 / 模长 / 总量），不冻结与各冻结条件 |
 
 ```bash
-python tools/c_channel/ablation.py --seeds 42,1234,2026 --n-graphs 8
+python tools/c_channel/ablation.py --seeds 42,1234,2026 --n-graphs 32 --chunk 8
 python tools/c_channel/update_stats.py --seeds 42,1234,2026 --n-graphs 8 \
   --conditions none,freeze0,freeze1,freeze2
 ```

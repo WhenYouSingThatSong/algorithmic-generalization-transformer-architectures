@@ -73,7 +73,7 @@
 
 设计与依据单独成文：[度量与冻结消融阶梯](../docs/records/2026-11-28/vector-difference-and-freeze-ablation-design.md)；实现：[tools/c_channel/](../tools/c_channel/)。
 
-要点：冻结阶梯把“第 0 轮那次变换”与“后续逐轮更新”分开（A 不冻结 / B 从第 0 轮起冻结 / C 第 0 轮不冻结后钉住 / D 更晚冻结 / E 算完不许更新 / F 算完允许 1–2 轮 / G 多给轮次）；更新幅度按方向、模长、总量三栏并做正交分解（`rel_l2² = radial² + tangential²`，逐条自检）。
+要点：冻结阶梯把“第 0 轮那次变换”与“后续逐轮更新”分开，十个条件分别为 `baseline`、`hold_unreached_from0/1/2/3`、`hold_computed_immediately/after1/after2`、`hold_unreached_from1_extra8`、`baseline_extra8`（条件名不复用字母，免与模型名冲突）；更新幅度记方向、模长、总量三栏并做正交分解（`rel_l2² = radial² + tangential²`，逐条自检）。
 
 **仍未做**：200 题规模的复跑（两次因共享 GPU 显存不足而中断）。
 
