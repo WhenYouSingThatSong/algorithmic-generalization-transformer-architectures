@@ -36,6 +36,42 @@ def make_small_graph(seed, num_nodes, max_depth, max_length):
     return tok_ds, info, tok
 
 
+
+def apply_prefill(batch, label, g, dv, val, mode, ratio, rng):
+    """把结果格的 VALUE 预填成指定数值（实验 073 / 074 的输入构造）。
+
+    mode: none | correct | random | all_wrong
+      correct    填真值
+      random     均匀随机（可能碰巧正确）——073
+      all_wrong  既不等于真值、也不等于父值当前推出的数——074
+    按拓扑顺序处理，父值使用已经确定下来的输入值。
+    """
+    if mode == 'none':
+        return {}, batch
+    import random as _r
+    order = sorted(g['res_pos'], key=lambda v: dv[v])
+    avail = dict(g['leaf_val'])
+    chosen = {}
+    for v in order:
+        p = g['res_pos'][v]
+        if mode == 'correct':
+            x = val[v]
+        elif mode == 'random':
+            x = _r.randrange(0, 23)
+        else:  # all_wrong
+            ps = g['parents'].get(v, [])
+            cand = sum(avail[q] for q in ps) % 23 if ps and all(q in avail for q in ps) else None
+            forbidden = {val[v]} | ({cand} if cand is not None else set())
+            pool = [z for z in range(23) if z not in forbidden]
+            x = rng.choice(pool)
+        if mode == 'random' and rng.random() >= ratio:
+            avail[v] = val[v]
+            continue
+        batch[p, P.F_VALUE] = x
+        chosen[int(p)] = x
+        avail[v] = x
+    return chosen, batch
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--seed-c', type=int, default=42, help='用哪个 C 权重')
@@ -45,6 +81,9 @@ def main():
     ap.add_argument('--max-length', type=int, default=256)
     ap.add_argument('--source', choices=['generate', 'train'], default='generate',
                     help='train = 取训练分布内的样本；generate = 现场生成')
+    ap.add_argument('--intervention', choices=['none', 'correct', 'random', 'all_wrong'],
+                    default='none', help='第一次前向之前如何预填结果格')
+    ap.add_argument('--prefill-ratio', type=float, default=0.5, help='random 模式下预填的比例')
     ap.add_argument('--out', default='tmp/analysis/channel/trace')
     a = ap.parse_args()
 
@@ -74,6 +113,11 @@ def main():
     bad = sum(1 for v, p in g['res_pos'].items() if int(label[p, P.F_VALUE]) != val.get(v, -1))
 
     a.tag = (f'train{a.max_depth}' if a.source == 'train' else f'{a.num_nodes}nodes')
+    import random as _rr
+    rng = _rr.Random(a.gen_seed)
+    chosen, batch = apply_prefill(batch, label, g, dv, val, a.intervention, a.prefill_ratio, rng)
+    print(f'干预 {a.intervention}：预填 {len(chosen)} 个结果格')
+
     lit, tk2, dev = P.load_model(os.path.join(P.REPO, *P.WEIGHTS[a.seed_c]))
     rt = lit.model
     b, dp = batch.unsqueeze(0).to(dev), depths.unsqueeze(0).to(dev)
@@ -102,6 +146,8 @@ def main():
                 avail = [q for q in ps if dv[q] == -1 or dv[q] <= t]
                 row = dict(t=t, var=v, pos=p, depth=d,
                            phase=('pre' if d > t else ('at' if d == t else 'post')),
+                           prefilled=int(p in chosen),
+                           prefill_value=int(chosen.get(p, -1)),
                            parents_total=len(ps), parents_available=len(avail),
                            parents_desc=';'.join(f'{q}@d{dv[q]}' for q in ps),
                            parents_readable=';'.join(f'{q}={int(dec[3][g["res_pos"][q]] if q in g["res_pos"] else -1)}' for q in ps),
@@ -118,7 +164,7 @@ def main():
                     row[f'{nm.lower()}_correct'] = int(int(dec[i][p]) == int(label[p, i]))
                 rows.append(row)
     os.makedirs(os.path.join(P.REPO, a.out), exist_ok=True)
-    csv_p = os.path.join(P.REPO, a.out, f'trace_{a.tag}_seed{a.seed_c}.csv')
+    csv_p = os.path.join(P.REPO, a.out, f'trace_{a.tag}_{a.intervention}_seed{a.seed_c}.csv')
     with open(csv_p, 'w', newline='', encoding='utf-8') as f:
         w = csv.DictWriter(f, fieldnames=list(rows[0].keys())); w.writeheader(); w.writerows(rows)
     print(f'图: {len(g["res_pos"])} 个结果位置，最大 depth {int(dp.max())}，标签复现失败 {bad}')
