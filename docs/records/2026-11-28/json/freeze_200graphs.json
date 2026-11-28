@@ -1,0 +1,35 @@
+{
+  "42": {
+    "n_graphs": 200,
+    "baseline": {
+      "node_acc": 0.994296875,
+      "graph_all": 0.9
+    },
+    "freeze_start0_grace0": {
+      "node_acc": 0.501328125,
+      "graph_all": 0.0
+    }
+  },
+  "1234": {
+    "n_graphs": 200,
+    "baseline": {
+      "node_acc": 0.9771484375,
+      "graph_all": 0.345
+    },
+    "freeze_start0_grace0": {
+      "node_acc": 0.7784375,
+      "graph_all": 0.0
+    }
+  },
+  "2026": {
+    "n_graphs": 200,
+    "baseline": {
+      "node_acc": 0.9998828125,
+      "graph_all": 0.985
+    },
+    "freeze_start0_grace0": {
+      "node_acc": 0.38078125,
+      "graph_all": 0.0
+    }
+  }
+}
