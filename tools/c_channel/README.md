@@ -9,6 +9,7 @@
 | 文件 | 作用 |
 |---|---|
 | `common.py` | 权重加载、图解析（按“父值之和 mod 23”重算校验）、带冻结的前向循环、正式指标 |
+| `trace_one_graph.py` | 单图逐轮逐位置追踪；`--intervention` 支持 none / random / all_wrong / correct 四种初始条件（对应 EXPERIMENT-073/074）；`--save-vectors` **默认关闭**，只有明确要求时才存原始隐藏向量 |
 | `ablation.py` | 冻结阶梯（十个条件，条件名不复用字母）+ 五栏信息传递度量（含正交分解自检） |
 | `freeze_sweep.py` | 提前量 g 的精度扫描 |
 | `update_stats.py` | 逐轮更新幅度（方向 / 模长 / 总量），不冻结与各冻结条件 |
