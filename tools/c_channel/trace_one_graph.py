@@ -70,27 +70,39 @@ def main():
     rows = []
     h = rt.token_embedder(b)
     L = min(int(dp.max().item()) + 1, 36)
+    FN = ['SYNTAX', 'VARIABLE', 'OPERATION', 'VALUE']
     with torch.no_grad():
         for t in range(L):
             h_prev = h
             h, preds = rt(h, True)
-            vp = preds[P.F_VALUE].argmax(-1)[0]
+            dec = [preds[f].argmax(-1)[0] for f in range(4)]
             for p in order:
                 v = g['res_var_of'][p]
                 d = int(dp[0, p])
                 a_, b_ = h_prev[0, p], h[0, p]
                 dd = b_ - a_
-                an = float(a_.norm()); bn = float(b_.norm()); dn = float(dd.norm())
+                an, bn, dn = float(a_.norm()), float(b_.norm()), float(dd.norm())
                 par = float((dd * a_).sum() / max(an, 1e-12))
                 perp = max(dn ** 2 - par ** 2, 0.0) ** 0.5
                 ps = g['parents'].get(v, [])
-                avail = sum(1 for q in ps if dv[q] == -1 or dv[q] <= t)
-                rows.append(dict(t=t, var=v, pos=p, depth=d, reached=int(d <= t),
-                                 parents_total=len(ps), parents_available=avail,
-                                 read=int(vp[p]), label=int(label[p, P.F_VALUE]),
-                                 one_minus_cos=1 - float(F.cosine_similarity(a_, b_, dim=0)),
-                                 norm_ratio=bn / max(an, 1e-12), rel_l2=dn / max(an, 1e-12),
-                                 radial=par / max(an, 1e-12), tangential=perp / max(an, 1e-12)))
+                avail = [q for q in ps if dv[q] == -1 or dv[q] <= t]
+                row = dict(t=t, var=v, pos=p, depth=d,
+                           phase=('pre' if d > t else ('at' if d == t else 'post')),
+                           parents_total=len(ps), parents_available=len(avail),
+                           parents_desc=';'.join(f'{q}@d{dv[q]}' for q in ps),
+                           parents_readable=';'.join(f'{q}={int(dec[3][g["res_pos"][q]] if q in g["res_pos"] else -1)}' for q in ps),
+                           label_syntax=int(label[p, 0]), label_variable=int(label[p, 1]),
+                           label_operation=int(label[p, 2]), label_value=int(label[p, 3]),
+                           read_syntax=int(dec[0][p]), read_variable=int(dec[1][p]),
+                           read_operation=int(dec[2][p]), read_value=int(dec[3][p]),
+                           value_correct=int(int(dec[3][p]) == int(label[p, 3])),
+                           norm_before=an, norm_after=bn,
+                           one_minus_cos=1 - float(F.cosine_similarity(a_, b_, dim=0)),
+                           norm_ratio=bn / max(an, 1e-12), rel_l2=dn / max(an, 1e-12),
+                           radial=par / max(an, 1e-12), tangential=perp / max(an, 1e-12))
+                for i, nm in enumerate(FN):
+                    row[f'{nm.lower()}_correct'] = int(int(dec[i][p]) == int(label[p, i]))
+                rows.append(row)
     os.makedirs(os.path.join(P.REPO, a.out), exist_ok=True)
     csv_p = os.path.join(P.REPO, a.out, f'trace_{a.num_nodes}nodes_seed{a.seed_c}.csv')
     with open(csv_p, 'w', newline='', encoding='utf-8') as f:
@@ -99,15 +111,12 @@ def main():
     print(f'轮数 {L}，记录 {len(rows)} 行 -> {os.path.relpath(csv_p, P.REPO)}')
     # 摘要：按是否已到轮次分组
     import statistics as st
-    for label_, sel in (('未到轮次 (depth>t)', [r for r in rows if not r['reached']]),
-                        ('本轮该算 (depth==t)', [r for r in rows if r['depth'] == r['t']])):
+    for ph, nm in (('pre', '未到轮次'), ('at', '本轮该算'), ('post', '已算完')):
+        sel = [r for r in rows if r['phase'] == ph]
         if not sel: continue
-        print(f"  {label_}: n={len(sel)}  1-cos={st.mean(r['one_minus_cos'] for r in sel):.4f}  "
-              f"norm_ratio={st.mean(r['norm_ratio'] for r in sel):.4f}  rel_l2={st.mean(r['rel_l2'] for r in sel):.4f}")
-    post = [r for r in rows if r['depth'] < r['t']]
-    if post:
-        print(f"  已算完 (depth<t): n={len(post)}  1-cos={st.mean(r['one_minus_cos'] for r in post):.4f}  "
-              f"norm_ratio={st.mean(r['norm_ratio'] for r in post):.4f}  rel_l2={st.mean(r['rel_l2'] for r in post):.4f}")
+        print(f"  {nm}: n={len(sel)}  1-cos={st.mean(r['one_minus_cos'] for r in sel):.4f}  "
+              f"norm_ratio={st.mean(r['norm_ratio'] for r in sel):.4f}  rel_l2={st.mean(r['rel_l2'] for r in sel):.4f}  "
+              f"VALUE 读对={sum(r['value_correct'] for r in sel)}/{len(sel)}")
 
 
 if __name__ == '__main__':
