@@ -159,3 +159,5 @@
 - 损失口径与验证集口径：[损失路径与上游改动](../docs/records/2026-11-26/loss-paths-and-upstream-changes.md)
 - 现有 C 权重与续训记录：[续训与里程碑取点](../docs/records/2026-11-27/resume-to-200ep-s42.md)、[续训前后的干净求解对比](../docs/records/2026-11-27/eval-before-after-s42.md)
 - 前序计划：[PLAN-009](../PLAN-009/README.md)
+- **本线完整现状（讨论、观察、已产出的数据、下一步）**：[跨轮信道这条线：完整现状](../docs/records/2026-11-28/channel-investigation-status.md)
+- 讨论过程：[channel-probe-discussion-log](../docs/records/2026-11-28/channel-probe-discussion-log.md)
