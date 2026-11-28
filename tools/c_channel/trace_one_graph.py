@@ -43,10 +43,23 @@ def main():
     ap.add_argument('--max-depth', type=int, default=4)
     ap.add_argument('--gen-seed', type=int, default=1)
     ap.add_argument('--max-length', type=int, default=256)
+    ap.add_argument('--source', choices=['generate', 'train'], default='generate',
+                    help='train = 取训练分布内的样本；generate = 现场生成')
     ap.add_argument('--out', default='tmp/analysis/channel/trace')
     a = ap.parse_args()
 
-    tok_ds, info, tk = make_small_graph(a.gen_seed, a.num_nodes, a.max_depth, a.max_length)
+    if a.source == 'train':
+        # 训练分布内的图：32 节点，取第一张最大深度等于 --max-depth 的样本
+        tr = torch.load(os.path.join(P.REPO, 'experiments/data/Tr32Test128-ADD/train_data.pt'),
+                        map_location='cpu', weights_only=True)
+        info_all = tr['dataset_info'][:, :, 0]
+        mx = info_all.max(dim=1).values
+        idx = next(i for i in range(len(mx)) if int(mx[i]) == a.max_depth)
+        tok_ds = tr['tokenized_dataset'][idx:idx + 1]
+        info = tr['dataset_info'][idx:idx + 1]
+        print(f'取训练集第 {idx} 题（最大深度 {int(mx[idx])}）')
+    else:
+        tok_ds, info, tk = make_small_graph(a.gen_seed, a.num_nodes, a.max_depth, a.max_length)
     label = tok_ds[0].clone()
     batch = label.clone()
     batch[..., P.F_VALUE] = torch.where(batch[..., P.F_SYNTAX] == P.SYN_VAR,
@@ -60,6 +73,7 @@ def main():
     val = P.evaluate(g['leaf_val'], g['parents'], dv)
     bad = sum(1 for v, p in g['res_pos'].items() if int(label[p, P.F_VALUE]) != val.get(v, -1))
 
+    a.tag = (f'train{a.max_depth}' if a.source == 'train' else f'{a.num_nodes}nodes')
     lit, tk2, dev = P.load_model(os.path.join(P.REPO, *P.WEIGHTS[a.seed_c]))
     rt = lit.model
     b, dp = batch.unsqueeze(0).to(dev), depths.unsqueeze(0).to(dev)
@@ -104,7 +118,7 @@ def main():
                     row[f'{nm.lower()}_correct'] = int(int(dec[i][p]) == int(label[p, i]))
                 rows.append(row)
     os.makedirs(os.path.join(P.REPO, a.out), exist_ok=True)
-    csv_p = os.path.join(P.REPO, a.out, f'trace_{a.num_nodes}nodes_seed{a.seed_c}.csv')
+    csv_p = os.path.join(P.REPO, a.out, f'trace_{a.tag}_seed{a.seed_c}.csv')
     with open(csv_p, 'w', newline='', encoding='utf-8') as f:
         w = csv.DictWriter(f, fieldnames=list(rows[0].keys())); w.writeheader(); w.writerows(rows)
     print(f'图: {len(g["res_pos"])} 个结果位置，最大 depth {int(dp.max())}，标签复现失败 {bad}')
