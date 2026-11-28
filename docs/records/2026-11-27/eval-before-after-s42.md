@@ -49,12 +49,23 @@
 
 但 `strict` 从 0.0140 掉到 0.0000。逐字段准确率给出了原因：
 
+下表是**末位变量处**的逐字段准确率（`last_var_factor_acc`）：
+
 | 字段 | C e143（前） | C e177（后） |
 |---|---:|---:|
 | SYNTAX | 1.0000 | 1.0000 |
 | VARIABLE | **0.9985** | **0.9820** |
 | OPERATION | 1.0000 | 1.0000 |
 | VALUE | **0.9665** | **0.9910** |
+
+同一组权重的**整条最终标签**上的逐字段准确率（`final_label_factor_acc`，口径更严）方向一致、数值不同：
+
+| 字段 | C e143（前） | C e177（后） |
+|---|---:|---:|
+| VARIABLE | **0.9879** | **0.9749** |
+| VALUE | 0.9988 | 0.9998 |
+
+两个口径都显示同一件事：**VALUE 升、VARIABLE 降**。引用时必须注明用的是哪一个。
 
 C 续训后 **VALUE 升（0.9665→0.9910）、VARIABLE 降（0.9985→0.9820）**。
 
@@ -82,4 +93,5 @@ C 续训后 **VALUE 升（0.9665→0.9910）、VARIABLE 降（0.9985→0.9820）
 - 启动器：`tmp/scripts/eval_before_after_s42.sh`
 - 原始日志：`/tmp/eval_ba_*.log`（临时）；结果目录 `tmp/analysis/eval-ba/<tag>/`
 - 权重位置：见 `docs/records/2026-11-27/resume-to-200ep-s42.md`
-- 指标定义：`experiments/evaluation/metric_utils.py`（`final_value_node_acc`、`final_value_graph_all_acc`、`final_label_full_acc`）
+- 指标定义：`experiments/evaluation/metric_utils.py`（`final_value_node_acc`、`final_value_graph_all_acc`、`final_label_full_acc`、`final_label_factor_acc`）
+- 归档的指标表：[eval-before-after-s42.metrics.csv](eval-before-after-s42.metrics.csv)（由 `tmp/analysis/eval-ba/*/val_metrics_by_size_agg.npy` 独立复算，非手工转录）；校验值见 [eval-before-after-s42.files.tsv](eval-before-after-s42.files.tsv)
